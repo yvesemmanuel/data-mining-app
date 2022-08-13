@@ -1,0 +1,50 @@
+/* @import url("https://fonts.googleapis.com/css2?family=Raleway:wght@400;700&display=swap"); */
+@import url("https://fonts.googleapis.com/css2?family=Kdam+Thmor+Pro&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap");
+
+* {
+    font-family: "Roboto", sans-serif;
+}
+
+.navbar {
+    background-color: #F2F2F2;
+}
+
+.logo {
+    padding-top: 0.314rem;
+    padding-bottom: 0.3125rem;
+    margin-right: 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 550;
+    color: #1277BC;
+    font-family: "Kdam Thmor Pro", sans-serif;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.link-nav {
+    font-size: 18px;
+    padding-right: 0;
+    padding-left: 0;
+    padding: 0.5rem 1rem;
+    color: #B82C64;
+    display: block;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.link-nav-dowpdown {
+    color: #B82C64;
+    font-weight: 500;
+}
+
+hr {
+    height: 3px!important;
+    opacity: 100%!important;
+    background-color: #E0E0E0;
+    border-color: #E0E0E0;
+}
+
+h1 {
+    font-size: 35px;
+}

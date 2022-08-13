@@ -1,0 +1,78 @@
+{% extends "layout.html" %} {% block body %}
+
+<div class="container">
+    <h1 class="title section-title">{{title}}</h1>
+
+    <hr>
+
+    <form method="post">
+        <div class="row">
+            <div class="col"></div>
+            <div class="col-sm-4 form-group">
+                <label class="input-title" for="municipio">Unidade Jurisdicionada</label>
+                <select class="form-control" id="municipio" name="municipio">
+                    {% for municipio in municipios %}
+                    <option value="{{ municipio }}" {% if municipio_selecionado==municipio %} selected {% endif %}>{{
+                        municipio }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col"></div>
+        </div>
+
+        <div class="text-center">
+            <button class="btn btn-default btn-md button-style" type="submit" name="action" value="aplicar">Aplicar</button>
+        </div>
+
+        {% if method == "POST" %}
+        <div class="row">
+            <div class="col"></div>
+            <div class="col-lg-8 form-group">
+                <label class="input-title" for="empenho">Fornecedor</label>
+                <select class="form-control" id="empenho" name="empenho" onchange="document.getElementById('atualizar').click()">
+                    {% for empenho in lista_empenhos %}
+                    <option value="{{ empenho }}" {% if empenho_selecionado==empenho %} selected {% endif %}>{{
+                        empenho }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col"></div>
+        </div>
+
+        <div class="text-center hidden">
+            <button class="btn btn-default btn-md button-style" type="submit" name="action" value="atualizar" id="atualizar">Atualizar</button>
+        </div>
+        {% endif %}
+
+    </form>
+
+    {% if method == "POST" %}
+    <div class="row descricao">
+        <div class="col"></div>
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <b>Descrição: </b>{{info_empenho["descricao"]}} 
+                </div>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item"><b>CPF/CNPJ: </b>{{info_empenho["cpf_cnpj"]}}</li>
+                    <li class="list-group-item"><b>Valor Pago no Primeiro Mês: </b>{{info_empenho["primeiro_mes"]}}</li>
+                    <li class="list-group-item"><b>Média Mensal: </b>{{info_empenho["media_mensal"]}}</li>
+                    <li class="list-group-item"><b>Datas: </b>{{info_empenho["datas"]}}</li>
+                    <li class="list-group-item"><b>Valores: </b>{{info_empenho["valores"]}}</li>
+                </ul>
+            </div>
+        </div>
+        <div class="col"></div>
+    </div>
+
+    <img src="{{ url_for("static", filename="assets/plot.png" ) }}" class="img-fluid mx-auto d-block">
+    {% endif %}
+
+    <br>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,42 @@
+.hidden {
+    display: none;
+}
+
+.lead {
+    margin-bottom: 30px;
+}
+
+.title {
+    text-align: center;
+    font-weight: 450;
+    margin-top: 35px;
+    margin-bottom: 15px;
+}
+
+.section-title {
+    margin-top: 97.0156px;
+}
+
+.social-link {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    transition: all 0.3s;
+    font-size: 0.9rem;
+    color: #666;
+    border: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+.social-link:hover, .social-link:focus {
+    background: #ddd;
+    text-decoration: none;
+    color: #555;
+}
+
+.fa-brands {
+    color:#B82C64;
+}

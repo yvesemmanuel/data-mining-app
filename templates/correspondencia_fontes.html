@@ -1,0 +1,132 @@
+{% extends "layout.html" %} {% block body %}
+
+<div class="container">
+    <h1 class="title section-title">{{title}}</h1>
+
+    <hr>
+
+    <form method="post">
+        <div class="row">
+            <div class="col"></div>
+            <div class="col-sm-4 form-group">
+                <label class="input-title" for="municipio">Unidade Jurisdicionada</label>
+                <select class="form-control" id="municipio" name="municipio">
+                    {% for municipio in municipios %}
+                    <option value="{{ municipio }}" {% if municipio_selecionado==municipio %} selected {% endif %}>{{
+                        municipio }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col"></div>
+        </div>
+
+        <div class="text-center">
+            <button class="btn btn-default btn-md button-style" type="submit" name="action"
+                value="aplicar">Aplicar</button>
+        </div>
+    </form>
+
+    <br>
+
+    {% if method == "POST" %}
+    <table class="table" style="width: 50%; margin-left: auto; margin-right: auto;">
+        <thead>
+            <tr scope="col">
+                <th>Porcentagem</th>
+                <th>Quantidade total de erros</th>
+                <th>Quantidade de acertos</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr>
+                {% for atributo in descricao_geral%}
+                <td>{{atributo}}</td>
+                {% endfor %}
+            </tr>
+        </tbody>
+    </table>
+
+    <table class="table table-hover">
+
+        <thead>
+            <tr scope="col">
+                {% for col in colunas %}
+                <th>{{col}}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for i in range(linhas|length) %}
+            <tr value={{i}} style="cursor: pointer;">
+                {% for atributo in linhas[i] %}
+                <td>{{atributo}}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-window"
+        style="display: none;" id="modal-button"></button>
+
+    <div class="modal fade" id="modal-window">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Pagamentos</h5>
+                    <button type="button" class="btn btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $(".table-hover").on("click", "tbody tr", function () {
+                // remove previous data from modal window
+                $(".modal-body").empty();
+
+                // get data
+                var rowIdx = $(this)[0].attributes.value.value;
+                var data = {{ linhas_descricoes | safe
+            }}[rowIdx];
+
+        var table = '<table class="table">';
+        // table header
+        table += '<thead><tr><td>VALOR</td><td>Data Pag.</td><td>Data Liq.</td><td>Descrição</td></tr></head>';
+
+        // table body
+        table += '<tbody>'
+        for (i = 0; i < data.length; i++) {
+            var descricao = data[i][1];
+            var empenho = JSON.parse(data[i][0]);
+
+            table += '<tr>' + '<td>' + empenho.VALOR + '</td>' + '<td>' + empenho.DATA_PAG + '</td>' + '<td>' + empenho.DATA_LIQ + '</td>' + '<td>' + descricao + '</td>' + '</tr>'
+        }
+        table += '</tbody></table>'
+
+        $(".modal-body").append(table);
+
+        // show modal
+        document.getElementById("modal-button").click();
+            });
+
+        $(document).on("click",)
+        });
+    </script>
+    {% endif %}
+
+</div>
+
+
+{% endblock %}

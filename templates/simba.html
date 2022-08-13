@@ -1,0 +1,62 @@
+{% extends "layout.html" %} {% block body %}
+
+<div class="container">
+    <h1 class="title section-title">{{title}}</h1>
+
+    <hr>
+
+    <form method="post">
+        <div class="row">
+            <div class="col"></div>
+            <div class="col-lg-10 form-group">
+                <label class="input-title" for="entidade">Entidade</label>
+                <select class="form-control" id="entidade" name="entidade"
+                    onchange="document.getElementById('aplicar').click()">
+                    {% for entidade in indexes %}
+                    <option value="{{ entidade }}" {% if idx_selecionado==entidade %} selected {% endif %}>{{
+                        entidade }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col"></div>
+        </div>
+
+        <div class="text-center hidden">
+            <button class="btn btn-default btn-md button-style" type="submit" name="action" value="aplicar"
+                id="aplicar">Aplicar</button>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-hover tb_info">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    {% for mes in table_info["meses"] %}
+                    <th scope="col">{{ mes }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">SIMBA</th>
+                    {% for valor in table_info["simba"] %}
+                    <td>{{valor}}</td>
+                    {% endfor %}
+                </tr>
+                <tr>
+                    <th scope="row">Sagres</th>
+                    {% for valor in table_info["sagres"] %}
+                    <td>{{valor}}</td>
+                    {% endfor %}
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <img src="{{ url_for("static", filename="assets/plot.png" ) }}" class="img-fluid mx-auto d-block">
+
+</div>
+
+{% endblock %}
