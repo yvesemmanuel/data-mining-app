@@ -46,8 +46,8 @@
             </div>
         </div>
 
-        <div class="row row-last" {% if analise_selecionada=="Análise de não Conformidade" %}
-            style="display: none!important;" {% endif %}>
+        {% if analise_selecionada == "Análise de não Conformidade" %}
+        <div class="row row-last" style="display: none!important;">
             <div class="col-6 form-group">
                 <label class="input-title" for="entidade">Tipo de Fornecedor</label>
                 <select class="form-control" id="entidade" name="entidade">
@@ -59,7 +59,7 @@
             </div>
 
             <div class="col-6 form-group">
-                
+
                 <div class="limite-selecionado">
                     <label class="input-title" for="limite-empenho">Valor de Empenho</label>
                     <div class="form-check form-check-inline">
@@ -79,36 +79,73 @@
                     </div>
                 </div>
 
-                {% if method == "GET" %}
                 <div class="input-group mb-3">
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="limite">R$</span>
                     </div>
                     <input type="number" class="form-control" placeholder="Não aplicado" aria-label="Limite"
-                        aria-describedby="limite" id="valor-limite" name="valor-limite" value="Não aplicado" disabled required>
+                        aria-describedby="limite" id="valor-limite" name="valor-limite" value="Não aplicado" disabled>
                 </div>
 
-                {% elif method == "POST" and limite_selecionado == "Não aplicado" %}
+            </div>
+        </div>
+
+        {% else %}
+        <div class="row row-last">
+            <div class="col-6 form-group">
+                <label class="input-title" for="entidade">Tipo de Fornecedor</label>
+                <select class="form-control" id="entidade" name="entidade">
+                    {% for entidade in entidades %}
+                    <option value="{{entidade}}" {% if entidade_selecionada==entidade %} selected {% endif %}>
+                        {{entidade}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-6 form-group">
+
+                <div class="limite-selecionado">
+                    <label class="input-title" for="limite-empenho">Valor de Empenho</label>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="limite-empenho" id="nao-aplicado"
+                            value="Não aplicado" checked>
+                        <label class="form-check-label" for="nao-aplicado">Não aplicado</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="limite-empenho" id="maior-que"
+                            value="Maior que" {% if limite_selecionado=="Maior que" %} checked {% endif %}>
+                        <label class="form-check-label" for="maior-que">Maior que</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="limite-empenho" id="menor-que"
+                            value="Menor que" {% if limite_selecionado=="Menor que" %} checked {% endif %}>
+                        <label class="form-check-label" for="menor-que">Menor que</label>
+                    </div>
+                </div>
+
+                {% if method == "GET" or limite_selecionado == "Não aplicado" %}
                 <div class="input-group mb-3">
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="limite">R$</span>
                     </div>
                     <input type="number" class="form-control" placeholder="Não aplicado" aria-label="Limite"
-                        aria-describedby="limite" id="valor-limite" name="valor-limite" value="Não aplicado" disabled required>
+                        aria-describedby="limite" id="valor-limite" name="valor-limite" value="Não aplicado" disabled>
                 </div>
 
-                {% elif method == "POST" and limite_selecionado != "Não aplicado" %}
+                {% else %}
                 <div class="input-group mb-3">
                     <div class="input-group-prepend">
                         <span class="input-group-text" id="limite">R$</span>
                     </div>
-                    <input type="number" class="form-control" aria-label="Limite"
-                        aria-describedby="limite" id="valor-limite" name="valor-limite" value="{{valor_selecionado}}" required>
+                    <input type="number" class="form-control" aria-label="Limite" aria-describedby="limite"
+                        id="valor-limite" name="valor-limite" value="{{valor_selecionado}}" required>
                 </div>
                 {% endif %}
 
             </div>
         </div>
+        {% endif %}
+
 
         <div class="col-md-12 text-center">
             <button class="btn btn-default btn-md button-style" type="submit">Aplicar</button>

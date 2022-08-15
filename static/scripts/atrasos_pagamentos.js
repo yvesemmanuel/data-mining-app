@@ -5,7 +5,7 @@ $(document).ready(function () {
         if (analise_selecionada == "Análise de não Conformidade") {
             $('input:radio[name="limite-empenho"]:first').click();
         }
-        
+
         $("#analise-forms .row:last").toggle(speed = "fast", easing = "linear");
     });
 
@@ -13,10 +13,12 @@ $(document).ready(function () {
         var limite = $('input[name="limite-empenho"]:checked').val();
 
         if (limite == "Não aplicado") {
-            $("#valor-limite").attr("disabled", "");
+            $("input#valor-limite").attr("disabled", true);
+            $("input#valor-limite").removeAttr("required");
             $("input#valor-limite").val("");
         } else {
-            $("#valor-limite").removeAttr("disabled");
+            $("input#valor-limite").removeAttr("disabled");
+            $("input#valor-limite").attr("required", true);
         }
 
         $("#valor-limite").attr("placeholder", limite);

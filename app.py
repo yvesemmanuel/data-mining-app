@@ -26,19 +26,20 @@ def atraso_pagamentos():
     )
 
     if request.method == "POST":
-        cor_mapa, ano = request.form.get("cormapa"), request.form.get("ano")
         analise = request.form.get("analise")
+        ano = request.form.get("ano")
+        cor_mapa = request.form.get("cormapa")
 
         if cor_mapa == "Pior UO+FONTE":
             mapa_selecionado = "mapa_pior"
         elif cor_mapa == "Média UO+FONTE":
             mapa_selecionado = "mapa_media"
 
-        limite_empenho = request.form.get("limite-empenho")
         if analise == "Análise de Atrasos":
             entidade = request.form.get("entidade")
             limite_empenho = request.form.get("limite-empenho")
             valor_limite = request.form.get("valor-limite")
+
 
             return render_template(
                 "atraso_pagamentos.html",
