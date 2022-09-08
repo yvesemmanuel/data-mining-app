@@ -4,15 +4,6 @@ import numpy as np
 from io import BytesIO
 from statistics import mean, stdev
 from static.scripts.MontaSagresSimba import *
-from numpy import quantile, where, random
-import pandas as pd
-from datetime import datetime
-from sklearn import preprocessing
-from sklearn.svm import OneClassSVM
-import matplotlib.pyplot as plt
-
-# import mplcursors
-
 
 
 def criar_plot_1(empenho):

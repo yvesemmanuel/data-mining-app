@@ -1,9 +1,10 @@
-from datetime import datetime,timedelta
+from datetime import datetime
 import static.scripts.MontaEmpenhosPorLinha as mtEmp
 from static.scripts.Empenho import Empenho
 
 
 empenhos = []
+
 
 def montaEmpenhos(linhaPag):
     format = '%Y-%m-%d'
@@ -18,28 +19,31 @@ def montaEmpenhos(linhaPag):
     datasEmpenhos = []
     valoresEmpenhos = []
     vlEmpenho = listaItems[1]
-    if((dtEmpenho > datetime.strptime("2019-01-01", format).date()) and float(listaItems[6]) < 40000):
-        for i in range(9,len(listaItems)):
-            #print(listaItems)
-            if(listaItems[i] != "\n"):
-                if(i%2 != 0):
+    if ((dtEmpenho > datetime.strptime("2019-01-01", format).date()) and float(listaItems[6]) < 40000):
+        for i in range(9, len(listaItems)):
+            # print(listaItems)
+            if (listaItems[i] != "\n"):
+                if (i % 2 != 0):
                     try:
                         res = bool(datetime.strptime(listaItems[i], format))
                         datasEmpenhos.append(listaItems[i])
                     except ValueError:
-                        
+
                         datasEmpenhos.append('2019-01-02')
                 else:
-                    if(listaItems[i].replace('.','',1).isdigit()):
+                    if (listaItems[i].replace('.', '', 1).isdigit()):
                         valoresEmpenhos.append(float(listaItems[i]))
                     else:
                         valoresEmpenhos.append(float(667.5))
 
-        empenhos.append(Empenho(nrEmpenho,datasEmpenhos,valoresEmpenhos, cpf, cnpj, vlEmpenho, 1, descricao, nmFornecedor))
+        empenhos.append(Empenho(nrEmpenho, datasEmpenhos, valoresEmpenhos,
+                        cpf, cnpj, vlEmpenho, 1, descricao, nmFornecedor))
 
 
 sortedEmpenhos = []
-#Abre arquivo de empenhos
+# Abre arquivo de empenhos
+
+
 def openFileEmpenhos(fileName):
 
     mtEmp.openFile(fileName)
@@ -62,12 +66,14 @@ def openFileEmpenhos(fileName):
             sortedEmpenhos.append(e)
         ct = ct + 1
     # print("Sorted Empenhos: " + str(len(sortedEmpenhos)))
+
+
 def getSortedEmpenhos(fileName):
     global sortedEmpenhos
     global empenhos
     sortedEmpenhos = []
     empenhos = []
-    #print(fileName)
+    # print(fileName)
     openFileEmpenhos(fileName)
 
     return sortedEmpenhos

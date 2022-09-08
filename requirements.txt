@@ -1,7 +1,7 @@
-Flask==2.1.2
-pandas==1.4.2
-matplotlib==3.5.2
-# folium==0.12.1.post1
-numpy==1.22.4
-# geopandas==0.10.2
+Flask
+pandas
 scikit-learn
+matplotlib
+#numpy
+# folium==0.12.1.post1
+# geopandas==0.10.2

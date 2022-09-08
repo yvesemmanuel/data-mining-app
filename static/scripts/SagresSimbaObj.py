@@ -5,9 +5,10 @@ class SagresSimbaObj:
     somaSagres = 0
     listaPagsSimba = []
     listaPagsSagres = []
-    dictPagsMensaisSagres = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0}
-    dictPagsMensaisSimba = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0}
-
+    dictPagsMensaisSagres = {1: 0, 2: 0, 3: 0, 4: 0,
+                             5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0}
+    dictPagsMensaisSimba = {1: 0, 2: 0, 3: 0, 4: 0,
+                            5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0}
 
     def __init__(self, _cpf_cnpj, _nmFornecedor, _listaSimba, _listaSagres):
 
@@ -16,11 +17,13 @@ class SagresSimbaObj:
         self.listaPagsSimba = _listaSimba
         self.listaPagsSagres = _listaSagres
 
-        dictSimba = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0}
-        dictSagres = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0}
+        dictSimba = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0,
+                     6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0}
+        dictSagres = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0,
+                      6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0, 12: 0}
 
         for s in self.listaPagsSagres:
-            if(s != "\n"):
+            if (s != "\n"):
                 l = s.split(",")
                 vl = float(l[0])
                 listaDt = str(l[1]).split("-")

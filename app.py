@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request
 import pandas as pd
 import json
-
 from static.scripts.MontaSagresSimba import *
 from static.scripts.Getters import *
 from static.scripts.Plots import *
@@ -39,7 +38,6 @@ def atraso_pagamentos():
             entidade = request.form.get("entidade")
             limite_empenho = request.form.get("limite-empenho")
             valor_limite = request.form.get("valor-limite")
-
 
             return render_template(
                 "atraso_pagamentos.html",

@@ -1,1 +1,3 @@
 static/datasets
+static/scripts/__pycache__
+.env
