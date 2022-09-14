@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 import pandas as pd
 import json
+from static.scripts.UtilsUJsProcessadas import *
 from static.scripts.MontaSagresSimba import *
 from static.scripts.Getters import *
 from static.scripts.Plots import *
@@ -15,10 +16,10 @@ def home():
 
 @app.route("/analises/atraso_pagamentos", methods=["GET", "POST"])
 def atraso_pagamentos():
-    anos = ["2020"]
-    cores = ["Pior UO+FONTE", "Média UO+FONTE"]
-    entidades = ["Pessoa Física", "Pessoa Jurídica", "Ambos"]
-    # limites = ["Não aplicado", "Menor que", "Maior que"]
+    anos = ["2019", "2020"]
+    cores = ["pior", "media"]
+    entidades = ["cpf", "cnpj", "ambos"]
+    limites = ["não_aplicado", "menor", "maior"]
 
     municipios = list(
         pd.read_csv("./static/datasets/ListaMunicipios.csv", sep=";").Municipio
@@ -29,10 +30,12 @@ def atraso_pagamentos():
         ano = request.form.get("ano")
         cor_mapa = request.form.get("cormapa")
 
-        if cor_mapa == "Pior UO+FONTE":
+        if cor_mapa == "pior":
             mapa_selecionado = "mapa_pior"
-        elif cor_mapa == "Média UO+FONTE":
+        elif cor_mapa == "media":
             mapa_selecionado = "mapa_media"
+
+        scr = UJsProcessadas.getScoreUJ(int(ano), 5301, 2000, Constantes.uiClausulaValEmpMaior, Constantes.uiCNPJ, 30, Constantes.uiOrdenacaoScoreMedia)
 
         if analise == "Análise de Atrasos":
             entidade = request.form.get("entidade")
@@ -46,7 +49,7 @@ def atraso_pagamentos():
                 anos=anos,
                 cores=cores,
                 entidades=entidades,
-                mapa=mapa_selecionado,
+                mapa_selecionado=mapa_selecionado,
                 cor_selecionada=cor_mapa,
                 analise_selecionada=analise,
                 entidade_selecionada=entidade,
@@ -62,7 +65,7 @@ def atraso_pagamentos():
                 anos=anos,
                 cores=cores,
                 entidades=entidades,
-                mapa=mapa_selecionado,
+                mapa_selecionado=mapa_selecionado,
                 cor_selecionada=cor_mapa,
                 analise_selecionada=analise,
                 municipios=municipios

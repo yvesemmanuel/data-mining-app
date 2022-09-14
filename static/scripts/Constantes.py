@@ -1,0 +1,9 @@
+colLiqValorempenho = "VALOR_EMPENHO"
+uiClausulaValEmpMaior = 'maior'
+uiClausulaValEmpMenor = 'menor'
+uiClausulaValEmpIndiferente = '&'
+uiAmbos = "ambos"
+uiCPF = "cpf"
+uiCNPJ = "cnpj"
+uiOrdenacaoScorePior = "pior"
+uiOrdenacaoScoreMedia = "media"

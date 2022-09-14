@@ -1,7 +1,5 @@
 from statistics import mean, stdev
-from datetime import datetime, timedelta
-from sklearn import preprocessing
-import numpy as np
+from datetime import datetime
 
 
 class Empenho:
@@ -10,8 +8,8 @@ class Empenho:
     listValoresPagamentos = []
     datasPagamentosDateTime = []
     scoreRegularidade = 1000
-    cpf = ''
-    cnpj = ''
+    cpf = ""
+    cnpj = ""
     nmFornecedor = ""
     vlEmpenho = 0
     descricao = ""
@@ -39,7 +37,7 @@ class Empenho:
     def getDtPagamentosDatetime(self):
         for i in self.listDtPagamentos:
             self.datasPagamentosDateTime.append(
-                datetime.strptime(i, '%Y-%m-%d').date())
+                datetime.strptime(i, "%Y-%m-%d").date())
         return self.datasPagamentosDateTime
 
     def getScoreRegularidadeSalario(self):
