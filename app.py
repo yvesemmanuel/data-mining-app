@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request
 import pandas as pd
 import json
+import geopandas as gpd
 from static.scripts.UtilsUJsProcessadas import *
 from static.scripts.MontaSagresSimba import *
 from static.scripts.Getters import *
@@ -17,30 +18,35 @@ def home():
 @app.route("/analises/atraso_pagamentos", methods=["GET", "POST"])
 def atraso_pagamentos():
     anos = ["2019", "2020"]
-    cores = ["pior", "media"]
-    entidades = ["cpf", "cnpj", "ambos"]
-    limites = ["não_aplicado", "menor", "maior"]
+    cores = ["Pior UO+FONTE", "Média UO+FONTE"]
+    entidades = ["Pessoa Física", "Pessoa Jurídica", "Ambos"]
+    limites = ["Não aplicado", "Menor que", "Maior que"]
 
-    municipios = list(
-        pd.read_csv("./static/datasets/ListaMunicipios.csv", sep=";").Municipio
-    )
+    df_cidades = pd.read_csv("./static/datasets/ListaMunicipios.csv", sep=";")
+    municipios = dict(zip(df_cidades.Municipio, df_cidades.numUJ))
 
     if request.method == "POST":
         analise = request.form.get("analise")
         ano = request.form.get("ano")
         cor_mapa = request.form.get("cormapa")
+        municipio_selecionado = request.form.get("municipio")
+        num_municipio_selecionado = municipios[municipio_selecionado]
+        limite_atraso_selecionado = request.form.get("limite-dias")
 
-        if cor_mapa == "pior":
+        if cor_mapa == "Pior UO+FONTE":
             mapa_selecionado = "mapa_pior"
-        elif cor_mapa == "media":
+        elif cor_mapa == "Média UO+FONTE":
             mapa_selecionado = "mapa_media"
 
-        scr = UJsProcessadas.getScoreUJ(int(ano), 5301, 2000, Constantes.uiClausulaValEmpMaior, Constantes.uiCNPJ, 30, Constantes.uiOrdenacaoScoreMedia)
-
         if analise == "Análise de Atrasos":
-            entidade = request.form.get("entidade")
+            entidade_selecionada = request.form.get("entidade")
             limite_empenho = request.form.get("limite-empenho")
             valor_limite = request.form.get("valor-limite")
+
+            if limite_empenho == "Não aplicado":
+                scr = UJsProcessadas.getScoreUJ(int(ano), num_municipio_selecionado, 0, Constantes.uiClausulaValEmpIndiferente, entidade_selecionada, int(limite_atraso_selecionado), cor_mapa)
+            else:
+                scr = UJsProcessadas.getScoreUJ(int(ano), num_municipio_selecionado, float(valor_limite), limite_empenho, entidade_selecionada, int(limite_atraso_selecionado), cor_mapa)
 
             return render_template(
                 "atraso_pagamentos.html",
@@ -52,10 +58,12 @@ def atraso_pagamentos():
                 mapa_selecionado=mapa_selecionado,
                 cor_selecionada=cor_mapa,
                 analise_selecionada=analise,
-                entidade_selecionada=entidade,
+                entidade_selecionada=entidade_selecionada,
                 limite_selecionado=limite_empenho,
                 valor_selecionado=valor_limite,
-                municipios=municipios
+                municipios=municipios,
+                municipio_selecionado=municipio_selecionado,
+                limite_atraso_selecionado=limite_atraso_selecionado
             )
         elif analise == "Análise de não Conformidade":
             return render_template(
@@ -68,7 +76,9 @@ def atraso_pagamentos():
                 mapa_selecionado=mapa_selecionado,
                 cor_selecionada=cor_mapa,
                 analise_selecionada=analise,
-                municipios=municipios
+                municipios=municipios,
+                municipio_selecionado=municipio_selecionado,
+                limite_atraso_selecionado=limite_atraso_selecionado
             )
 
     return render_template(
@@ -77,7 +87,8 @@ def atraso_pagamentos():
         anos=anos,
         method=request.method,
         cores=cores,
-        entidades=entidades
+        entidades=entidades,
+        municipios=municipios
     )
 
 

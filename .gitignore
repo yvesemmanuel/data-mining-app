@@ -2,3 +2,5 @@ static/datasets
 static/scripts/__pycache__
 static/scripts/__pycache__/
 .env
+test.py
+cache

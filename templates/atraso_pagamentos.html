@@ -27,7 +27,18 @@
         </div>
 
         <div class="row">
-            <div class="col-6 form-group">
+            <div class="col form-group">
+                <label class="input-title" for="municipio">Unidade Jurisdicionada</label>
+                <select class="form-control" id="municipio" name="municipio">
+                    {% for municipio in municipios %}
+                    <option value="{{ municipio }}" {% if municipio_selecionado==municipio %} selected {% endif %}>{{
+                        municipio }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col form-group">
                 <label class="input-title" for="cormapa">Coloração do Mapa</label>
                 <select class="form-control" id="cormapa" name="cormapa">
                     {% for cor in cores %}
@@ -36,13 +47,18 @@
                 </select>
             </div>
 
-            <div class="col-6 form-group">
+            <div class="col form-group">
                 <label class="input-title" for="ano">Ano</label>
                 <select class="form-control" id="ano" name="ano">
                     {% for ano in anos %}
                     <option value="{{ano}}">{{ano}}</option>
                     {% endfor %}
                 </select>
+            </div>
+
+            <div class="col form-group">
+                <label class="input-title" for="limite-dias">Limite de Atraso</label>
+                <input type="number" class="form-control" name="limite-dias" placeholder="Dias de atraso"  aria-label="Dias de atraso" value="{{limite_atraso_selecionado}}" required>
             </div>
         </div>
 

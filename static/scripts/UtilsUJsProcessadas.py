@@ -86,7 +86,3 @@ class UJsProcessadas:
             return max(lScores)
         else:
             return mean(lScores)
-
-
-scr = UJsProcessadas.getScoreUJ(2019, 5301, 2000, Constantes.uiClausulaValEmpMaior,
-                                Constantes.uiCNPJ, 30, Constantes.uiOrdenacaoScoreMedia)
