@@ -74,15 +74,18 @@ class UJsProcessadas:
                 score = score/max(totalPagsUO, 1)
                 arrScores.append(score)
 
-            d = {"NUM_UJ": arrUJ, "NOME_FONTE": arrFonte, "NOME_UO": arrUO, "totalPagsUO": arrTotalPags,
-                 "totalPagsAtrasadosUO": arrTotalPagsAtr, "score": arrScores}
+            NUM_UJ = pd.read_csv("./static/datasets/ListaMunicipios.csv", sep=";")
+            UJ = NUM_UJ.loc[NUM_UJ["numUJ"] == arrUJ[0], "Municipio"].item()
+
+            d = {"NUM_UJ": arrUJ, "Municipio": UJ, "NOME_FONTE": arrFonte, "NOME_UO": arrUO, "totalPagsUO": arrTotalPags,
+                 "totalPagsAtrasadosUO": arrTotalPagsAtr, "Score": arrScores}
             dfRetorno = pd.DataFrame(data=d)
 
             dfRetorno.to_csv("cache/"+nomeArquivoCache, index=False)
 
-        lScores = list(dfRetorno["score"])
+        lScores = list(dfRetorno["Score"])
 
         if (ordenacaoScore == Constantes.uiOrdenacaoScorePior):
-            return max(lScores)
+            return max(lScores), nomeArquivoCache
         else:
-            return mean(lScores)
+            return mean(lScores), nomeArquivoCache

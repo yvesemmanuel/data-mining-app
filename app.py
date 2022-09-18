@@ -1,11 +1,11 @@
 from flask import Flask, render_template, request
 import pandas as pd
 import json
-import geopandas as gpd
 from static.scripts.UtilsUJsProcessadas import *
 from static.scripts.MontaSagresSimba import *
 from static.scripts.Getters import *
 from static.scripts.Plots import *
+from static.scripts.CreateMap import *
 
 app = Flask(__name__)
 
@@ -33,20 +33,17 @@ def atraso_pagamentos():
         num_municipio_selecionado = municipios[municipio_selecionado]
         limite_atraso_selecionado = request.form.get("limite-dias")
 
-        if cor_mapa == "Pior UO+FONTE":
-            mapa_selecionado = "mapa_pior"
-        elif cor_mapa == "Média UO+FONTE":
-            mapa_selecionado = "mapa_media"
-
         if analise == "Análise de Atrasos":
             entidade_selecionada = request.form.get("entidade")
             limite_empenho = request.form.get("limite-empenho")
             valor_limite = request.form.get("valor-limite")
 
             if limite_empenho == "Não aplicado":
-                scr = UJsProcessadas.getScoreUJ(int(ano), num_municipio_selecionado, 0, Constantes.uiClausulaValEmpIndiferente, entidade_selecionada, int(limite_atraso_selecionado), cor_mapa)
+                max_score, filename = UJsProcessadas.getScoreUJ(int(ano), num_municipio_selecionado, 0, Constantes.uiClausulaValEmpIndiferente, entidade_selecionada, int(limite_atraso_selecionado), cor_mapa)
             else:
-                scr = UJsProcessadas.getScoreUJ(int(ano), num_municipio_selecionado, float(valor_limite), limite_empenho, entidade_selecionada, int(limite_atraso_selecionado), cor_mapa)
+                max_score, filename = UJsProcessadas.getScoreUJ(int(ano), num_municipio_selecionado, float(valor_limite), limite_empenho, entidade_selecionada, int(limite_atraso_selecionado), cor_mapa)
+
+            score_map(filename)
 
             return render_template(
                 "atraso_pagamentos.html",
@@ -55,7 +52,6 @@ def atraso_pagamentos():
                 anos=anos,
                 cores=cores,
                 entidades=entidades,
-                mapa_selecionado=mapa_selecionado,
                 cor_selecionada=cor_mapa,
                 analise_selecionada=analise,
                 entidade_selecionada=entidade_selecionada,
@@ -73,7 +69,6 @@ def atraso_pagamentos():
                 anos=anos,
                 cores=cores,
                 entidades=entidades,
-                mapa_selecionado=mapa_selecionado,
                 cor_selecionada=cor_mapa,
                 analise_selecionada=analise,
                 municipios=municipios,
@@ -92,13 +87,9 @@ def atraso_pagamentos():
     )
 
 
-@app.route("/mapa_pior")
-def mapa_pior():
-    return render_template("mapa_pior.html")
-
-
-@app.route("/mapa_media")
-def mapa_media():
+@app.route("/mapa")
+def mapa():
+    return render_template("mapa.html")
     return render_template("mapa_media.html")
 
 
