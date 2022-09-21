@@ -10,7 +10,7 @@ def score_map(filename):
     geoJSON_muni = list(mapageografico.name.values)
 
     # state_data = pd.read_csv("./static/datasets/Score_por_Municipio.csv", sep=";")
-    state_data = pd.read_csv(f"./cache/{filename}")
+    state_data = pd.read_csv(filename)
 
     dados_muni = list(state_data.Municipio.values)
     muni_faltantes = np.setdiff1d(geoJSON_muni, dados_muni)

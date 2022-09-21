@@ -1,6 +1,7 @@
 import pandas as pd
 from statistics import mean
 from os.path import exists
+from os import makedirs
 import static.scripts.Constantes as Constantes
 
 
@@ -30,62 +31,71 @@ class UJsProcessadas:
 
         return dfRes
 
-    def getScoreUJ(ano, numUJ, valorEmpenho, clausulaValEmp, clausulaCPFouCNPJ, limiteAtraso, ordenacaoScore):
+    def getScoreUJ(UJ, ano, numUJ, valorEmpenho, clausulaValEmp, clausulaCPFouCNPJ, limiteAtraso, ordenacaoScore):
+        caminhoDoDir = str(ano)+"-"+str(int(valorEmpenho))+"-"+clausulaValEmp+"-"+clausulaCPFouCNPJ+"-"+str(limiteAtraso)
 
-        nomeArquivoCache = str(ano)+"-"+str(numUJ)+"-"+str(int(valorEmpenho)) + \
-            clausulaValEmp+clausulaCPFouCNPJ+str(limiteAtraso)+".csv"
-        if (exists("cache/"+nomeArquivoCache)):
-            dfRetorno = pd.read_csv("cache/"+nomeArquivoCache)
-        else:
-            dfUJ = UJsProcessadas.openFileUJ(ano, numUJ)
+        if not exists("./static/datasets/cache_scores"):
+            makedirs("./static/datasets/cache_scores")
 
-            dfRes = UJsProcessadas.selectRowsUJ(
-                valorEmpenho, Constantes.uiClausulaValEmpMaior, clausulaCPFouCNPJ, dfUJ)
-            dfRes = dfRes[dfRes["DIFF_LIQ_PAG"] > limiteAtraso]
+        if not exists("./static/datasets/cache_scores/" + caminhoDoDir):
+            makedirs("./static/datasets/cache_scores/" + caminhoDoDir)
 
-            dfGroup = dfRes
+        if exists("./static/datasets/cache_scores/" + caminhoDoDir + "/all_scores.csv"):
+            return True
+        elif exists("./static/datasets/cache_scores/"+caminhoDoDir+"/"+str(numUJ)+".csv"):
+            return False
 
-            dfGroup = dfGroup.groupby(
-                by=["NOME_FONTE_REC", "NOME_UO"], dropna=False).mean()
+        dfUJ = UJsProcessadas.openFileUJ(ano, numUJ)
+        dfRes = UJsProcessadas.selectRowsUJ(
+            valorEmpenho, Constantes.uiClausulaValEmpMaior, clausulaCPFouCNPJ, dfUJ)
+        dfRes = dfRes[dfRes["DIFF_LIQ_PAG"] > limiteAtraso]
 
-            arrUJ = []
-            arrFonte = []
-            arrUO = []
-            arrTotalPags = []
-            arrTotalPagsAtr = []
-            arrScores = []
+        dfGroup = dfRes
 
-            for a in dfGroup.index:
+        dfGroup = dfGroup.groupby(
+            by=["NOME_FONTE_REC", "NOME_UO"], dropna=False).mean()
 
-                arrFonte.append(a[0])
-                arrUO.append(a[1])
-                arrTotalPagsAtr.append(
-                    len(dfRes[(dfRes["NOME_FONTE_REC"] == a[0]) & (dfRes["NOME_UO"] == a[1])]))
-                arrUJ.append(numUJ)
+        arrUJ = []
+        arrFonte = []
+        arrUO = []
+        arrTotalPags = []
+        arrTotalPagsAtr = []
+        arrScores = []
 
-                totalPagsUO = len(
-                    dfUJ[(dfUJ["NOME_FONTE_REC"] == a[0]) & (dfUJ["NOME_UO"] == a[1])])
-                arrTotalPags.append(totalPagsUO)
+        for a in dfGroup.index:
 
-                df = dfRes[(dfRes["NOME_FONTE_REC"] == a[0])
-                           & (dfRes["NOME_UO"] == a[1])]
-                somaAtrasos = sum(list(df["DIFF_LIQ_PAG"]))
-                score = somaAtrasos/30
-                score = score/max(totalPagsUO, 1)
-                arrScores.append(score)
+            arrFonte.append(a[0])
+            arrUO.append(a[1])
+            arrTotalPagsAtr.append(
+                len(dfRes[(dfRes["NOME_FONTE_REC"] == a[0]) & (dfRes["NOME_UO"] == a[1])]))
+            arrUJ.append(numUJ)
 
-            NUM_UJ = pd.read_csv("./static/datasets/ListaMunicipios.csv", sep=";")
-            UJ = NUM_UJ.loc[NUM_UJ["numUJ"] == arrUJ[0], "Municipio"].item()
+            totalPagsUO = len(
+                dfUJ[(dfUJ["NOME_FONTE_REC"] == a[0]) & (dfUJ["NOME_UO"] == a[1])])
+            arrTotalPags.append(totalPagsUO)
 
-            d = {"NUM_UJ": arrUJ, "Municipio": UJ, "NOME_FONTE": arrFonte, "NOME_UO": arrUO, "totalPagsUO": arrTotalPags,
-                 "totalPagsAtrasadosUO": arrTotalPagsAtr, "Score": arrScores}
-            dfRetorno = pd.DataFrame(data=d)
+            df = dfRes[(dfRes["NOME_FONTE_REC"] == a[0])
+                        & (dfRes["NOME_UO"] == a[1])]
+            somaAtrasos = sum(list(df["DIFF_LIQ_PAG"]))
+            score = somaAtrasos/30
+            score = score/max(totalPagsUO, 1)
+            arrScores.append(score)
 
-            dfRetorno.to_csv("cache/"+nomeArquivoCache, index=False)
+        NUM_UJ = pd.read_csv("./static/datasets/ListaMunicipios.csv", sep=";")
 
-        lScores = list(dfRetorno["Score"])
+        d = {"NUM_UJ": arrUJ, "Municipio": UJ, "NOME_FONTE": arrFonte, "NOME_UO": arrUO, "totalPagsUO": arrTotalPags,
+                "totalPagsAtrasadosUO": arrTotalPagsAtr, "Score": arrScores}
+        dfRetorno = pd.DataFrame(data=d)
 
-        if (ordenacaoScore == Constantes.uiOrdenacaoScorePior):
-            return max(lScores), nomeArquivoCache
-        else:
-            return mean(lScores), nomeArquivoCache
+        dfRetorno.to_csv("./static/datasets/cache_scores/"+caminhoDoDir+"/"+str(numUJ)+".csv", index=False)
+
+        return False
+
+        # lScores = list(dfRetorno["Score"])
+
+        # caminho_completo = "./static/datasets/cache_scores/" + caminhoDoDir
+
+        # if (ordenacaoScore == Constantes.uiOrdenacaoScorePior):
+        #     return max(lScores), caminhoDoDir
+        # else:
+        #     return mean(lScores), caminhoDoDir
