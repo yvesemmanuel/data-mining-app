@@ -4,3 +4,13 @@ static/scripts/__pycache__/
 .env
 test.py
 cache
+templates/mapa.html
+static/assets/plot.png
+static/scripts/__pycache__/Empenho.cpython-38.pyc
+static/scripts/__pycache__/EmpenhosSalarios.cpython-38.pyc
+static/scripts/__pycache__/EmpenhosServicosInicAntesEmp.cpython-38.pyc
+static/scripts/__pycache__/Getters.cpython-38.pyc
+static/scripts/__pycache__/MontaEmpenhosPorLinha.cpython-38.pyc
+static/scripts/__pycache__/MontaSagresSimba.cpython-38.pyc
+static/scripts/__pycache__/Plots.cpython-38.pyc
+static/scripts/__pycache__/SagresSimbaObj.cpython-38.pyc

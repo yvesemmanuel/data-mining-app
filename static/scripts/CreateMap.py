@@ -29,23 +29,23 @@ def score_map(filename):
         data=state_data,
         columns=["Municipio", "Score"],
         key_on="feature.properties.name",
-        fill_color="PuBu",
-        fill_opacity=0.7,
-        line_opacity=0.4,
+        # line_color = "#0000",
+        fill_color="YlOrRd",
+        fill_opacity = 0.7,
+        line_opacity = 0.2,
         legend_name="Regularidade",
         smooth_factor=0,
-        Highlight=True,
-        line_color="#0000",
+        Highlight= True,
         show=True,
         overlay=True,
-        nan_fill_color="White"
+        nan_fill_color = "White"
     ).add_to(mapa)
 
     valor = state_data.rename(columns={"Municipio": "name"})
     final_df = pd.merge(mapageografico, valor, on="name")
 
     # Add hover functionality.
-    style_function = lambda x: {"fillColor": "#ffffff", "color": "#000000", "fillOpacity": 0.1, "weight": 0.1}
+    style_function = lambda x: {"fillColor": "transparent", "color": "#8a8a8a", "fillOpacity": 0.1, "weight": 0.1}
     highlight_function = lambda x: {"fillColor": "#000000", "color": "#000000", "fillOpacity": 0.50, "weight": 0.1}
 
     # Colocar os valores nos estados

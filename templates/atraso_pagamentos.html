@@ -27,17 +27,7 @@
         </div>
 
         <div class="row">
-            <div class="col form-group">
-                <label class="input-title" for="municipio">Unidade Jurisdicionada</label>
-                <select class="form-control" id="municipio" name="municipio">
-                    {% for municipio in municipios %}
-                    <option value="{{ municipio }}" {% if municipio_selecionado==municipio %} selected {% endif %}>{{
-                        municipio }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-
+            
             <div class="col form-group">
                 <label class="input-title" for="cormapa">Coloração do Mapa</label>
                 <select class="form-control" id="cormapa" name="cormapa">

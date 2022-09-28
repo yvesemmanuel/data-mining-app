@@ -18,10 +18,10 @@ def home():
 
 @app.route("/analises/atraso_pagamentos", methods=["GET", "POST"])
 def atraso_pagamentos():
-    anos = ["2019", "2020"]
+    anos = [file.split("outputs")[1] for file in listdir("./static/datasets") if "outputs" in file]
     cores = ["Pior UO+FONTE", "Média UO+FONTE"]
     entidades = ["Pessoa Física", "Pessoa Jurídica", "Ambos"]
-    limites = ["Não aplicado", "Menor que", "Maior que"]
+    # limites = ["Não aplicado", "Menor que", "Maior que"]
 
     df_cidades = pd.read_csv("./static/datasets/ListaMunicipios.csv", sep=";")
     municipios = dict(zip(df_cidades.Municipio, df_cidades.numUJ))
@@ -54,7 +54,9 @@ def atraso_pagamentos():
             df_scores = pd.concat(all_dfs)
             df_scores.to_csv(caminhoDoDir+"/all_scores.csv", index=False)
 
+            print("CRIOU OS DADOS")
             score_map(caminhoDoDir+"/all_scores.csv")
+            print("CRIOU O MAPA")
 
             return render_template(
                 "atraso_pagamentos.html",
