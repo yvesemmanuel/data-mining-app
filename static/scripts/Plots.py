@@ -1,6 +1,7 @@
 from matplotlib.figure import Figure
 import base64
 import numpy as np
+import matplotlib.pyplot as plt
 from io import BytesIO
 from statistics import mean, stdev
 from static.scripts.MontaSagresSimba import *
@@ -133,6 +134,41 @@ def criar_plot_3(idx):
     ax.legend(loc="upper right")
 
     fig.autofmt_xdate()
+
+    # salvar imagem temporarimente em um buffer
+    buf = BytesIO()
+    fig.savefig(buf, format="png")
+    # embed the result in the html output.
+    data_image = base64.b64encode(buf.getbuffer()).decode("ascii")
+
+    image_file = open("./static/assets/plot.png", "wb")
+    image_file.write(base64.b64decode((data_image)))
+    image_file.close()
+
+
+def criar_plot_4(x, y):
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
+
+    # first plot
+    ax1.scatter(x, y)
+    ax1.set_ylabel("Valor (R$)")
+    ax1.set_xlabel("Atraso (dias)")
+
+    # second plot
+    b = [30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360]
+    n, bins, patches = ax2.hist(x, bins=b)
+    ax2.grid(color="white", lw=4.5, axis="x")
+
+    xticks = [(bins[idx + 1] + value) / 2 for idx,
+              value in enumerate(bins[:-1])]
+    # xticks_labels = ["{:.2f}\nto\n{:.2f}".format(value, bins[idx + 1]) for idx, value in enumerate(bins[:-1])]
+    # plt.xticks(xticks, labels = xticks_labels)
+
+    for idx, value in enumerate(n):
+        if value > 0:
+            ax2.text(xticks[idx], value + 5, int(value), ha='center')
+
+    ax2.set_xticks(b)
 
     # salvar imagem temporarimente em um buffer
     buf = BytesIO()

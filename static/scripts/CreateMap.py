@@ -63,6 +63,10 @@ def score_map(filename):
 
     mapa.add_child(NIL)
     mapa.keep_in_front(NIL)
+
+    # Add dark and light mode. 
+    folium.TileLayer("cartodbdark_matter", name="modo escuro", control=True).add_to(mapa)
+    folium.TileLayer("cartodbpositron", name="modo claro", control=True).add_to(mapa)
     folium.LayerControl().add_to(mapa)
 
     mapa.save("./templates/mapa.html")

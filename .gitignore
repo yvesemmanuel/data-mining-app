@@ -1,6 +1,10 @@
 static/datasets
+__pycache__/
+*.py[cod]
+/static/scripts/__pycache__
 static/scripts/__pycache__
 static/scripts/__pycache__/
+static/assets/plot.png
 .env
 test.py
 cache

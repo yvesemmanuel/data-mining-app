@@ -27,7 +27,7 @@
         </div>
 
         <div class="row">
-            
+
             <div class="col form-group">
                 <label class="input-title" for="cormapa">Coloração do Mapa</label>
                 <select class="form-control" id="cormapa" name="cormapa">
@@ -48,7 +48,8 @@
 
             <div class="col form-group">
                 <label class="input-title" for="limite-dias">Limite de Atraso</label>
-                <input type="number" class="form-control" name="limite-dias" placeholder="Dias de atraso"  aria-label="Dias de atraso" value="{{limite_atraso_selecionado}}" required>
+                <input type="number" class="form-control" name="limite-dias" placeholder="Dias de atraso"
+                    aria-label="Dias de atraso" value="{{limite_atraso_selecionado}}" required>
             </div>
         </div>
 
@@ -154,18 +155,19 @@
 
 
         <div class="col-md-12 text-center">
-            <button class="btn btn-default btn-md button-style" type="submit">Aplicar</button>
+            <button class="btn btn-default btn-md button-style" name="apply" value="aplicar" type="submit">Aplicar</button>
         </div>
 
-    </form>
+    <!-- </form> -->
 
     {% if method == "POST" %}
     <hr>
     <iframe class="map col-lg-12 col-md-12 col-sm-12 col-12 .col-xl-12" height="440" src="/mapa"></iframe>
 
-    <form action="#" class="map-form">
+    <!-- <form> -->
         <div class="row">
-            <div class="col-6 form-group">
+            <div class="col"></div>
+            <div class="col-sm-4 form-group">
                 <label class="input-title" for="municipio">Unidade Jurisdicionada</label>
                 <select class="form-control" id="municipio" name="municipio">
                     {% for municipio in municipios %}
@@ -175,18 +177,37 @@
                     {% endfor %}
                 </select>
             </div>
+            <div class="col"></div>
+        </div>
 
-            <div class="col-6 form-group">
-                <label class="input-title" for="cormapa">Unidade Orçamentária</label>
-                <select class="form-control" id="cormapa" name="cormapa">
-                    <option value="unidade1">Unidade1</option>
+        <div class="text-center">
+            <button type="submit" class="btn btn-default btn-md button-style" name="consultar" value="consultar" id="consultar">Consultar</button>
+        </div>
+
+        {% if municipio_selecionado %}
+        <div class="row">
+            <div class="col"></div>
+            <div class="col-lg-8 form-group">
+                <label class="input-title" for="empenho">Fornecedor</label>
+                <select class="form-control" id="empenho" name="empenho" onchange="document.getElementById('consultar').click()">
+                    {% for empenho in listaUJSNaoFormatadas %}
+                    <option value="{{ empenho }}" {% if empenho_selecionado==empenho %} selected {% endif %}>{{
+                        empenho }}
+                    </option>
+                    {% endfor %}
                 </select>
             </div>
+            <div class="col"></div>
         </div>
+        {% endif %}
+        
     </form>
-
     {% endif %}
 
+    {% if plot_4 %}
+    <img src="{{ url_for("static", filename="assets/plot.png" ) }}" class="img-fluid mx-auto d-block">
+    {% endif %}
+    
 </div>
 
 {% endblock %}
