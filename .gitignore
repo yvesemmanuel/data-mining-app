@@ -2,6 +2,8 @@ static/datasets
 __pycache__/
 *.py[cod]
 /static/scripts/__pycache__
+/templates/plot.html
+/templates/mapa.html
 static/scripts/__pycache__
 static/scripts/__pycache__/
 static/assets/plot.png

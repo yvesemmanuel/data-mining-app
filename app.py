@@ -8,6 +8,10 @@ from static.scripts.Getters import *
 from static.scripts.Plots import *
 from static.scripts.CreateMap import *
 from static.scripts.AnaliseScoreUJS import *
+import locale
+
+locale.getlocale()
+('pt_BR', 'UTF-8')
 
 app = Flask(__name__)
 
@@ -55,13 +59,10 @@ def atraso_pagamentos():
 
                 listaUJSNaoFormatadas = resumoPorMunicipio[municipio_selecionado]["UJ"]
                 uj = request.form.get("empenho", listaUJSNaoFormatadas[0])
+                
                 df = getPagLiqsRes()
-                df = df[df["UJ"] == uj]
-
-                x = list(df["DIFF_LIQ_PAG"])
-                y = list(df["VALOR"])
-
-                criar_plot_4(x, y)
+                criar_plot_4(df[df["UJ"] == uj])
+                criar_plot_5(df[df["UJ"] == uj])
 
                 return render_template(
                     "atraso_pagamentos.html",
@@ -84,7 +85,7 @@ def atraso_pagamentos():
                     plot_5=True
                 )
 
-            score_map(caminhoDoDir+"/all_scores.csv")
+            # score_map(caminhoDoDir+"/all_scores.csv")
 
             return render_template(
                 "atraso_pagamentos.html",
@@ -128,6 +129,11 @@ def atraso_pagamentos():
         entidades=entidades,
         municipios=municipios
     )
+
+
+@app.route("/plot")
+def plot():
+    return render_template("plot.html")
 
 
 @app.route("/mapa")
