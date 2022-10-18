@@ -89,7 +89,7 @@ def criar_plot_3(idx):
     )
 
     # gerar a figura (sem utilizar o pyploy)
-    fig = Figure(figsize=(7, 5))
+    fig = Figure(figsize=(8, 5))
     ax = fig.subplots()
 
     barWidth = 0.25
@@ -148,13 +148,12 @@ def criar_plot_3(idx):
 
 
 def criar_plot_4(df):
+    x = df["DIFF_LIQ_PAG"]
+    y = df["VALOR"]
+
     fig = Figure(figsize=(7, 5))
     ax = fig.subplots()
 
-    y = df["DIFF_LIQ_PAG"]
-    x = df["DIFF_LIQ_PAG"]
-    y = df["VALOR"]
-    # second plot
     b = [30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360]
     n, bins, patches = ax.hist(x, bins=b)
     ax.grid(color="white", lw=4.5, axis="x")

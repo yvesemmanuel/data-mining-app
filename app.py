@@ -8,6 +8,7 @@ from static.scripts.Getters import *
 from static.scripts.Plots import *
 from static.scripts.CreateMap import *
 from static.scripts.AnaliseScoreUJS import *
+from static.scripts.FilaP import *
 import locale
 
 locale.getlocale()
@@ -19,127 +20,6 @@ app = Flask(__name__)
 @app.route("/")
 def home():
     return render_template("home.html", title="Home")
-
-
-@app.route("/analises/atraso_pagamentos", methods=["GET", "POST"])
-def atraso_pagamentos():
-    anos = [file.split("outputs")[1] for file in listdir(
-        "./static/datasets") if "outputs" in file]
-    cores = ["Pior UO+FONTE", "Média UO+FONTE"]
-    entidades = ["Pessoa Física", "Pessoa Jurídica", "Ambos"]
-
-    df_cidades = pd.read_csv("./static/datasets/ListaMunicipios.csv", sep=";")
-    municipios = dict(zip(df_cidades.Municipio, df_cidades.numUJ))
-
-    if request.method == "POST":
-        analise = request.form.get("analise")
-        ano = request.form.get("ano")
-        cor_mapa = request.form.get("cormapa")
-        municipio_selecionado = request.form.get("municipio")
-        limite_atraso_selecionado = request.form.get("limite-dias")
-
-        if analise == "Análise de Atrasos":
-            entidade_selecionada = request.form.get("entidade")
-            limite_empenho = request.form.get("limite-empenho")
-            limite_atraso = request.form.get("valor-limite", "0")
-
-            for muni in municipios:
-                if UJsProcessadas.getScoreUJ(muni, ano, municipios[muni], float(limite_atraso), limite_empenho, entidade_selecionada, int(limite_atraso_selecionado), cor_mapa):
-                    break
-
-            caminhoDoDir = "./static/datasets/cache_scores/"+ano+"-"+limite_atraso + \
-                "-"+limite_empenho+"-"+entidade_selecionada+"-"+limite_atraso_selecionado
-            all_dfs = [pd.read_csv(caminhoDoDir + "/" + file)
-                       for file in listdir(caminhoDoDir)]
-            df_scores = pd.concat(all_dfs)
-            df_scores.to_csv(caminhoDoDir+"/all_scores.csv", index=False)
-
-            if request.form.get("consultar"):
-                computaAtrasos(int(limite_atraso), int(ano))
-
-                listaUJSNaoFormatadas = resumoPorMunicipio[municipio_selecionado]["UJ"]
-                uj = request.form.get("empenho", listaUJSNaoFormatadas[0])
-                
-                df = getPagLiqsRes()
-                criar_plot_4(df[df["UJ"] == uj])
-                criar_plot_5(df[df["UJ"] == uj])
-
-                return render_template(
-                    "atraso_pagamentos.html",
-                    title="Análise de Atraso de Pagamentos",
-                    method=request.method,
-                    anos=anos,
-                    cores=cores,
-                    entidades=entidades,
-                    cor_selecionada=cor_mapa,
-                    analise_selecionada=analise,
-                    entidade_selecionada=entidade_selecionada,
-                    limite_selecionado=limite_empenho,
-                    empenho_selecionado=uj,
-                    valor_selecionado=limite_atraso,
-                    municipios=municipios,
-                    listaUJSNaoFormatadas=listaUJSNaoFormatadas,
-                    municipio_selecionado=municipio_selecionado,
-                    limite_atraso_selecionado=limite_atraso_selecionado,
-                    plot_4=True,
-                    plot_5=True
-                )
-
-            # score_map(caminhoDoDir+"/all_scores.csv")
-
-            return render_template(
-                "atraso_pagamentos.html",
-                title="Análise de Atraso de Pagamentos",
-                method=request.method,
-                anos=anos,
-                cores=cores,
-                entidades=entidades,
-                cor_selecionada=cor_mapa,
-                analise_selecionada=analise,
-                entidade_selecionada=entidade_selecionada,
-                limite_selecionado=limite_empenho,
-                valor_selecionado=limite_atraso,
-                municipios=municipios,
-                limite_atraso_selecionado=limite_atraso_selecionado,
-                plot_4=False,
-                plot_5=False
-            )
-
-        elif analise == "Análise de não Conformidade":
-            return render_template(
-                "atraso_pagamentos.html",
-                title="Análise de Atraso de Pagamentos",
-                method=request.method,
-                anos=anos,
-                cores=cores,
-                entidades=entidades,
-                cor_selecionada=cor_mapa,
-                analise_selecionada=analise,
-                municipios=municipios,
-                # municipio_selecionado=municipio_selecionado,
-                limite_atraso_selecionado=limite_atraso_selecionado
-            )
-
-    return render_template(
-        "atraso_pagamentos.html",
-        title="Análise de Atraso de Pagamentos",
-        anos=anos,
-        method=request.method,
-        cores=cores,
-        entidades=entidades,
-        municipios=municipios
-    )
-
-
-@app.route("/plot")
-def plot():
-    return render_template("plot.html")
-
-
-@app.route("/mapa")
-def mapa():
-    return render_template("mapa.html")
-    return render_template("mapa_media.html")
 
 
 @app.route("/analises/pagamentos_regulares", methods=["GET", "POST"])
@@ -200,10 +80,6 @@ def pag_reg():
         municipios=municipios,
         method=request.method,
     )
-
-
-def date_to_string(date):
-    return date.strftime("%d/%m/%Y")
 
 
 @app.route("/analises/servicos_antes_empenho", methods=["GET", "POST"])
@@ -352,6 +228,130 @@ def simba():
     )
 
 
+@app.route("/analises/atraso_pagamentos", methods=["GET", "POST"])
+def atraso_pagamentos():
+    anos = [int(file.split("outputs")[1]) for file in listdir(
+        "./static/datasets") if "outputs" in file]
+    anos.sort()
+    cores = ["Pior UO+FONTE", "Média UO+FONTE"]
+    entidades = ["Pessoa Física", "Pessoa Jurídica", "Ambos"]
+
+    df_cidades = pd.read_csv("./static/datasets/ListaMunicipios.csv", sep=";")
+    municipios = dict(zip(df_cidades.Municipio, df_cidades.numUJ))
+
+    if request.method == "POST":
+        analise = request.form.get("analise")
+        ano_selecionado = request.form.get("ano")
+        cor_mapa = request.form.get("cormapa")
+        municipio_selecionado = request.form.get("municipio")
+        limite_atraso_selecionado = request.form.get("limite-dias")
+
+        if analise == "Análise de Atrasos":
+            entidade_selecionada = request.form.get("entidade")
+            limite_empenho = request.form.get("limite-empenho")
+            limite_atraso = request.form.get("valor-limite", "0")
+
+            for muni in municipios:
+                if UJsProcessadas.getScoreUJ(muni, ano_selecionado, municipios[muni], float(limite_atraso), limite_empenho, entidade_selecionada, int(limite_atraso_selecionado), cor_mapa):
+                    break
+
+            caminhoDoDir = "./static/datasets/cache_scores/"+ano_selecionado+"-"+limite_atraso + \
+                "-"+limite_empenho+"-"+entidade_selecionada+"-"+limite_atraso_selecionado
+            all_dfs = [pd.read_csv(caminhoDoDir + "/" + file)
+                       for file in listdir(caminhoDoDir)]
+            df_scores = pd.concat(all_dfs)
+            df_scores.to_csv(caminhoDoDir+"/all_scores.csv", index=False)
+
+            if request.form.get("consultar"):
+                computaAtrasos(int(limite_atraso), int(ano_selecionado))
+
+                listaUJSNaoFormatadas = resumoPorMunicipio[municipio_selecionado]["UJ"]
+                uj = request.form.get("empenho", listaUJSNaoFormatadas[0])
+                
+                df = getPagLiqsRes()
+                criar_plot_4(df[df["UJ"] == uj])
+                criar_plot_5(df[df["UJ"] == uj])
+
+                return render_template(
+                    "atraso_pagamentos.html",
+                    title="Análise de Atraso de Pagamentos",
+                    method=request.method,
+                    anos=anos,
+                    cores=cores,
+                    entidades=entidades,
+                    cor_selecionada=cor_mapa,
+                    analise_selecionada=analise,
+                    entidade_selecionada=entidade_selecionada,
+                    limite_selecionado=limite_empenho,
+                    empenho_selecionado=uj,
+                    valor_selecionado=limite_atraso,
+                    municipios=municipios,
+                    ano_selecionado=ano_selecionado,
+                    listaUJSNaoFormatadas=listaUJSNaoFormatadas,
+                    municipio_selecionado=municipio_selecionado,
+                    limite_atraso_selecionado=limite_atraso_selecionado,
+                    plot_4=True,
+                    plot_5=True
+                )
+
+            # criar_mapa_1(caminhoDoDir+"/all_scores.csv")
+
+            return render_template(
+                "atraso_pagamentos.html",
+                title="Análise de Atraso de Pagamentos",
+                method=request.method,
+                anos=anos,
+                cores=cores,
+                entidades=entidades,
+                cor_selecionada=cor_mapa,
+                analise_selecionada=analise,
+                entidade_selecionada=entidade_selecionada,
+                limite_selecionado=limite_empenho,
+                valor_selecionado=limite_atraso,
+                ano_selecionado=int(ano_selecionado),
+                municipios=municipios,
+                limite_atraso_selecionado=limite_atraso_selecionado,
+                plot_4=False,
+                plot_5=False
+            )
+
+        elif analise == "Análise de não Conformidade":
+            return render_template(
+                "atraso_pagamentos.html",
+                title="Análise de Atraso de Pagamentos",
+                method=request.method,
+                anos=anos,
+                cores=cores,
+                entidades=entidades,
+                cor_selecionada=cor_mapa,
+                analise_selecionada=analise,
+                municipios=municipios,
+                ano_selecionado=int(ano_selecionado),
+                # municipio_selecionado=municipio_selecionado,
+                limite_atraso_selecionado=limite_atraso_selecionado
+            )
+
+    return render_template(
+        "atraso_pagamentos.html",
+        title="Análise de Atraso de Pagamentos",
+        anos=anos,
+        method=request.method,
+        cores=cores,
+        entidades=entidades,
+        municipios=municipios
+    )
+
+
+@app.route("/mapa_atrasos")
+def mapa_atrasos():
+    return render_template("mapa_atrasos.html")
+
+
+@app.route("/plot")
+def plot():
+    return render_template("plot.html")
+
+
 @app.route("/analises/correspondencia_fontes", methods=["GET", "POST"])
 def correspondencia_fontes():
     municipios = ["Cabo de Santo Agostinho"]
@@ -365,6 +365,48 @@ def correspondencia_fontes():
         return render_template("correspondencia_fontes.html", title="Correspondência Entre Fontes de Dados", municipios=municipios, method=request.method, municipio_selecionado=municipio_selecionado, colunas=colunas, linhas=linhas, linhas_descricoes=json.dumps(linhas_descricoes), descricao_geral=descricao_geral)
 
     return render_template("correspondencia_fontes.html", title="Correspondência Entre Fontes de Dados", municipios=municipios, method=request.method)
+
+
+def date_to_string(date):
+    return date.strftime("%d/%m/%Y")
+
+
+@app.route("/analises/filas_pagamentos", methods=["GET", "POST"])
+def filas_pagamentos():
+    df = pd.read_csv("./static/datasets/ListaMunicipios.csv", sep=";")
+    municipios = df["Municipio"].tolist()
+    dias_tolerancia = [7, 15, 30]
+    colunas = ["Numero Empenho", "CPF/CNPJ", "VL Emp", "VL Liq", "Data Pag", "Data Liq.", "Qtd ultrapassaram"]
+
+
+    if request.method == "POST":
+        municipio = request.form.get("municipio", municipios[0])
+        lista_fontes = get_lista_UOFR(municipio)
+        fonte_selecionada = request.form.get("fonte", lista_fontes[0])
+        num_municipio = int(df[df["Municipio"] == municipio].numUJ)
+
+        if request.form.get("action") == "aplicar":
+            dias_selecionado = dias_tolerancia[0]
+            result1, varia, result2 = MudaMunicio(num_municipio, fonte_selecionada, int(dias_selecionado))
+
+            return render_template("filas_pagamentos.html", municipios=municipios, municipio_selecionado=municipio,
+                                    dias_tolerancia=dias_tolerancia, dias_selecionado=int(dias_selecionado), lista_fontes=lista_fontes, title="Filas de Pagamentos", pontuacao=varia, show_table=True, colunas=colunas, resultado=result1, fonte_selecionada=fonte_selecionada, method=request.method)
+        else:
+            dias_selecionado = request.form.get("dias")
+            result1, varia, result2 = MudaMunicio(num_municipio, fonte_selecionada, int(dias_selecionado))
+
+            return render_template("filas_pagamentos.html", municipios=municipios, municipio_selecionado=municipio,
+                                    dias_tolerancia=dias_tolerancia, dias_selecionado=int(dias_selecionado), lista_fontes=lista_fontes, title="Filas de Pagamentos", pontuacao=varia, resultado=result1, fonte_selecionada=fonte_selecionada, show_table=True, colunas=colunas, method=request.method)
+
+            
+
+    return render_template("filas_pagamentos.html", municipios=municipios, dias_tolerancia=dias_tolerancia, title="Filas de Pagamentos", method=request.method)
+
+
+@app.route("/mapa_filas")
+def mapa_filas():
+    criar_mapa_2()
+    return render_template("mapa_filas.html")
 
 
 if __name__ == "__main__":

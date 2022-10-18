@@ -1,0 +1,123 @@
+{% extends "layout.html" %} {% block body %}
+
+<h1 class="title section-title">{{title}}</h1>
+
+<div class="container">
+
+    <hr>
+
+    <iframe class="map col-lg-12 col-md-12 col-sm-12 col-12 .col-xl-12" height="400" src="/mapa_filas"></iframe>
+
+    <form method="post">
+        <div class="row">
+            <div class="col"></div>
+            <div class="col-sm-4 form-group">
+                <label class="input-title" for="municipio">Unidade Jurisdicionada</label>
+                <select class="form-control" id="municipio" name="municipio">
+                    {% for municipio in municipios %}
+                    <option value="{{ municipio }}" {% if municipio_selecionado==municipio %} selected {% endif %}>{{
+                        municipio }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col"></div>
+        </div>
+
+        <div class="col-md-12 text-center">
+            <button class="btn btn-default btn-md button-style" name="action" value="aplicar"
+                type="submit">Aplicar</button>
+        </div>
+
+        <br>
+
+        {% if method == "POST" %}
+
+        <div class="row">
+            <div class="col-6 form-group">
+                <label class="input-title" for="fonte">Fonte</label>
+                <select class="form-control" id="fonte" name="fonte"
+                    onchange="document.getElementById('atualizar').click()">
+                    {% for fonte in lista_fontes %}
+                    <option value="{{ fonte }}" {% if fonte_selecionada==fonte %} selected {% endif %}>{{
+                        fonte }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-6 form-group">
+                <label class="input-title" for="dias">Dias de Tolerância</label>
+                <select class="form-control" id="dias" name="dias"
+                    onchange="document.getElementById('atualizar').click()">
+                    {% for dias in dias_tolerancia %}
+                    <option value="{{ dias }}" {% if dias_selecionado==dias %} selected {% endif %}>{{
+                        dias }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+</div>
+
+<div class="text-center hidden">
+    <button class="btn btn-default btn-md button-style" type="submit" name="action" value="atualizar"
+        id="atualizar">Atualizar</button>
+</div>
+
+<br>
+{% endif %}
+
+</form>
+
+
+{% if show_table %}
+<div class="row">
+    <div class="col"></div>
+    <div class="col">
+        <div class="card" style="width: 18rem;">
+            <div class="card-body">
+              <!-- <h5 class="card-title">Resultado</h5> -->
+              <!-- <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6> -->
+              <h7>A pontuação da consulta foi <strong>{{ pontuacao }}</strong>.</h7>
+            </div>
+          </div>
+    </div>
+    <div class="col"></div>
+</div>
+<hr>
+<!-- <table class="table table-hover"> -->
+<table class="table fila-table table-striped table-bordered table-sm" cellspacing="0" width="100%">
+
+    <thead>
+        <tr scope="col">
+            {% for col in colunas %}
+            <th>{{col}}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for k in resultado %}
+        {% for i in k[5] %}
+
+        <tr>
+            <td> {{ i[0] }} </td>
+            <td> {{ i[1] }} </td>
+            <td> {{ i[2] }} </td>
+            <td> {{ i[3] }} </td>
+            <td> {{ k[1].strftime("%Y-%m-%d") }} </td>
+            <td> {{ k[2].strftime("%Y-%m-%d") }} </td>
+            <td> {% if k[4] != 0 %} {{ k[4] }} {% else: %} 0 {% endif %}</td>
+        </tr>
+
+        {% endfor %}
+        {% endfor %}
+    </tbody>
+
+</table>
+<br>
+{% endif %}
+
+</div>
+
+{% endblock %}

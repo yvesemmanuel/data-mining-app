@@ -16,32 +16,20 @@ def get_filenames(dir_path):
 
 def get_servico_emp(municipio):
     df = pd.read_csv("./static/datasets/ListaMunicipios.csv", sep=";")
-    municipios = df["Municipio"]
-
-    for i in municipios.index:
-        if municipios[i] == municipio:
-            municipio_num = i
-            break
-
-    base_num = 5296
+    municipio_num = int(df[df["Municipio"] == municipio].numUJ)
+    
     filename = "./static/datasets/outputs2019/" + \
-        str(base_num + municipio_num) + ".csv"
+        str(municipio_num) + ".csv"
 
     return empServ.getSortedEmpenhos(filename)
 
 
 def get_salario_emp(municipio):
     df = pd.read_csv("./static/datasets/ListaMunicipios.csv", sep=";")
-    municipios = df["Municipio"]
+    municipio_num = int(df[df["Municipio"] == municipio].numUJ)
 
-    for i in municipios.index:
-        if municipios[i] == municipio:
-            municipio_num = i
-            break
-
-    base_num = 5296
     filename = "./static/datasets/outputs2019/" + \
-        str(base_num + municipio_num) + ".csv"
+        str(municipio_num) + ".csv"
 
     return empSal.getSortedEmpenhos(filename)
 
@@ -77,3 +65,15 @@ def get_dados_correspondencia(municipio):
     descricao_geral = df1.loc[0].tolist()
 
     return colunas, linhas, descricoes, descricao_geral
+
+
+def get_lista_UOFR(municipio):
+    df = pd.read_csv("./static/datasets/ListaMunicipios.csv", sep=";")
+    municipio_num = int(df[df["Municipio"] == municipio].numUJ)
+
+    path = "./static/datasets/outputs2019/" + str(municipio_num) + ".csv"
+    df = pd.read_csv(path, sep=',', usecols=['NUMERO_EMPENHO', 'NOME_FONTE_REC', 'NOME_UO'])
+
+    df.rename(columns = {'NOME_FONTE_REC':"FONTE_REC", 'NOME_UO':"UNID_ORC"},  inplace = True)
+
+    return (df["FONTE_REC"] + df["UNID_ORC"]).dropna().unique().tolist()
