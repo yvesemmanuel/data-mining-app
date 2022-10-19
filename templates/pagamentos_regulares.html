@@ -6,9 +6,8 @@
     <hr>
 
     <form method="post">
-        <div class="row">
-            <div class="col"></div>
-            <div class="col-sm-4 form-group">
+        <div class="row justify-content-center">
+            <div class="col-4 form-group">
                 <label class="input-title" for="municipio">Unidade Jurisdicionada</label>
                 <select class="form-control" id="municipio" name="municipio">
                     {% for municipio in municipios %}
@@ -18,7 +17,16 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="col"></div>
+            <div class="col-4 form-group">
+                <label class="input-title" for="ano">Ano</label>
+                <select class="form-control" id="ano" name="ano">
+                    {% for ano in anos %}
+                    <option value="{{ ano }}" {% if ano_selecionado==ano %} selected {% endif %}>{{
+                        ano }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
 
         <div class="text-center">

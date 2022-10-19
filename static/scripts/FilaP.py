@@ -34,6 +34,7 @@ def MudaMunicio(numero, uofr, diastl):
 
     empsagres = CriaDivisao(camposuteismuni, diastl, uofr)
 
+
     retorno1 = empsagres[0].retresultado1()
     retorno2 = empsagres[0].retornaIndice()
     retorno3 = empsagres[0].retresultado2()
@@ -188,6 +189,8 @@ def CriaDivisao(df, dias1, chave):
     new_emp = UOFR(chave)
     new_emp.execute(df, dias1, chave)
     uomaisfonte.append(new_emp)
+
+    print(uomaisfonte)
 
     return uomaisfonte
 

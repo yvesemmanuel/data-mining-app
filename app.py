@@ -28,11 +28,14 @@ def pag_reg():
         pd.read_csv("./static/datasets/ListaMunicipios.csv", sep=";").Municipio
     )
 
+    anos = [2019, 2020]
+
     if request.method == "POST":
         municipio = request.form.get("municipio")
+        ano = request.form.get("ano")
 
         # pegando os empenhos associados ao municipio
-        empenhos = get_salario_emp(municipio)
+        empenhos = get_salario_emp(municipio, ano)
         lista_empenhos = []
         for idx, empenho in enumerate(empenhos):
             lista_empenhos.append(str(idx) + " - " + str(empenho.nmFornecedor))
@@ -68,7 +71,9 @@ def pag_reg():
             title="Análise de Pagamentos Regulares",
             municipios=municipios,
             method=request.method,
+            anos=anos,
             municipio_selecionado=municipio,
+            ano_selecionado=int(ano),
             empenho_selecionado=request.form.get("empenho"),
             lista_empenhos=lista_empenhos,
             info_empenho=info,
@@ -78,6 +83,7 @@ def pag_reg():
         "pagamentos_regulares.html",
         title="Análise de Pagamentos Regulares",
         municipios=municipios,
+        anos=anos,
         method=request.method,
     )
 
@@ -88,10 +94,13 @@ def servicos_antes():
         pd.read_csv("./static/datasets/ListaMunicipios.csv", sep=";").Municipio
     )
 
+    anos = [2019, 2020]
+
     if request.method == "POST":
         municipio = request.form.get("municipio")
+        ano = request.form.get("ano")
 
-        empenhos = get_servico_emp(municipio)
+        empenhos = get_servico_emp(municipio, ano)
         lista_empenhos = []
         for idx, empenho in enumerate(empenhos):
             lista_empenhos.append(str(idx) + " - " + str(empenho.nmFornecedor))
@@ -130,6 +139,8 @@ def servicos_antes():
             title="Análise de Serviços Antes de Empenho",
             municipios=municipios,
             method=request.method,
+            anos=anos,
+            ano_selecionado=ano,
             municipio_selecionado=municipio,
             empenho_selecionado=request.form.get("empenho"),
             lista_empenhos=lista_empenhos,
@@ -140,6 +151,7 @@ def servicos_antes():
         "servicos_antes.html",
         title="Análise de Serviços Antes de Empenho",
         municipios=municipios,
+        anos=anos,
         method=request.method,
     )
 
@@ -354,7 +366,8 @@ def plot():
 
 @app.route("/analises/correspondencia_fontes", methods=["GET", "POST"])
 def correspondencia_fontes():
-    municipios = ["Cabo de Santo Agostinho"]
+    df_cidades = pd.read_csv("./static/datasets/ListaMunicipios.csv", sep=";")
+    municipios = dict(zip(df_cidades.Municipio, df_cidades.numUJ))
 
     if request.method == "POST":
         municipio_selecionado = request.form.get("municipio")
@@ -387,7 +400,7 @@ def filas_pagamentos():
 
         if request.form.get("action") == "aplicar":
             dias_selecionado = dias_tolerancia[0]
-            result1, varia, result2 = MudaMunicio(num_municipio, fonte_selecionada, int(dias_selecionado))
+            result1, varia, _ = MudaMunicio(num_municipio, fonte_selecionada, int(dias_selecionado))
 
             return render_template("filas_pagamentos.html", municipios=municipios, municipio_selecionado=municipio,
                                     dias_tolerancia=dias_tolerancia, dias_selecionado=int(dias_selecionado), lista_fontes=lista_fontes, title="Filas de Pagamentos", pontuacao=varia, show_table=True, colunas=colunas, resultado=result1, fonte_selecionada=fonte_selecionada, method=request.method)

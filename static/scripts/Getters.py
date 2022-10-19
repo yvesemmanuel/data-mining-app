@@ -14,21 +14,21 @@ def get_filenames(dir_path):
     return res
 
 
-def get_servico_emp(municipio):
+def get_servico_emp(municipio, ano):
     df = pd.read_csv("./static/datasets/ListaMunicipios.csv", sep=";")
     municipio_num = int(df[df["Municipio"] == municipio].numUJ)
     
-    filename = "./static/datasets/outputs2019/" + \
+    filename = "./static/datasets/outputs" + ano + "/" + \
         str(municipio_num) + ".csv"
 
     return empServ.getSortedEmpenhos(filename)
 
 
-def get_salario_emp(municipio):
+def get_salario_emp(municipio, ano):
     df = pd.read_csv("./static/datasets/ListaMunicipios.csv", sep=";")
     municipio_num = int(df[df["Municipio"] == municipio].numUJ)
 
-    filename = "./static/datasets/outputs2019/" + \
+    filename = "./static/datasets/outputs" + ano + "/" + \
         str(municipio_num) + ".csv"
 
     return empSal.getSortedEmpenhos(filename)
