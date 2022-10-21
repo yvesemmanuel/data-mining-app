@@ -42,13 +42,10 @@ def regular_payments_plot(x, y):
     image_file.close()
 
 
-def criar_plot_2(empenho):
+def service_before_payment_plot(x, y):
     # gerar a figura (sem utilizar o pyploy)
     fig = Figure(figsize=(7, 5))
     ax = fig.subplots()
-
-    y = empenho.listValoresPagamentos
-    x = empenho.datasPagamentosDateTime
 
     # arrumar as datas no eixo X
     ax.plot(x, y, color="black", linestyle="--", marker="o")
