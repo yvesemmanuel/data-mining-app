@@ -163,85 +163,39 @@ def service_before_payment():
 
 @app.route('/analysis/simba', methods=['GET', 'POST'])
 def simba():
-    lObjs = montaObjsSagresSimba(
-        'simba/SimbaGoiana.csv', 'simba/SagresGoiana.csv')
-    lst_idx_simba_sagres = []
+    page_title = 'SIMBA'
+    lObjs = montaObjsSagresSimba('simba/SimbaGoiana.csv', 'simba/SagresGoiana.csv')
+    entity_options = []
     for idx, o in enumerate(lObjs):
-        lst_idx_simba_sagres.append(
+        entity_options.append(
             '{} - {}({}) - {}'.format(
                 idx, o.nmFornecedor, o.cpf_cnpj, round(
                     o.somaSimba - o.somaSagres, 2)
             )
         )
 
-    meses = [
-        'Jan',
-        'Fev',
-        'Mar',
-        'Abr',
-        'Mai',
-        'Jun',
-        'Jul',
-        'Ago',
-        'Set',
-        'Out',
-        'Nov',
-        'Dez',
-    ]
+    entity_selected = int(request.form.get('entity', 0))
 
-    if request.method == 'POST':
-        entidade_idx = int(request.form.get('entidade').split(' - ')[0])
-        entidade = lObjs[entidade_idx]
+    entity = lObjs[entity_selected]
+    simba_plot(entity_selected)
 
-        dictPagsSagres = entidade.dictPagsMensaisSagres
-        dictPagsSimba = entidade.dictPagsMensaisSimba
-
-        linhaSagres = []
-        linhaSimba = []
-
-        for idx in range(1, 13):
-            linhaSagres.append(round(dictPagsSagres[idx], 2))
-            linhaSimba.append(round(dictPagsSimba[idx], 2))
-
-        info = {'fornecedor': entidade.nmFornecedor}
-        criar_plot_3(entidade_idx)
-
-        tb_info = {'meses': meses, 'sagres': linhaSagres, 'simba': linhaSimba}
-
-        return render_template(
-            'simba.html',
-            title='SIMBA',
-            indexes=lst_idx_simba_sagres,
-            info_entidade=info,
-            table_info=tb_info,
-            idx_selecionado=request.form.get('entidade'),
-        )
-
-    entidade_idx = 0
-    entidade = lObjs[entidade_idx]
-
-    dictPagsSagres = entidade.dictPagsMensaisSagres
-    dictPagsSimba = entidade.dictPagsMensaisSimba
-
+    dictPagsSagres = entity.dictPagsMensaisSagres
+    dictPagsSimba = entity.dictPagsMensaisSimba
     linhaSagres = []
     linhaSimba = []
-
     for idx in range(1, 13):
         linhaSagres.append(round(dictPagsSagres[idx], 2))
         linhaSimba.append(round(dictPagsSimba[idx], 2))
 
-    info = {'fornecedor': entidade.nmFornecedor}
-    criar_plot_3(entidade_idx)
 
-    tb_info = {'meses': meses, 'sagres': linhaSagres, 'simba': linhaSimba}
+    entity_info = {'months': ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'], 'sagres': linhaSagres, 'simba': linhaSimba}
 
     return render_template(
         'simba.html',
-        title='SIMBA',
-        indexes=lst_idx_simba_sagres,
-        info_entidade=info,
-        table_info=tb_info,
-        idx_selecionado=request.form.get('entidade'),
+        page_title=page_title,
+        entity_options=entity_options,
+        entity_info=entity_info,
+        entity_selected=entity_selected,
     )
 
 

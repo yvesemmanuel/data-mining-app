@@ -1,7 +1,7 @@
 {% extends "layout.html" %} {% block body %}
 
 <div class="container">
-    <h1 class="title section-title">{{title}}</h1>
+    <h1 class="title section-title">{{page_title}}</h1>
 
     <hr>
 
@@ -9,12 +9,12 @@
         <div class="row">
             <div class="col"></div>
             <div class="col-lg-10 form-group">
-                <label class="input-title" for="entidade">Entidade</label>
-                <select class="form-control" id="entidade" name="entidade"
-                    onchange="document.getElementById('aplicar').click()">
-                    {% for entidade in indexes %}
-                    <option value="{{ entidade }}" {% if idx_selecionado==entidade %} selected {% endif %}>{{
-                        entidade }}
+                <label class="input-title" for="entity">Entidade</label>
+                <select class="form-control" id="entity" name="entity"
+                    onchange="document.getElementById('apply').click()">
+                    {% for idx, entity in enumerate(entity_options) %}
+                    <option value="{{ idx }}" {% if entity_selected==idx %} selected {% endif %}>{{
+                        entity }}
                     </option>
                     {% endfor %}
                 </select>
@@ -23,8 +23,8 @@
         </div>
 
         <div class="text-center hidden">
-            <button class="btn btn-default btn-md button-style" type="submit" name="action" value="aplicar"
-                id="aplicar">Aplicar</button>
+            <button class="btn btn-default btn-md button-style" type="submit" name="action" value="apply"
+                id="apply">Aplicar</button>
         </div>
     </form>
 
@@ -33,22 +33,22 @@
             <thead>
                 <tr>
                     <th scope="col">#</th>
-                    {% for mes in table_info["meses"] %}
-                    <th scope="col">{{ mes }}</th>
+                    {% for month in entity_info["months"] %}
+                    <th scope="col">{{ month }}</th>
                     {% endfor %}
                 </tr>
             </thead>
             <tbody>
                 <tr>
                     <th scope="row">SIMBA</th>
-                    {% for valor in table_info["simba"] %}
-                    <td>{{valor}}</td>
+                    {% for value in entity_info["simba"] %}
+                    <td>{{value}}</td>
                     {% endfor %}
                 </tr>
                 <tr>
                     <th scope="row">Sagres</th>
-                    {% for valor in table_info["sagres"] %}
-                    <td>{{valor}}</td>
+                    {% for value in entity_info["sagres"] %}
+                    <td>{{value}}</td>
                     {% endfor %}
                 </tr>
             </tbody>

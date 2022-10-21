@@ -78,7 +78,7 @@ def service_before_payment_plot(x, y):
     image_file.close()
 
 
-def criar_plot_3(idx):
+def simba_plot(idx):
     lObjs = montaObjsSagresSimba(
         "../datasets/simba/SimbaGoiana.csv", "../datasets/simba/SagresGoiana.csv"
     )
