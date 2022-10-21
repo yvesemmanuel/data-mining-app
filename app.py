@@ -187,7 +187,6 @@ def simba():
         linhaSagres.append(round(dictPagsSagres[idx], 2))
         linhaSimba.append(round(dictPagsSimba[idx], 2))
 
-
     entity_info = {'months': ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'], 'sagres': linhaSagres, 'simba': linhaSimba}
 
     return render_template(
@@ -326,20 +325,30 @@ def plot():
     return render_template('plot.html')
 
 
-@app.route('/analysis/correspondencia_fontes', methods=['GET', 'POST'])
-def correspondencia_fontes():
-    df_cidades = pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';')
-    municipios = dict(zip(df_cidades.Municipio, df_cidades.numUJ))
+@app.route('/analysis/matching_sources', methods=['GET', 'POST'])
+def matching_sources():
+    # df_cities = pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';')
+    # city_options = dict(zip(df_cities.Municipio, df_cities.numUJ))
+    city_options = ['Cabo de Santo Agostinho']
 
     if request.method == 'POST':
-        municipio_selecionado = request.form.get('municipio')
+        city_selected = request.form.get('city')
 
-        colunas, linhas, linhas_descricoes, descricao_geral = get_dados_correspondencia(
-            municipio_selecionado)
+        columns, rows, payment_rows, row_general_descriptions, columns_general_descriptions = get_dados_correspondencia(
+            city_selected)
 
-        return render_template('correspondencia_fontes.html', title='Correspondência Entre Fontes de Dados', municipios=municipios, method=request.method, municipio_selecionado=municipio_selecionado, colunas=colunas, linhas=linhas, linhas_descricoes=json.dumps(linhas_descricoes), descricao_geral=descricao_geral)
+        return render_template(
+            'matching_sources.html', title='Correspondência Entre Fontes de Dados',
+            city_options=city_options, method=request.method,
+            city_selected=city_selected,
+            columns=columns,
+            rows=rows,
+            payment_rows=json.dumps(payment_rows),
+            row_general_descriptions=row_general_descriptions,
+            columns_general_descriptions=columns_general_descriptions
+        )
 
-    return render_template('correspondencia_fontes.html', title='Correspondência Entre Fontes de Dados', municipios=municipios, method=request.method)
+    return render_template('matching_sources.html', title='Correspondência Entre Fontes de Dados', city_options=city_options, method=request.method)
 
 
 def date_to_string(date):
