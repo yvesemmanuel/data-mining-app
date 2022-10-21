@@ -8,13 +8,11 @@ from static.scripts.MontaSagresSimba import *
 import plotly.express as px
 
 
-def criar_plot_1(empenho):
+def regular_payments_plot(x, y):
     # gerar a figura (sem utilizar o pyploy)
     fig = Figure(figsize=(7, 5))
     ax = fig.subplots()
 
-    y = empenho.listValoresPagamentos
-    x = empenho.datasPagamentosDateTime
     ax.plot(x, y, color="black", linestyle="--", marker="o")
 
     # arrumar as datas no eixo X
