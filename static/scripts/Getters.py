@@ -63,8 +63,9 @@ def get_dados_correspondencia(municipio):
     descricoes = list(linhas_descricoes.values())
 
     descricao_geral = df1.loc[0].tolist()
+    colunas_descricao_geral = df1.loc[0].index.values.tolist()
 
-    return colunas, linhas, descricoes, descricao_geral
+    return colunas, linhas, descricoes, descricao_geral, colunas_descricao_geral
 
 
 def get_lista_UOFR(municipio):
