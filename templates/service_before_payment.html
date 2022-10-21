@@ -1,0 +1,84 @@
+{% extends "layout.html" %} {% block body %}
+
+<div class="container">
+    <h1 class="title section-title">{{page_title}}</h1>
+
+    <hr>
+
+    <form method="post">
+        <div class="row justify-content-center">
+            <div class="col-4 form-group">
+                <label class="input-title" for="city">Unidade Jurisdicionada</label>
+                <select class="form-control" id="city" name="city">
+                    {% for city in city_options %}
+                    <option value="{{ city }}" {% if municipio_selecionado==city %} selected {% endif %}>{{
+                        city }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-4 form-group">
+                <label class="input-title" for="year">Ano</label>
+                <select class="form-control" id="year" name="year">
+                    {% for year in year_options %}
+                    <option value="{{ year }}" {% if ano_selecionado==year %} selected {% endif %}>{{
+                        year }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <button class="btn btn-default btn-md button-style" type="submit" name="action" value="apply">Aplicar</button>
+        </div>
+
+        {% if user_request == "POST" %}
+        <div class="row">
+            <div class="col"></div>
+            <div class="col-lg-8 form-group">
+                <label class="input-title" for="supplier">Fornecedor</label>
+                <select class="form-control" id="supplier" name="supplier" onchange="document.getElementById('update').click()">
+                    {% for idx, supplier in enumerate(supplier_options) %}
+                    <option value="{{ idx }}" {% if supplier_selected==idx %} selected {% endif %}>{{
+                        supplier }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col"></div>
+        </div>
+
+        <div class="text-center hidden">
+            <button class="btn btn-default btn-md button-style" type="submit" name="action" value="update" id="update">Atualizar</button>
+        </div>
+        {% endif %}
+
+    </form>
+
+    {% if user_request == "POST" %}
+    <div class="row descricao">
+        <div class="col"></div>
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <b>Descrição: </b>{{loan_info["Descrição"]}} 
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for col in ["CPF/CNPJ", "Datas", "Valores", "Primeiro Mês", "Média Mensal"] %}
+                    <li class="list-group-item"><b>{{col}}: </b>{{loan_info[col]}}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="col"></div>
+    </div>
+
+    <img src="{{ url_for("static", filename="assets/plot.png" ) }}" class="img-fluid mx-auto d-block">
+    {% endif %}
+
+    <br>
+
+</div>
+
+{% endblock %}

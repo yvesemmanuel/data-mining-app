@@ -27,7 +27,7 @@ def home():
 
 
 @app.route('/analysis/regular_payments', methods=['GET', 'POST'])
-def get_regular_payments():
+def regular_payments():
     page_title = 'Análise de Pagamentos Regulares'
     city_options = list(
         pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';').Municipio
@@ -69,7 +69,76 @@ def get_regular_payments():
         }
 
         return render_template(
-            'pagamentos_regulares.html',
+            'regular_payments.html',
+            page_title=page_title,
+            city_options=city_options,
+            year_options=year_options,
+            user_request=user_request,
+            
+            supplier_options=supplier_options,
+            loan_info=loan_info,
+            city_selected=city_selected,
+            year_selected=int(year_selected),
+            supplier_selected=int(supplier_selected),
+        )
+
+    return render_template(
+        'regular_payments.html',
+        page_title=page_title,
+        city_options=city_options,
+        year_options=year_options,
+        user_request=user_request,
+    )
+
+
+@app.route('/analysis/service_before_payment', methods=['GET', 'POST'])
+def service_before_payment():
+    page_title = 'Análise de Serviços Antes de Empenho'
+    city_options = list(
+        pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';').Municipio
+    )
+    year_options = [2019, 2020]
+    user_request = request.method
+
+    if user_request == 'POST':
+        city_selected = request.form.get('city')
+        year_selected = request.form.get('year')
+        supplier_selected = request.form.get('supplier', 0)
+        action_selected = request.form.get('action')
+
+        loans = get_servico_emp(city_selected, year_selected)
+        supplier_options = []
+        for idx, loan in enumerate(loans):
+            supplier_options.append(str(idx) + ' - ' + str(loan.nmFornecedor))
+
+        if action_selected == 'apply':
+            loan_idx = 0
+        elif action_selected == 'update':
+            loan_idx = int(supplier_selected)
+        
+        loan_selected = loans[loan_idx]
+        y = loan_selected.listValoresPagamentos
+        x = loan_selected.datasPagamentosDateTime
+        service_before_payment_plot(x, y)
+
+        supplier_id = '{} ({})'.format(loan_selected.cnpj, loan_selected.nmFornecedor)
+        dates = '; '.join(map(date_to_string, loan_selected.datasPagamentosDateTime))
+        values = '; '.join(map(str, loan_selected.listValoresPagamentos))
+        description = loan_selected.descricao
+        first_month = str(round(loan_selected.vlMes1, 2))
+        monthly_average = str(round(loan_selected.vlMedioMensal, 2))
+
+        loan_info = {
+            'CPF/CNPJ': supplier_id,
+            'Datas': dates,
+            'Valores': values,
+            'Descrição': description,
+            'Primeiro Mês': first_month,
+            'Média Mensal': monthly_average
+        }
+
+        return render_template(
+            'service_before_payment.html',
             page_title=page_title,
             city_options=city_options,
             year_options=year_options,
@@ -84,79 +153,11 @@ def get_regular_payments():
         )
 
     return render_template(
-        'pagamentos_regulares.html',
+        'service_before_payment.html',
         page_title=page_title,
         city_options=city_options,
         year_options=year_options,
         user_request=user_request,
-    )
-
-
-@app.route('/analysis/servicos_antes_empenho', methods=['GET', 'POST'])
-def servicos_antes():
-    municipios = list(
-        pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';').Municipio
-    )
-
-    anos = [2019, 2020]
-
-    if request.method == 'POST':
-        municipio = request.form.get('municipio')
-        ano = request.form.get('ano')
-
-        empenhos = get_servico_emp(municipio, ano)
-        lista_empenhos = []
-        for idx, empenho in enumerate(empenhos):
-            lista_empenhos.append(str(idx) + ' - ' + str(empenho.nmFornecedor))
-
-        if request.form.get('action') == 'aplicar':
-            empenho = empenhos[0]
-            criar_plot_2(empenho)
-        elif request.form.get('action') == 'atualizar':
-            num_empenho = int(request.form.get('empenho').split(' - ')[0])
-            empenho = empenhos[num_empenho]
-            criar_plot_2(empenho)
-
-        cpf_cnpj = '{} ({})'.format(empenho.cnpj, empenho.nmFornecedor)
-        primeiro_mes = str(round(empenho.vlMes1, 2))
-        media_mensal = str(round(empenho.vlMedioMensal, 2))
-
-        lista_datas = map(date_to_string, empenho.datasPagamentosDateTime)
-        datas = '; '.join(lista_datas)
-
-        lista_valores = map(str, empenho.listValoresPagamentos)
-        valores = '; '.join(lista_valores)
-
-        descricao = empenho.descricao
-
-        info = {
-            'cpf_cnpj': cpf_cnpj,
-            'datas': datas,
-            'valores': valores,
-            'descricao': descricao,
-            'primeiro_mes': primeiro_mes,
-            'media_mensal': media_mensal,
-        }
-
-        return render_template(
-            'servicos_antes.html',
-            title='Análise de Serviços Antes de Empenho',
-            municipios=municipios,
-            method=request.method,
-            anos=anos,
-            ano_selecionado=ano,
-            municipio_selecionado=municipio,
-            empenho_selecionado=request.form.get('empenho'),
-            lista_empenhos=lista_empenhos,
-            info_empenho=info,
-        )
-
-    return render_template(
-        'servicos_antes.html',
-        title='Análise de Serviços Antes de Empenho',
-        municipios=municipios,
-        anos=anos,
-        method=request.method,
     )
 
 
