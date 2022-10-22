@@ -142,10 +142,7 @@ def simba_plot(idx):
     image_file.close()
 
 
-def criar_plot_4(df):
-    x = df["DIFF_LIQ_PAG"]
-    y = df["VALOR"]
-
+def payments_delay_plot_0(x, y):
     fig = Figure(figsize=(7, 5))
     ax = fig.subplots()
 
@@ -175,6 +172,6 @@ def criar_plot_4(df):
     image_file.close()
 
 
-def criar_plot_5(df):
+def payments_delay_plot_1(df):
     fig = px.scatter(df, x="DIFF_LIQ_PAG", y="VALOR", color="FORNEC")
-    fig.write_html("./templates/plot.html")
+    fig.write_html("./templates/payments_delay_plot_1.html")

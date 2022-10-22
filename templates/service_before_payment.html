@@ -40,7 +40,7 @@
                 <label class="input-title" for="supplier">Fornecedor</label>
                 <select class="form-control" id="supplier" name="supplier" onchange="document.getElementById('update').click()">
                     {% for idx, supplier in enumerate(supplier_options) %}
-                    <option value="{{ idx }}" {% if supplier_selected==idx %} selected {% endif %}>{{
+                    <option value="{{ idx }}" {% if selected_supplier==idx %} selected {% endif %}>{{
                         supplier }}
                     </option>
                     {% endfor %}
@@ -57,7 +57,7 @@
     </form>
 
     {% if user_request == "POST" %}
-    <div class="row descricao">
+    <div class="row description">
         <div class="col"></div>
         <div class="col-lg-8">
             <div class="card">

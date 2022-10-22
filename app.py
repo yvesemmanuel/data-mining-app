@@ -16,10 +16,11 @@ locale.getlocale()
 
 app = Flask(__name__)
 
+
 @app.context_processor
 def inject_enumerate():
     return dict(enumerate=enumerate)
-    
+
 
 @app.route('/')
 def home():
@@ -36,28 +37,31 @@ def regular_payments():
     user_request = request.method
 
     if user_request == 'POST':
-        city_selected = request.form.get('city')
-        year_selected = request.form.get('year')
-        supplier_selected = request.form.get('supplier', 0)
-        action_selected = request.form.get('action')
+        selected_city = request.form.get('city')
+        selected_year = request.form.get('year')
+        selected_supplier = request.form.get('supplier', 0)
+        selected_action = request.form.get('action')
 
-        loans = get_salario_emp(city_selected, year_selected)
+        loans = get_salario_emp(selected_city, selected_year)
         supplier_options = []
         for idx, empenho in enumerate(loans):
-            supplier_options.append(str(idx) + ' - ' + str(empenho.nmFornecedor))
+            supplier_options.append(
+                str(idx) + ' - ' + str(empenho.nmFornecedor))
 
-        if action_selected == 'apply':
+        if selected_action == 'apply':
             loan_idx = 0
-        elif action_selected == 'update':
-            loan_idx = int(supplier_selected)
+        elif selected_action == 'update':
+            loan_idx = int(selected_supplier)
 
         loan_selected = loans[loan_idx]
         y = loan_selected.listValoresPagamentos
         x = loan_selected.datasPagamentosDateTime
         regular_payments_plot(x, y)
 
-        supplier_id = '{} ({})'.format(loan_selected.cnpj, loan_selected.nmFornecedor)
-        dates = '; '.join(map(date_to_string, loan_selected.datasPagamentosDateTime))
+        supplier_id = '{} ({})'.format(
+            loan_selected.cnpj, loan_selected.nmFornecedor)
+        dates = '; '.join(
+            map(date_to_string, loan_selected.datasPagamentosDateTime))
         values = '; '.join(map(str, loan_selected.listValoresPagamentos))
         description = loan_selected.descricao
 
@@ -69,21 +73,21 @@ def regular_payments():
         }
 
         return render_template(
-            'regular_payments.html',
+            'payments_regular.html',
             page_title=page_title,
             city_options=city_options,
             year_options=year_options,
             user_request=user_request,
-            
+
             supplier_options=supplier_options,
             loan_info=loan_info,
-            city_selected=city_selected,
-            year_selected=int(year_selected),
-            supplier_selected=int(supplier_selected),
+            selected_city=selected_city,
+            selected_year=int(selected_year),
+            selected_supplier=int(selected_supplier),
         )
 
     return render_template(
-        'regular_payments.html',
+        'payments_regular.html',
         page_title=page_title,
         city_options=city_options,
         year_options=year_options,
@@ -101,28 +105,30 @@ def service_before_payment():
     user_request = request.method
 
     if user_request == 'POST':
-        city_selected = request.form.get('city')
-        year_selected = request.form.get('year')
-        supplier_selected = request.form.get('supplier', 0)
-        action_selected = request.form.get('action')
+        selected_city = request.form.get('city')
+        selected_year = request.form.get('year')
+        selected_supplier = request.form.get('supplier', 0)
+        selected_action = request.form.get('action')
 
-        loans = get_servico_emp(city_selected, year_selected)
+        loans = get_servico_emp(selected_city, selected_year)
         supplier_options = []
         for idx, loan in enumerate(loans):
             supplier_options.append(str(idx) + ' - ' + str(loan.nmFornecedor))
 
-        if action_selected == 'apply':
+        if selected_action == 'apply':
             loan_idx = 0
-        elif action_selected == 'update':
-            loan_idx = int(supplier_selected)
-        
+        elif selected_action == 'update':
+            loan_idx = int(selected_supplier)
+
         loan_selected = loans[loan_idx]
         y = loan_selected.listValoresPagamentos
         x = loan_selected.datasPagamentosDateTime
         service_before_payment_plot(x, y)
 
-        supplier_id = '{} ({})'.format(loan_selected.cnpj, loan_selected.nmFornecedor)
-        dates = '; '.join(map(date_to_string, loan_selected.datasPagamentosDateTime))
+        supplier_id = '{} ({})'.format(
+            loan_selected.cnpj, loan_selected.nmFornecedor)
+        dates = '; '.join(
+            map(date_to_string, loan_selected.datasPagamentosDateTime))
         values = '; '.join(map(str, loan_selected.listValoresPagamentos))
         description = loan_selected.descricao
         first_month = str(round(loan_selected.vlMes1, 2))
@@ -143,13 +149,13 @@ def service_before_payment():
             city_options=city_options,
             year_options=year_options,
             user_request=user_request,
-            
+
             supplier_options=supplier_options,
             loan_info=loan_info,
-            city_selected=city_selected,
-            year_selected=int(year_selected),
-            year=int(year_selected),
-            supplier_selected=int(supplier_selected),
+            selected_city=selected_city,
+            selected_year=int(selected_year),
+            year=int(selected_year),
+            selected_supplier=int(selected_supplier),
         )
 
     return render_template(
@@ -164,7 +170,8 @@ def service_before_payment():
 @app.route('/analysis/simba', methods=['GET', 'POST'])
 def simba():
     page_title = 'SIMBA'
-    lObjs = montaObjsSagresSimba('simba/SimbaGoiana.csv', 'simba/SagresGoiana.csv')
+    lObjs = montaObjsSagresSimba(
+        'simba/SimbaGoiana.csv', 'simba/SagresGoiana.csv')
     entity_options = []
     for idx, o in enumerate(lObjs):
         entity_options.append(
@@ -174,10 +181,10 @@ def simba():
             )
         )
 
-    entity_selected = int(request.form.get('entity', 0))
+    selected_entity = int(request.form.get('entity', 0))
 
-    entity = lObjs[entity_selected]
-    simba_plot(entity_selected)
+    entity = lObjs[selected_entity]
+    simba_plot(selected_entity)
 
     dictPagsSagres = entity.dictPagsMensaisSagres
     dictPagsSimba = entity.dictPagsMensaisSimba
@@ -187,160 +194,192 @@ def simba():
         linhaSagres.append(round(dictPagsSagres[idx], 2))
         linhaSimba.append(round(dictPagsSimba[idx], 2))
 
-    entity_info = {'months': ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'], 'sagres': linhaSagres, 'simba': linhaSimba}
+    entity_info = {'months': ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul',
+                              'Ago', 'Set', 'Out', 'Nov', 'Dez'], 'sagres': linhaSagres, 'simba': linhaSimba}
 
     return render_template(
         'simba.html',
+        # rendering
         page_title=page_title,
-        entity_options=entity_options,
+        # input
+        selected_entity=selected_entity,
+        # output
         entity_info=entity_info,
-        entity_selected=entity_selected,
+        entity_options=entity_options,
     )
 
 
-@app.route('/analysis/atraso_pagamentos', methods=['GET', 'POST'])
-def atraso_pagamentos():
-    anos = [int(file.split('outputs')[1]) for file in listdir(
+@app.route('/analysis/payments_delay', methods=['GET', 'POST'])
+def payments_delay():
+    page_title = 'Análise de Atraso de Pagamentos'
+    city_df = pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';')
+    city_options = dict(zip(city_df.Municipio, city_df.numUJ))
+    year_options = [int(file.split('outputs')[1]) for file in listdir(
         './static/datasets') if 'outputs' in file]
-    anos.sort()
-    cores = ['Pior UO+FONTE', 'Média UO+FONTE']
-    entidades = ['Pessoa Física', 'Pessoa Jurídica', 'Ambos']
+    year_options.sort()
+    map_options = ['Pior UO+FONTE', 'Média UO+FONTE']
+    entity_options = ['Pessoa Física', 'Pessoa Jurídica', 'Ambos']
+    user_request = request.method
 
-    df_cidades = pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';')
-    municipios = dict(zip(df_cidades.Municipio, df_cidades.numUJ))
+    if user_request == 'POST':
+        selected_analysis = request.form.get('analysis')
+        selected_year = request.form.get('year')
+        selected_map = request.form.get('map')
+        selected_city = request.form.get('city')
+        days_limit_selected = request.form.get('days-limit')
 
-    if request.method == 'POST':
-        analise = request.form.get('analise')
-        ano_selecionado = request.form.get('ano')
-        cor_mapa = request.form.get('cormapa')
-        municipio_selecionado = request.form.get('municipio')
-        limite_atraso_selecionado = request.form.get('limite-dias')
+        if selected_analysis == 'Análise de Atrasos':
+            selected_entity = request.form.get('entity')
+            selected_loan_limit = request.form.get('loan-limit')
+            loan_value_limit = request.form.get('loan-value', '0')
 
-        if analise == 'Análise de Atrasos':
-            entidade_selecionada = request.form.get('entidade')
-            limite_empenho = request.form.get('limite-empenho')
-            limite_atraso = request.form.get('valor-limite', '0')
-
-            for muni in municipios:
-                if UJsProcessadas.getScoreUJ(muni, ano_selecionado, municipios[muni], float(limite_atraso), limite_empenho, entidade_selecionada, int(limite_atraso_selecionado), cor_mapa):
+            for selected_city in city_options:
+                if UJsProcessadas.getScoreUJ(selected_city, selected_year, city_options[selected_city], float(loan_value_limit), selected_loan_limit, selected_entity, int(days_limit_selected), selected_map):
                     break
 
-            caminhoDoDir = './static/datasets/cache_scores/'+ano_selecionado+'-'+limite_atraso + \
-                '-'+limite_empenho+'-'+entidade_selecionada+'-'+limite_atraso_selecionado
-            all_dfs = [pd.read_csv(caminhoDoDir + '/' + file)
-                       for file in listdir(caminhoDoDir)]
-            df_scores = pd.concat(all_dfs)
-            df_scores.to_csv(caminhoDoDir+'/all_scores.csv', index=False)
+            filepath = './static/datasets/cache_scores/'+selected_year+'-'+loan_value_limit + \
+                '-'+selected_loan_limit+'-'+selected_entity+'-'+days_limit_selected
+            all_dfs = [pd.read_csv(filepath + '/' + file)
+                       for file in listdir(filepath)]
+            df_smap_options = pd.concat(all_dfs)
+            df_smap_options.to_csv(
+                filepath+'/all_smap_options.csv', index=False)
 
-            if request.form.get('consultar'):
-                computaAtrasos(int(limite_atraso), int(ano_selecionado))
+            if request.form.get('consult'):
+                computaAtrasos(int(loan_value_limit), int(selected_year))
 
-                listaUJSNaoFormatadas = resumoPorMunicipio[municipio_selecionado]['UJ']
-                uj = request.form.get('empenho', listaUJSNaoFormatadas[0])
-                
+                loans = resumoPorMunicipio[selected_city]['UJ']
+                selected_loan = request.form.get(
+                    'loan', loans[0])
+
                 df = getPagLiqsRes()
-                criar_plot_4(df[df['UJ'] == uj])
-                criar_plot_5(df[df['UJ'] == uj])
+                plots_df = df[df['UJ'] == selected_loan]
+
+                x = plots_df["DIFF_LIQ_PAG"]
+                y = plots_df["VALOR"]
+
+                payments_delay_plot_0(x, y)
+                payments_delay_plot_1(plots_df)
 
                 return render_template(
-                    'atraso_pagamentos.html',
-                    title='Análise de Atraso de Pagamentos',
-                    method=request.method,
-                    anos=anos,
-                    cores=cores,
-                    entidades=entidades,
-                    cor_selecionada=cor_mapa,
-                    analise_selecionada=analise,
-                    entidade_selecionada=entidade_selecionada,
-                    limite_selecionado=limite_empenho,
-                    empenho_selecionado=uj,
-                    valor_selecionado=limite_atraso,
-                    municipios=municipios,
-                    ano_selecionado=ano_selecionado,
-                    listaUJSNaoFormatadas=listaUJSNaoFormatadas,
-                    municipio_selecionado=municipio_selecionado,
-                    limite_atraso_selecionado=limite_atraso_selecionado,
-                    plot_4=True,
-                    plot_5=True
+                    'payments_delay.html',
+                    # rendering
+                    page_title=page_title,
+                    city_options=city_options,
+                    year_options=year_options,
+                    map_options=map_options,
+                    entity_options=entity_options,
+                    user_request=user_request,
+
+                    # input
+                    selected_entity=selected_entity,
+                    selected_loan_limit=selected_loan_limit,
+                    selected_map=selected_map,
+                    selected_analysis=selected_analysis,
+                    selected_loan=selected_loan,
+                    selected_year=selected_year,
+                    selected_city=selected_city,
+                    loan_value_limit=loan_value_limit,
+
+                    # output
+                    loans=loans,
+                    days_limit_selected=days_limit_selected,
+                    plot_0=True,
+                    plot_1=True
                 )
 
-            # criar_mapa_1(caminhoDoDir+'/all_scores.csv')
+            payments_delay_map(filepath+'/all_smap_options.csv')
 
             return render_template(
-                'atraso_pagamentos.html',
-                title='Análise de Atraso de Pagamentos',
-                method=request.method,
-                anos=anos,
-                cores=cores,
-                entidades=entidades,
-                cor_selecionada=cor_mapa,
-                analise_selecionada=analise,
-                entidade_selecionada=entidade_selecionada,
-                limite_selecionado=limite_empenho,
-                valor_selecionado=limite_atraso,
-                ano_selecionado=int(ano_selecionado),
-                municipios=municipios,
-                limite_atraso_selecionado=limite_atraso_selecionado,
-                plot_4=False,
-                plot_5=False
+                'payments_delay.html',
+                # rendering
+                page_title=page_title,
+                city_options=city_options,
+                year_options=year_options,
+                map_options=map_options,
+                entity_options=entity_options,
+                user_request=user_request,
+                selected_year=int(selected_year),
+                selected_map=selected_map,
+
+                selected_entity=selected_entity,
+                selected_loan_limit=selected_loan_limit,
+                selected_analysis=selected_analysis,
+                loan_value_limit=loan_value_limit,
+                days_limit_selected=days_limit_selected,
+                plot_0=False,
+                plot_1=False
             )
-        elif analise == 'Análise de inconformidades':
-            dados = pd.read_csv('./static/datasets/inconformidades/{}.csv'.format(ano_selecionado))
-            dados = dados.drop(['qtd_liq_pag', 'uj', 'valor_liq'], axis=1)
+        elif selected_analysis == 'Análise de inconformidades':
+            table_df = pd.read_csv(
+                './static/datasets/inconformidades/{}.csv'.format(selected_year))
+            table_df = table_df.drop(
+                ['qtd_liq_pag', 'uj', 'valor_liq'], axis=1)
 
             return render_template(
-                'atraso_pagamentos.html',
-                title='Análise de Atraso de Pagamentos',
-                method=request.method,
-                anos=anos,
-                cores=cores,
-                dados = dados,
-                entidades=entidades,
-                cor_selecionada=cor_mapa,
-                analise_selecionada=analise,
-                municipios=municipios,
-                ano_selecionado=int(ano_selecionado),
-                # municipio_selecionado=municipio_selecionado,
-                limite_atraso_selecionado=limite_atraso_selecionado
+                'payments_delay.html',
+                page_title=page_title,
+                city_options=city_options,
+                year_options=year_options,
+                map_options=map_options,
+                entity_options=entity_options,
+                user_request=user_request,
+
+                selected_year=int(selected_year),
+                table_df=table_df,
+                selected_map=selected_map,
+                selected_analysis=selected_analysis,
+                days_limit_selected=days_limit_selected
+                # selected_city=selected_city,
             )
 
     return render_template(
-        'atraso_pagamentos.html',
-        title='Análise de Atraso de Pagamentos',
-        anos=anos,
-        method=request.method,
-        cores=cores,
-        entidades=entidades,
-        municipios=municipios
+        'payments_delay.html',
+        # rendering
+        page_title=page_title,
+        city_options=city_options,
+        year_options=year_options,
+        map_options=map_options,
+        entity_options=entity_options,
+        user_request=user_request
     )
 
 
-@app.route('/mapa_atrasos')
-def mapa_atrasos():
-    return render_template('mapa_atrasos.html')
+@app.route('/payments_delay_map')
+def payments_delay_map():
+    return render_template('payments_delay_map.html')
 
 
-@app.route('/plot')
-def plot():
-    return render_template('plot.html')
+@app.route('/payments_delay_plot_1')
+def payments_delay_plot_1():
+    return render_template('payments_delay_plot_1.html')
 
 
 @app.route('/analysis/matching_sources', methods=['GET', 'POST'])
 def matching_sources():
+    page_title = 'Correspondência Entre Fontes de Dados'
     # df_cities = pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';')
     # city_options = dict(zip(df_cities.Municipio, df_cities.numUJ))
     city_options = ['Cabo de Santo Agostinho']
+    user_request = request.method
 
-    if request.method == 'POST':
-        city_selected = request.form.get('city')
+    if user_request == 'POST':
+        selected_city = request.form.get('city')
 
         columns, rows, payment_rows, row_general_descriptions, columns_general_descriptions = get_dados_correspondencia(
-            city_selected)
+            selected_city)
 
         return render_template(
-            'matching_sources.html', title='Correspondência Entre Fontes de Dados',
-            city_options=city_options, method=request.method,
-            city_selected=city_selected,
+            'matching_sources.html',
+            # rendering
+            page_title=page_title,
+            city_options=city_options,
+            user_request=user_request,
+
+            # input
+            selected_city=selected_city,
+
+            # output
             columns=columns,
             rows=rows,
             payment_rows=json.dumps(payment_rows),
@@ -348,49 +387,73 @@ def matching_sources():
             columns_general_descriptions=columns_general_descriptions
         )
 
-    return render_template('matching_sources.html', title='Correspondência Entre Fontes de Dados', city_options=city_options, method=request.method)
+    return render_template('matching_sources.html',
+                            # rendering
+                            page_title=page_title,
+                            city_options=city_options,
+                            user_request=user_request)
 
 
 def date_to_string(date):
     return date.strftime('%d/%m/%Y')
 
 
-@app.route('/analysis/filas_pagamentos', methods=['GET', 'POST'])
-def filas_pagamentos():
+@app.route('/analysis/payments_queue', methods=['GET', 'POST'])
+def payments_queue():
+    page_title = 'Filas de Pagamentos'
     df = pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';')
-    municipios = df['Municipio'].tolist()
-    dias_tolerancia = [7, 15, 30]
-    colunas = ['Numero Empenho', 'CPF/CNPJ', 'VL Emp', 'VL Liq', 'Data Pag', 'Data Liq.', 'Qtd ultrapassaram']
+    city_options = df['Municipio'].tolist()
+    days_of_tolerance = [7, 15, 30]
+    columns = ['Numero Empenho', 'CPF/CNPJ', 'VL Emp',
+               'VL Liq', 'Data Pag', 'Data Liq.', 'Qtd ultrapassaram']
+    user_request = request.method
 
+    if user_request == 'POST':
+        selected_city = request.form.get('city', city_options[0])
+        sources = get_lista_UOFR(selected_city)
+        selected_source = request.form.get('source', sources[0])
+        cities_num = int(df[df['Municipio'] == selected_city].numUJ)
+        selected_action = request.form.get('action')
 
-    if request.method == 'POST':
-        municipio = request.form.get('municipio', municipios[0])
-        lista_fontes = get_lista_UOFR(municipio)
-        fonte_selecionada = request.form.get('fonte', lista_fontes[0])
-        num_municipio = int(df[df['Municipio'] == municipio].numUJ)
-
-        if request.form.get('action') == 'aplicar':
-            dias_selecionado = dias_tolerancia[0]
-            result1, varia, _ = MudaMunicio(num_municipio, fonte_selecionada, int(dias_selecionado))
-
-            return render_template('filas_pagamentos.html', municipios=municipios, municipio_selecionado=municipio,
-                                    dias_tolerancia=dias_tolerancia, dias_selecionado=int(dias_selecionado), lista_fontes=lista_fontes, title='Filas de Pagamentos', pontuacao=varia, show_table=True, colunas=colunas, resultado=result1, fonte_selecionada=fonte_selecionada, method=request.method)
+        if selected_action == 'apply':
+            selected_day = 0
         else:
-            dias_selecionado = request.form.get('dias')
-            result1, varia, result2 = MudaMunicio(num_municipio, fonte_selecionada, int(dias_selecionado))
+            selected_day = request.form.get('day')
 
-            return render_template('filas_pagamentos.html', municipios=municipios, municipio_selecionado=municipio,
-                                    dias_tolerancia=dias_tolerancia, dias_selecionado=int(dias_selecionado), lista_fontes=lista_fontes, title='Filas de Pagamentos', pontuacao=varia, resultado=result1, fonte_selecionada=fonte_selecionada, show_table=True, colunas=colunas, method=request.method)
+        rows, varia, _ = MudaMunicio(
+            cities_num, selected_source, int(selected_day))
 
-            
+        return render_template('payments_queue.html',
+                                # rendering
+                                page_title=page_title,
+                                city_options=city_options,
+                                days_of_tolerance=days_of_tolerance,
+                                user_request=user_request,
+                                
+                                # input
+                                selected_city=selected_city,
+                                selected_day=int(selected_day),
+                                selected_source=selected_source,
 
-    return render_template('filas_pagamentos.html', municipios=municipios, dias_tolerancia=dias_tolerancia, title='Filas de Pagamentos', method=request.method)
+                                # output
+                                sources=sources,
+                                score=varia,
+                                rows=rows,
+                                show_table=True,
+                                columns=columns)
+
+    return render_template('payments_queue.html',
+                           # rendering
+                           page_title=page_title,
+                           city_options=city_options,
+                           days_of_tolerance=days_of_tolerance,
+                           user_request=user_request)
 
 
-@app.route('/mapa_filas')
-def mapa_filas():
-    criar_mapa_2()
-    return render_template('mapa_filas.html')
+@app.route('/payment_queues_map')
+def payment_queues_map():
+    queues_map()
+    return render_template('payment_queues_map.html')
 
 
 if __name__ == '__main__':

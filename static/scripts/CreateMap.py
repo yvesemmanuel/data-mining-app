@@ -4,7 +4,7 @@ import numpy as np
 import geopandas as gpd
 
 
-def criar_mapa_1(filename):
+def payments_delay_map(filename):
     mapa = folium.Map(location=[-8.4319084, -37.60809747],
                       tiles="OpenStreetMap", zoom_start=7.33)
     mapageografico = gpd.read_file("./static/datasets/geojs-26-mun.json")
@@ -77,10 +77,10 @@ def criar_mapa_1(filename):
                      control=True).add_to(mapa)
     folium.LayerControl().add_to(mapa)
 
-    mapa.save("./templates/mapa_atrasos.html")
+    mapa.save("./templates/payments_delay_map.html")
 
 
-def criar_mapa_2():
+def queues_map():
     state_unemployment = "./static/datasets/Indice_por_Municipio.csv"
     state_data = pd.read_csv(state_unemployment, sep=";")
 
@@ -146,4 +146,4 @@ def criar_mapa_2():
     folium.LayerControl().add_to(mapa)
     fig.add_child(mapa)
 
-    mapa.save("./templates/mapa_filas.html")
+    mapa.save("./templates/payment_queues_map.html")

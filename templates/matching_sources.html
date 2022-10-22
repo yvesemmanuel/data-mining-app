@@ -1,7 +1,7 @@
 {% extends "layout.html" %} {% block body %}
 
 <div class="container">
-    <h1 class="title section-title">{{title}}</h1>
+    <h1 class="title section-title">{{page_title}}</h1>
 
     <hr>
 
@@ -12,7 +12,7 @@
                 <label class="input-title" for="city">Unidade Jurisdicionada</label>
                 <select class="form-control" id="city" name="city">
                     {% for city in city_options %}
-                    <option value="{{ city }}" {% if city_selected==city %} selected {% endif %}>{{
+                    <option value="{{ city }}" {% if selected_city==city %} selected {% endif %}>{{
                         city }}
                     </option>
                     {% endfor %}
@@ -29,7 +29,7 @@
 
     <br>
 
-    {% if method == "POST" %}
+    {% if user_request == "POST" %}
     <table class="table" style="width: 50%; margin-left: auto; margin-right: auto;">
         <thead>
             <tr scope="col">
