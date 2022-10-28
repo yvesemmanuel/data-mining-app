@@ -68,13 +68,21 @@ def get_dados_correspondencia(municipio):
     return colunas, linhas, descricoes, descricao_geral, colunas_descricao_geral
 
 
-def get_lista_UOFR(municipio):
+def get_lista_UOFR(municipio, ano):
     df = pd.read_csv("./static/datasets/ListaMunicipios.csv", sep=";")
     municipio_num = int(df[df["Municipio"] == municipio].numUJ)
 
-    path = "./static/datasets/outputs2019/" + str(municipio_num) + ".csv"
-    df = pd.read_csv(path, sep=',', usecols=['NUMERO_EMPENHO', 'NOME_FONTE_REC', 'NOME_UO'])
+    if ano == '2020':
+        path = "./static/datasets/outputs2020/" + str(municipio_num) + ".csv"
+        df = pd.read_csv(path, sep=',', usecols=['NUMERO_EMPENHO', 'NOME_FONTE_REC', 'NOME_UO'])
 
-    df.rename(columns = {'NOME_FONTE_REC':"FONTE_REC", 'NOME_UO':"UNID_ORC"},  inplace = True)
+        df.rename(columns = {'NOME_FONTE_REC':"FONTE_REC", 'NOME_UO':"UNID_ORC"},  inplace = True)
 
-    return (df["FONTE_REC"] + df["UNID_ORC"]).dropna().unique().tolist()
+        return (df["FONTE_REC"] + df["UNID_ORC"]).dropna().unique().tolist()
+    else:
+        path = "./static/datasets/outputs2019/" + str(municipio_num) + ".csv"
+        df = pd.read_csv(path, sep=',', usecols=['NUMERO_EMPENHO', 'NOME_FONTE_REC', 'NOME_UO'])
+
+        df.rename(columns = {'NOME_FONTE_REC':"FONTE_REC", 'NOME_UO':"UNID_ORC"},  inplace = True)
+
+        return (df["FONTE_REC"] + df["UNID_ORC"]).dropna().unique().tolist()

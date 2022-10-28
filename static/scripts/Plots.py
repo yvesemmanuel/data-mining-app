@@ -2,6 +2,9 @@ from matplotlib.figure import Figure
 import base64
 import numpy as np
 import matplotlib.pyplot as plt
+import folium
+import geopandas as gpd
+import pandas as pd
 from io import BytesIO
 from statistics import mean, stdev
 from static.scripts.MontaSagresSimba import *
@@ -175,3 +178,69 @@ def payments_delay_plot_0(x, y):
 def payments_delay_plot_1(df):
     fig = px.scatter(df, x="DIFF_LIQ_PAG", y="VALOR", color="FORNEC")
     fig.write_html("./templates/payments_delay_plot_1.html")
+
+def geraMapaFolium(state_data):
+
+    fig = folium.Figure(height=500)
+
+    mapageografico = gpd.read_file('./static/datasets/geojs-26-mun.json')
+    
+    map = folium.Map(
+        location=[-8.1959084, -37.81929747],
+        tiles='OpenStreetMap', 
+        zoom_start=7.55
+    )
+
+    cores = folium.Choropleth(
+            geo_data=mapageografico,
+            name="choropleth",
+            data=state_data,
+            columns=["Municipio", "Score"],
+            key_on="feature.properties.name",
+            fill_color="PuBu",
+            fill_opacity=0.7,
+            line_opacity=0.4,
+            legend_name="Regularidade",
+            smooth_factor=0,
+            Highlight= True,
+            line_color = "#0000",
+            show=True,
+            overlay=True,
+            nan_fill_color = "White", 
+        )
+    cores.add_to(map)
+
+    valor = state_data.rename(columns = {"Municipio":"name"})
+    final_df = pd.merge(mapageografico,valor, on = "name")
+    print(final_df.head())
+        # Add hover functionality.
+    style_function = lambda x: {'fillColor': '#ffffff', 
+                                    'color':'#000000', 
+                                    'fillOpacity': 0.1, 
+                                    'weight': 0.1}
+    highlight_function = lambda x: {'fillColor': '#000000', 
+                                        'color':'#000000', 
+                                        'fillOpacity': 0.50, 
+        
+                                        'weight': 0.1}
+        
+        
+        #Colocar os valores nos estados 
+    NIL = folium.features.GeoJson(
+            data = final_df,
+            style_function=style_function, 
+            control=False,
+            highlight_function=highlight_function, 
+            tooltip=folium.features.GeoJsonTooltip(
+                fields=['name','Score'],
+                aliases=['Municipio','Score'],
+                style=("background-color: white; color: #333333; font-family: arial; font-size: 12px; padding: 10px;") 
+            )
+        )
+    map.add_child(NIL)
+    map.keep_in_front(NIL)
+
+    folium.LayerControl().add_to(map)
+    fig.add_child(map)
+
+    return map

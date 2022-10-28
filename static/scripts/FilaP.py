@@ -23,10 +23,16 @@ def MudaMunicipio2(index, numero, diastl):
     return calculo1
 
 
-def MudaMunicio(numero, uofr, diastl):
-    muniselect = pd.read_csv("./static/datasets/outputs2019/" + str(numero) + ".csv", sep=',', usecols=['NUMERO_EMPENHO',
+def MudaMunicio(numero, uofr, diastl, ano):
+    if ano == '2020':
+        muniselect = pd.read_csv("./static/datasets/outputs2020/" + str(numero) + ".csv", sep=',', usecols=['NUMERO_EMPENHO',
+                                                                                                            'VALOR_EMPENHO', 'DATA', 'CPF_CNPJ',
+                                                                                                            'DATA_LIQ', 'VALOR', 'FORNEC', 'ID_PAGAMENTO', 'NOME_FONTE_REC', 'NOME_UO'])
+    else:
+        muniselect = pd.read_csv("./static/datasets/outputs2019/" + str(numero) + ".csv", sep=',', usecols=['NUMERO_EMPENHO',
                                                                                                         'VALOR_EMPENHO', 'DATA', 'CPF_CNPJ',
                                                                                                         'DATA_LIQ', 'VALOR', 'FORNEC', 'ID_PAGAMENTO', 'NOME_FONTE_REC', 'NOME_UO'])
+
 
     camposuteismuni = muniselect
     camposuteismuni.rename(columns={'DATA': 'DATA_PAGAMENTO', "VALOR": "VALOR_PAGAMENTO",
@@ -119,31 +125,33 @@ class UOFR:
 
             varx = 0
             libera = 1
-            for k in anteriores:
-                dtl2 = Dicionario[k]["dtl"]
-                dtp2 = Dicionario[k]["dtp"]
 
-                if (datapagidx != Dicionario[k]["dtp"]) and (dtl2 > dtl1) and ((dtp1 - dtp2).days > ndias):
-                    # Significa desresopeito a fila de pagamentos
-                    dataantes = dtp2
-                    diferencadias = dtp1 - dataantes
-                    diff = diferencadias.days
+            if(datapagidx-dataliqidx).days > ndias:
+                for k in anteriores:
+                    dtl2 = Dicionario[k]["dtl"]
+                    dtp2 = Dicionario[k]["dtp"]
 
-                    # Antes do pagamento em questão
-                    quantidadeantes = Dicionario[k]["quantidade"]
-                    # QUantidade de pagamentos*(1+N)
-                    pontosporpagamento += int(quantidadeantes) * \
-                        int(qtd)*(1+int(diff/31))
+                    if (datapagidx != Dicionario[k]["dtp"]) and (dtl2 > dtl1) and ((dtp1 - dtp2).days > ndias):
+                        # Significa desresopeito a fila de pagamentos
+                        dataantes = dtp2
+                        diferencadias = dtp1 - dataantes
+                        diff = diferencadias.days
 
-                    varx += int(quantidadeantes)
+                        # Antes do pagamento em questão
+                        quantidadeantes = Dicionario[k]["quantidade"]
+                        # QUantidade de pagamentos*(1+N)
+                        pontosporpagamento += int(quantidadeantes) * \
+                            int(qtd)*(1+int(diff/31))
 
-                    if (libera == 1):
-                        quantidadetotaldesordem += int(qtd)
-                        quantidadetotaldesordem2 += int(quantidadeantes)
-                    libera = 0
+                        varx += int(quantidadeantes)
 
-            Dicionario[chavedicio]["Pagamentosqultrapass"] = varx
-            pontuacao += pontosporpagamento
+                        if (libera == 1):
+                            quantidadetotaldesordem += int(qtd)
+                            quantidadetotaldesordem2 += int(quantidadeantes)
+                        libera = 0
+
+                Dicionario[chavedicio]["Pagamentosqultrapass"] = varx
+                pontuacao += pontosporpagamento
 
         self.pagamentosordem1 = Dicionario
         aaa = [[k, v['dtp'], v['dtl'], v['quantidade'], v['Pagamentosqultrapass'],

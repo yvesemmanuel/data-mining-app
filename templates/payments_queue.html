@@ -6,21 +6,43 @@
 
     <hr>
 
-    <iframe class="map col-lg-12 col-md-12 col-sm-12 col-12 .col-xl-12" height="400" src="/payment_queues_map"></iframe>
+    
+
+    {% if selected_year == '2019' %} 
+    <iframe class="map col-lg-12 col-md-12 col-sm-12 col-12 .col-xl-12" height="400"
+    src="/payment_queues_map" ></iframe>
+    {% else: %}
+    
+    <iframe class="map col-lg-12 col-md-12 col-sm-12 col-12 .col-xl-12" height="400"
+    src="/payment_queues_map2"></iframe>
+
+    {% endif %}
 
     <form method="post">
         <div class="row">
             <div class="col"></div>
             <div class="col-sm-4 form-group">
                 <label class="input-title" for="city">Unidade Jurisdicionada</label>
-                <select class="form-control" id="city" name="city">
+                <select class="form-control" id="city" name="city"
+                    onchange="document.getElementById('aplica').click()">
                     {% for city in city_options %}
                     <option value="{{ city }}" {% if selected_city==city %} selected {% endif %}>{{ city }}
                     </option>
                     {% endfor %}
                 </select>
             </div>
+            <div class="col-sm-4 form-group">
+                <label class="input-title" for="year">Ano</label>
+                <select class="form-control" id="year" name="year"
+                    onchange="document.getElementById('mudaano').click()">
+                    {% for year in year_options %}
+                    <option value="{{ year }}" {% if selected_year==year %} selected {% endif %}>{{ year }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
             <div class="col"></div>
+            
         </div>
 
         <div class="col-md-12 text-center">
@@ -33,7 +55,7 @@
         {% if user_request == "POST" %}
 
         <div class="row">
-            <div class="col-6 form-group">
+            <div class="col-12 form-group">
                 <label class="input-title" for="source">Fonte</label>
                 <select class="form-control" id="source" name="source"
                     onchange="document.getElementById('update').click()">
@@ -44,6 +66,9 @@
                     {% endfor %}
                 </select>
             </div>
+
+        </div>
+        <div class="row">
             <div class="col-6 form-group">
                 <label class="input-title" for="day">Dias de Tolerância</label>
                 <select class="form-control" id="day" name="day"
@@ -55,7 +80,26 @@
                     {% endfor %}
                 </select>
             </div>
+            <div class="col-6 form-group">
+                <label class="input-title" for="payment">Tipo de Pagamento</label>
+                <select class="form-control" id="payment" name="payment"
+                    onchange="document.getElementById('update').click()">
+                    {% for payment in payment_types %}
+                    <option value="{{ payment }}" {% if selected_payment==payment %} selected {% endif %}>{{ payment }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
+        
+</div>
+
+<div class="text-center hidden">
+    <button class="btn btn-default btn-md button-style" type="submit" name="action" value="mudaano" id="mudaano">Atualizar</button>
+</div>
+
+<div class="text-center hidden">
+    <button class="btn btn-default btn-md button-style" type="submit" name="action" value="update2" id="aplica">Atualizar</button>
 </div>
 
 <div class="text-center hidden">

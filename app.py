@@ -1,3 +1,4 @@
+from turtle import update
 from flask import Flask, render_template, request
 import pandas as pd
 import json
@@ -403,49 +404,100 @@ def payments_queue():
     page_title = 'Filas de Pagamentos'
     df = pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';')
     city_options = df['Municipio'].tolist()
-    days_of_tolerance = [7, 15, 30]
+
+    year_options = ['2019','2020']
+    payment_types = ['Geral','Dispensa','Licitação']
+
+    days_of_tolerance = [7, 30, 60]
     columns = ['Numero Empenho', 'CPF/CNPJ', 'VL Emp',
-               'VL Liq', 'Data Pag', 'Data Liq.', 'Qtd ultrapassaram']
+               'VL Liq', 'Data Pag', 'Data Liq.', 'Qtd ultrapassaram']          
     user_request = request.method
+
+    pathmap1 =  './static/datasets/Indice_por_Municipio.csv'
+    pathmap2 =  './static/datasets/Indice30.csv'
+
+
+
+    selected_action = request.form.get('action')
+    selected_year = request.form.get('year', year_options[0])
+    #if selected_action == 'mudaano':
+    #    sources = get_lista_UOFR(selected_city, selected_year)
+
+    sources = get_lista_UOFR(city_options[0], '2019')
 
     if user_request == 'POST':
         selected_city = request.form.get('city', city_options[0])
-        sources = get_lista_UOFR(selected_city)
-        selected_source = request.form.get('source', sources[0])
-        cities_num = int(df[df['Municipio'] == selected_city].numUJ)
+        selected_year = request.form.get('year', year_options[0])
+        
         selected_action = request.form.get('action')
+        
+        if (selected_action == 'update2' or selected_action != 'apply') or selected_action != 'update':
+            sources = get_lista_UOFR(selected_city, selected_year)
+        selected_source = request.form.get('source', sources[0])
 
-        if selected_action == 'apply':
-            selected_day = 0
+        selected_payment = request.form.get('payment', payment_types[0])
+        cities_num = int(df[df['Municipio'] == selected_city].numUJ)
+        
+
+        if selected_action == 'apply' or selected_action == 'update':
+            selected_day = request.form.get('day', int(7))
+
+            rows, varia, _ = MudaMunicio(
+            cities_num, selected_source, int(selected_day), selected_year)
+
+            return render_template('payments_queue.html',
+                                    # rendering
+                                    page_title=page_title,
+                                    city_options=city_options,
+                                    year_options=year_options,
+                                    days_of_tolerance=days_of_tolerance,
+                                    user_request=user_request,
+                                    payment_types=payment_types,
+                                    
+                                    # input
+                                    selected_city=selected_city,
+                                    selected_year=selected_year,
+                                    selected_day=int(selected_day),
+                                    selected_source=selected_source,
+                                    selected_payment=selected_payment,
+                                    
+
+                                    # output
+                                    sources=sources,
+                                    score=varia,
+                                    rows=rows,
+                                    show_table=True,
+                                    columns=columns)
         else:
             selected_day = request.form.get('day')
 
-        rows, varia, _ = MudaMunicio(
-            cities_num, selected_source, int(selected_day))
+            return render_template('payments_queue.html',
+                                    # rendering
+                                    page_title=page_title,
+                                    city_options=city_options,
+                                    year_options=year_options,
+                                    days_of_tolerance=days_of_tolerance,
+                                    user_request=user_request,
+                                    payment_types=payment_types,
+                                    
+                                    # input
+                                    selected_city=selected_city,
+                                    selected_year=selected_year,
+                                    selected_day=int(selected_day),
+                                    selected_source=selected_source,
+                                    selected_payment=selected_payment,
+                                    
 
-        return render_template('payments_queue.html',
-                                # rendering
-                                page_title=page_title,
-                                city_options=city_options,
-                                days_of_tolerance=days_of_tolerance,
-                                user_request=user_request,
-                                
-                                # input
-                                selected_city=selected_city,
-                                selected_day=int(selected_day),
-                                selected_source=selected_source,
+                                    # output
+                                    sources=sources)
 
-                                # output
-                                sources=sources,
-                                score=varia,
-                                rows=rows,
-                                show_table=True,
-                                columns=columns)
+        
 
     return render_template('payments_queue.html',
                            # rendering
                            page_title=page_title,
                            city_options=city_options,
+                           year_options=year_options,
                            days_of_tolerance=days_of_tolerance,
                            user_request=user_request)
 
@@ -455,6 +507,10 @@ def payment_queues_map():
     queues_map()
     return render_template('payment_queues_map.html')
 
+@app.route('/payment_queues_map2')
+def payment_queues_map2():
+    queues_map()
+    return render_template('payment_queues_map2.html')
 
 if __name__ == '__main__':
 
