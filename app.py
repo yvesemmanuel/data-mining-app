@@ -412,17 +412,8 @@ def payments_queue():
     columns = ['Numero Empenho', 'CPF/CNPJ', 'VL Emp',
                'VL Liq', 'Data Pag', 'Data Liq.', 'Qtd ultrapassaram']          
     user_request = request.method
-
-    pathmap1 =  './static/datasets/Indice_por_Municipio.csv'
-    pathmap2 =  './static/datasets/Indice30.csv'
-
-
-
     selected_action = request.form.get('action')
     selected_year = request.form.get('year', year_options[0])
-    #if selected_action == 'mudaano':
-    #    sources = get_lista_UOFR(selected_city, selected_year)
-
     sources = get_lista_UOFR(city_options[0], '2019')
 
     if user_request == 'POST':
