@@ -23,7 +23,7 @@ def MudaMunicipio2(index, numero, diastl):
     return calculo1
 
 
-def MudaMunicio(numero, uofr, diastl, ano):
+def MudaMunicio(numero, uofr, diastl, ano, tipop):
     if ano == '2020':
         muniselect = pd.read_csv("./static/datasets/outputs2020/" + str(numero) + ".csv", sep=',', usecols=['NUMERO_EMPENHO',
                                                                                                             'VALOR_EMPENHO', 'DATA', 'CPF_CNPJ',
@@ -38,7 +38,7 @@ def MudaMunicio(numero, uofr, diastl, ano):
     camposuteismuni.rename(columns={'DATA': 'DATA_PAGAMENTO', "VALOR": "VALOR_PAGAMENTO",
                            'NOME_FONTE_REC': "FONTE_REC", 'NOME_UO': "UNID_ORC"},  inplace=True)
 
-    empsagres = CriaDivisao(camposuteismuni, diastl, uofr)
+    empsagres = CriaDivisao(camposuteismuni, diastl, uofr, ano, tipop)
 
 
     retorno1 = empsagres[0].retresultado1()
@@ -66,8 +66,16 @@ class UOFR:
         self.indice2 = 0
         self.valortotal_pago = 0
 
-    def execute(self, df, dias1, chave):
+    def execute(self, df, dias1, chave, ano, tipop):
+
         emp_rows = df[df["FONTE_REC"] + df["UNID_ORC"] == self.key]
+        if tipop == 'Dispensa':
+            if ano == '2020':
+                emp_rows = emp_rows[emp_rows.eval("DATA_LIQ >= '2020-07-40' & VALOR_EMPENHO <= 50000 | DATA_LIQ < '2020-07-40' & VALOR_EMPENHO <= 20000 ")]
+            else:
+                emp_rows = emp_rows[emp_rows["VALOR_EMPENHO"] <= 20000]
+        elif tipop == 'Licitação':
+            emp_rows = emp_rows[emp_rows["VALOR_EMPENHO"] > 20000]
         pagament = []
         indice = 0
         Dicionario = {}
@@ -192,10 +200,10 @@ class UOFR:
         return "UO+FONTE_{}\n ValorPago={} Indicetotal1={} \nPAGAMENTOS({}): {}\n".format(self.key, self.valortotal_pago, self.indice,  len(self.pagamentos), self.pagamentos)
 
 
-def CriaDivisao(df, dias1, chave):
+def CriaDivisao(df, dias1, chave, ano, tipop):
     uomaisfonte = []
     new_emp = UOFR(chave)
-    new_emp.execute(df, dias1, chave)
+    new_emp.execute(df, dias1, chave, ano, tipop)
     uomaisfonte.append(new_emp)
 
     print(uomaisfonte)

@@ -414,9 +414,11 @@ def payments_queue():
     user_request = request.method
     selected_action = request.form.get('action')
     selected_year = request.form.get('year', year_options[0])
+    selected_day = days_of_tolerance[0]
     sources = get_lista_UOFR(city_options[0], '2019')
 
     if user_request == 'POST':
+        print("Chegou aquiiii")
         selected_city = request.form.get('city', city_options[0])
         selected_year = request.form.get('year', year_options[0])
         
@@ -433,10 +435,13 @@ def payments_queue():
         if selected_action == 'apply' or selected_action == 'update':
             selected_day = request.form.get('day', int(7))
 
+            tipopagamento = request.form.get('payment', payment_types[0])
+
             rows, varia, _ = MudaMunicio(
-            cities_num, selected_source, int(selected_day), selected_year)
+            cities_num, selected_source, int(selected_day), selected_year, tipopagamento)
 
             return render_template('payments_queue.html',
+                                    acao = selected_action,
                                     # rendering
                                     page_title=page_title,
                                     city_options=city_options,
@@ -460,37 +465,61 @@ def payments_queue():
                                     show_table=True,
                                     columns=columns)
         else:
-            selected_day = request.form.get('day')
 
-            return render_template('payments_queue.html',
-                                    # rendering
-                                    page_title=page_title,
-                                    city_options=city_options,
-                                    year_options=year_options,
-                                    days_of_tolerance=days_of_tolerance,
-                                    user_request=user_request,
-                                    payment_types=payment_types,
-                                    
-                                    # input
-                                    selected_city=selected_city,
-                                    selected_year=selected_year,
-                                    selected_day=int(selected_day),
-                                    selected_source=selected_source,
-                                    selected_payment=selected_payment,
-                                    
-
-                                    # output
-                                    sources=sources)
-
-        
-
-    return render_template('payments_queue.html',
+            if selected_action == 'mudaano':
+                return render_template('payments_queue.html',
+                            acao = selected_action,
                            # rendering
                            page_title=page_title,
                            city_options=city_options,
                            year_options=year_options,
                            days_of_tolerance=days_of_tolerance,
-                           user_request=user_request)
+                           user_request=user_request,
+                            payment_types=payment_types,
+
+
+                           selected_city=selected_city,
+                                        selected_year=selected_year,
+                                        selected_day=int(selected_day),
+                                        selected_source=selected_source,
+                                        selected_payment=selected_payment)
+            
+            else:
+                selected_day = request.form.get('day', days_of_tolerance[0])
+
+                return render_template('payments_queue.html',
+                                        acao = selected_action,
+                                        # rendering
+                                        page_title=page_title,
+                                        city_options=city_options,
+                                        year_options=year_options,
+                                        days_of_tolerance=days_of_tolerance,
+                                        user_request=user_request,
+                                        payment_types=payment_types,
+                                        
+                                        # input
+                                        selected_city=selected_city,
+                                        selected_year=selected_year,
+                                        selected_day=int(selected_day),
+                                        selected_source=selected_source,
+                                        selected_payment=selected_payment,
+                                        
+
+                                        # output
+                                        sources=sources)
+
+        
+
+    return render_template('payments_queue.html',
+                            acao = selected_action,
+                           # rendering
+                           page_title=page_title,
+                           city_options=city_options,
+                           year_options=year_options,
+                           days_of_tolerance=days_of_tolerance,
+                           user_request=user_request,
+                            payment_types=payment_types
+                           )
 
 
 @app.route('/payment_queues_map')

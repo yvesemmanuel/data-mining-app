@@ -20,7 +20,7 @@
 
     <form method="post">
         <div class="row">
-            <div class="col"></div>
+            
             <div class="col-sm-4 form-group">
                 <label class="input-title" for="city">Unidade Jurisdicionada</label>
                 <select class="form-control" id="city" name="city"
@@ -41,35 +41,35 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="col"></div>
-            
-        </div>
-
-        <div class="col-md-12 text-center">
-            <button class="btn btn-default btn-md button-style" name="action" value="apply"
-                type="submit">Aplicar</button>
-        </div>
-
-        <br>
-
-        {% if user_request == "POST" %}
-
-        <div class="row">
-            <div class="col-12 form-group">
-                <label class="input-title" for="source">Fonte</label>
-                <select class="form-control" id="source" name="source"
-                    onchange="document.getElementById('update').click()">
-                    {% for source in sources %}
-                    <option value="{{ source }}" {% if selected_source==source %} selected {% endif %}>{{
-                        source }}
+            <div class="col-sm-4 form-group">
+                <label class="input-title" for="payment">Tipo de Pagamento</label>
+                <select class="form-control" id="payment" name="payment"
+                    onchange="document.getElementById('mudaano').click()">
+                    {% for payment in payment_types %}
+                    <option value="{{ payment }}" {% if selected_payment==payment %} selected {% endif %}>{{ payment }}
                     </option>
                     {% endfor %}
                 </select>
             </div>
-
+            
+            
         </div>
+
+        <div class="col-md-12 text-center">
+            <button class="btn btn-default btn-md button-style" name="action" value="apply" id="posta"
+                type="submit">Aplicar</button>
+        </div>
+
+        <div class="text-center hidden">
+            <button class="btn btn-default btn-md button-style" type="submit" name="action" value="mudaano" id="mudaano">Atualizar</button>
+        </div>
+
+        <br>
+
+        {% if user_request == "POST" and acao != 'mudaano' %}
+
         <div class="row">
-            <div class="col-6 form-group">
+            <div class="col-2 form-group">
                 <label class="input-title" for="day">Dias de Tolerância</label>
                 <select class="form-control" id="day" name="day"
                     onchange="document.getElementById('update').click()">
@@ -80,22 +80,19 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-6 form-group">
-                <label class="input-title" for="payment">Tipo de Pagamento</label>
-                <select class="form-control" id="payment" name="payment"
+            <div class="col-10 form-group">
+                <label class="input-title" for="source">Unidade Orçamentária + Fonte de Recursos</label>
+                <select class="form-control" id="source" name="source"
                     onchange="document.getElementById('update').click()">
-                    {% for payment in payment_types %}
-                    <option value="{{ payment }}" {% if selected_payment==payment %} selected {% endif %}>{{ payment }}
+                    {% for source in sources %}
+                    <option value="{{ source }}" {% if selected_source==source %} selected {% endif %}>{{
+                        source }}
                     </option>
                     {% endfor %}
                 </select>
             </div>
         </div>
         
-</div>
-
-<div class="text-center hidden">
-    <button class="btn btn-default btn-md button-style" type="submit" name="action" value="mudaano" id="mudaano">Atualizar</button>
 </div>
 
 <div class="text-center hidden">
