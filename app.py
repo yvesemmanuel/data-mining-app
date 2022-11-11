@@ -399,41 +399,6 @@ def matching_sources():
 def date_to_string(date):
     return date.strftime('%d/%m/%Y')
 
-dicionario = {}
-'''for i in range(0,184):
-
-    indice = i
-    base = 5296
-    numero = base + indice
-    path = "./static/datasets/pagamentos2020/" + str(numero) + ".csv"
-
-    base = 10
-    #ponto0 = math.log(0.3,base)
-    #if(ponto0 >= 0): 
-    #    ponto0 = 0
-    if(i == 119):
-        b = 0
-    else:
-        
-
-        arq1 = pd.read_csv(path, nrows=2, usecols=['CIDADE'])
-        cidade = arq1['CIDADE'].iloc[1]
-        #print(str(numero) + "aaa" + str(cidade))
-        diastolerados = 30
-        score = MudaMunicipio2(path, numero, diastolerados, '2020', 'Dispensa')
-        
-        _,__ = (cidade,score)
-        if(score == 0):
-            print(str(_)+"; 0.0")
-        else:
-            _i_ = math.log(score,base)
-            print(str(_)+"; "+str(_i_))
-
-    
-
-    dicionario[cidade] = numero'''
-
-
 @app.route('/analysis/payments_queue', methods=['GET', 'POST'])
 def payments_queue():
     page_title = 'Filas de Pagamentos'
@@ -453,10 +418,10 @@ def payments_queue():
     sources = get_lista_UOFR(city_options[0], '2019')
 
     #SALVAR MAPA
-    '''state_unemployment = './static/datasets/IndicesporMunicipio/ScoreMedio2020geral.csv'
+    '''state_unemployment = './static/datasets/IndicesporMunicipio/ScoreMedio2020Li.csv'
     dataset = pd.read_csv(state_unemployment, sep=';')
     mapa = geraMapaFolium(dataset)
-    mapa.save("./templates/payment_queues_map_2020_Ge.html")
+    mapa.save("./templates/payment_queues_map_2020_Li.html")
     mapa = mapa._repr_html_()'''
     #==============---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---==========#
 
@@ -466,13 +431,6 @@ def payments_queue():
     if user_request == 'POST':
         selected_city = request.form.get('city', city_options[0])
         selected_year = request.form.get('year', year_options[0])
-
-        '''if selected_year == '2020':
-            state_unemployment = 'C:\Filipe\Estagio\MVPs Estagio\AplicacaoFlaskFilaP\IndicesporMunicipio\pontuacaomedia2020geral.csv'
-        else:
-            state_unemployment = 'C:\Filipe\Estagio\MVPs Estagio\AplicacaoFlaskFilaP\IndicesporMunicipio\pontuacaomedia2019geral.csv'
-        dataset = pd.read_csv(state_unemployment, sep=';')
-        mapa = geraMapaFolium(dataset)._repr_html_()'''
 
         selected_action = request.form.get('action')
         
@@ -565,8 +523,6 @@ def payments_queue():
 
                                         # output
                                         sources=sources)
-
-        
 
     return render_template('payments_queue.html',
                             mapa = mapa,

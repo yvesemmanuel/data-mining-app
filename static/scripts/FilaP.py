@@ -8,7 +8,7 @@ def pegaQtdultrapass(item):
 
 
 def MudaMunicipio2(index, numero, diastl, ano, tipop):
-    muniselect = pd.read_csv(index, sep=',', usecols=['NUMERO_EMPENHO',
+    muniselect = pd.read_csv(index, sep=',', usecols=['NUMERO_EMPENHO','DATA_EMP',
                                                       'VALOR_EMPENHO', 'DATA', 'CPF_CNPJ',
                                                       'DATA_LIQ', 'VALOR', 'FORNEC', 'ID_PAGAMENTO', 'NOME_FONTE_REC', 'NOME_UO'])
 
@@ -27,11 +27,11 @@ def MudaMunicipio2(index, numero, diastl, ano, tipop):
 
 def MudaMunicio(numero, uofr, diastl, ano, tipop):
     if ano == '2020':
-        muniselect = pd.read_csv("./static/datasets/pagamentos2020/" + str(numero) + ".csv", sep=',', usecols=['NUMERO_EMPENHO',
+        muniselect = pd.read_csv("./static/datasets/pagamentos2020/" + str(numero) + ".csv", sep=',', usecols=['NUMERO_EMPENHO','DATA_EMP',
                                                                                                             'VALOR_EMPENHO', 'DATA', 'CPF_CNPJ',
                                                                                                             'DATA_LIQ', 'VALOR', 'FORNEC', 'ID_PAGAMENTO', 'NOME_FONTE_REC', 'NOME_UO'])
     else:
-        muniselect = pd.read_csv("./static/datasets/pagamentos2019/" + str(numero) + ".csv", sep=',', usecols=['NUMERO_EMPENHO',
+        muniselect = pd.read_csv("./static/datasets/pagamentos2019/" + str(numero) + ".csv", sep=',', usecols=['NUMERO_EMPENHO','DATA_EMP',
                                                                                                         'VALOR_EMPENHO', 'DATA', 'CPF_CNPJ',
                                                                                                         'DATA_LIQ', 'VALOR', 'FORNEC', 'ID_PAGAMENTO', 'NOME_FONTE_REC', 'NOME_UO'])
 
@@ -71,18 +71,21 @@ class UOFR:
 
     def execute(self, df, dias1, chave, ano, tipop):
 
-        valorlicitacao = 20000
+        valorlicitacao = 17600
 
         emp_rows = df[df["FONTE_REC"] + df["UNID_ORC"] == self.key]
         emp_rows1 = []
         chavesfiltradas = []
         if tipop == 'Dispensa':
             if ano == '2020':
-                emp_rows1 = emp_rows[emp_rows.eval("DATA_LIQ >= '2020-07-40' & VALOR_EMPENHO <= 50000 | DATA_LIQ < '2020-07-40' & VALOR_EMPENHO <= 20000 ")]
+                emp_rows1 = emp_rows[emp_rows.eval("DATA_EMP > '2020-03-19' & VALOR_EMPENHO <= 50000 | DATA_EMP <= '2020-03-19' & VALOR_EMPENHO <= 17600 ")]
             else:
-                emp_rows1 = emp_rows[emp_rows["VALOR_EMPENHO"] <= 20000]
+                emp_rows1 = emp_rows[emp_rows["VALOR_EMPENHO"] <= 17600]
         elif tipop == 'Licitação':
-            emp_rows1 = emp_rows[emp_rows["VALOR_EMPENHO"] > 20000]
+            if ano == '2020':
+                emp_rows1 = emp_rows[emp_rows.eval("DATA_EMP > '2020-03-19' & VALOR_EMPENHO > 50000 | DATA_EMP <= '2020-03-19' & VALOR_EMPENHO > 17600 ")]
+            else:
+                emp_rows1 = emp_rows[emp_rows["VALOR_EMPENHO"] > 17600]
 
         if(len(emp_rows1) > 0):
             chavesfiltradas = (emp_rows1["DATA_PAGAMENTO"] + emp_rows1["DATA_LIQ"]).unique()
