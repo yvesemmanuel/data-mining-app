@@ -2,9 +2,7 @@
 ##Nr_Empenho;DataEmisEmp;ValorEmpenhado;Data_Liq;ValorSE;DataPgmtSE;INSMF
 
 from datetime import datetime
-import numpy as np
 import pandas as pd
-import csv
 
 linhasArquivoPagamento = []
 
@@ -179,7 +177,7 @@ def montaEmpenhos():
 
     empenhos[0] = cabecalho + "\n"
 
-    arquivo = ("./static/datasets/resultado222.csv")
+    arquivo = ("./datasets/resultado222.csv")
     arq = open(arquivo, 'w', encoding="utf8")
     arq.writelines(empenhos)
     arq.close()

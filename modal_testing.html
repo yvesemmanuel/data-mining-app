@@ -1,0 +1,31 @@
+$(document).ready(function () {
+    $(".table-hover").on("click", "tbody tr", function () {
+        // remove previous data from modal window
+        $(".modal-body").empty();
+
+        // get data
+        var rowIdx = $(this)[0].attributes.value.value;
+        var data = {{ rows_payment | safe}}[rowIdx];
+
+        // table header
+        var table = '<table class="table">';
+        table += '<thead><tr><td>VALOR</td><td>Data Pag.</td><td>Data Liq.</td><td>Descrição</td></tr></head>';
+
+        // table body
+        table += '<tbody>'
+        for (i = 0; i < data.length; i++) {
+            var descricao = data[i][1];
+            var empenho = JSON.parse(data[i][0]);
+
+            table += '<tr>' + '<td>' + empenho.VALOR + '</td>' + '<td>' + empenho.DATA_PAG + '</td>' + '<td>' + empenho.DATA_LIQ + '</td>' + '<td>' + descricao + '</td>' + '</tr>'
+        }
+        table += '</tbody></table>'
+
+        $(".modal-body").append(table);
+        // show modal
+        document.getElementById("modal-button").click();
+    });
+
+
+    $(document).on("click");
+});

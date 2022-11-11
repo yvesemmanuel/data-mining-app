@@ -1,10 +1,9 @@
 from datetime import datetime
-import static.scripts.MontaEmpenhosPorLinha as mtEmp
-from static.scripts.Empenho import Empenho
+from . import MontaEmpenhosPorLinha as mtEmp
+from . import Empenho as emp
 
 
 empenhos = []
-sortedEmpenhos = []
 
 
 def montaEmpenhos(linhaPag):
@@ -36,8 +35,11 @@ def montaEmpenhos(linhaPag):
                     else:
                         valoresEmpenhos.append(float(667.5))
 
-        empenhos.append(Empenho(nrEmpenho, datasEmpenhos, valoresEmpenhos,
+        empenhos.append(emp.Empenho(nrEmpenho, datasEmpenhos, valoresEmpenhos,
                         cpf, cnpj, vlEmpenho, 1, descricao, nmFornecedor))
+
+
+sortedEmpenhos = []
 
 
 def openFileEmpenhos(fileName):

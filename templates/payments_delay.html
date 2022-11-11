@@ -1,216 +1,131 @@
 {% extends "layout.html" %} {% block body %}
 
-<h1 class="title section-title">{{page_title}}</h1>
-
 <div class="container">
+    <h1 class="title section-title">{{page_title}}</h1>
 
     <hr>
 
-    <form method="post" id="analysis-form">
+    <form method="post">
+        <div class="row justify-content-center">
 
-        <div class="analysis-selected" id="analysis-selected">
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="analysis" id="analise-atrasos"
-                    value="Análise de Atrasos" checked>
-                <label class="form-check-label" for="analise-atrasos">
-                    Análise de atrasos
-                </label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="analysis" id="analise-conformidade"
-                    value="Análise de não Conformidade" {% if selected_analysis=="Análise de não Conformidade" %}
-                    checked {% endif %}>
-                <label class="form-check-label" for="analise-conformidade">
-                    Análise de não conformidade
-                </label>
-            </div>
-        </div>
-
-        <div class="row">
-
-            <div class="col form-group">
-                <label class="input-title" for="map">Coloração do Mapa</label>
-                <select class="form-control" id="map" name="map">
-                    {% for cor in map_options %}
-                    <option value="{{cor}}" {% if selected_map==cor %} selected {% endif %}>{{cor}}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="col form-group">
-                <label class="input-title" for="year">Ano</label>
-                <select class="form-control" id="year" name="year">
-                    {% for year in year_options %}
-                    <option value="{{year}}" {% if selected_year==year %} selected {% endif %}>{{year}}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="col form-group">
-                <label class="input-title" for="days-limit">Limite de Atraso</label>
-                <input type="number" class="form-control" name="days-limit" placeholder="Dias de atraso"
-                    aria-label="Dias de atraso" value="{{days_limit_selected}}" required>
-            </div>
-        </div>
-
-        {% if selected_analysis == "Análise de não Conformidade" %}
-        <div class="row row-last" style="display: none!important;">
-            <div class="col-6 form-group">
-                <label class="input-title" for="entity">Tipo de Fornecedor</label>
-                <select class="form-control" id="entity" name="entity">
-                    {% for entity in entity_options %}
-                    <option value="{{entity}}" {% if selected_entity==entity %} selected {% endif %}>
-                        {{entity}}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="col-6 form-group">
-
-                <div class="limit-options">
-                    <label class="input-title" for="loan-limit">Valor de Empenho</label>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="loan-limit" id="nao-aplicado"
-                            value="Não aplicado" checked>
-                        <label class="form-check-label" for="nao-aplicado">Não aplicado</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="loan-limit" id="maior-que"
-                            value="Maior que" {% if selected_loan_limit=="Maior que" %} checked {% endif %}>
-                        <label class="form-check-label" for="maior-que">Maior que</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="loan-limit" id="menor-que"
-                            value="Menor que" {% if selected_loan_limit=="Menor que" %} checked {% endif %}>
-                        <label class="form-check-label" for="menor-que">Menor que</label>
-                    </div>
-                </div>
-
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="limite">R$</span>
-                    </div>
-                    <input type="number" class="form-control" placeholder="Não aplicado" aria-label="Limite"
-                        aria-describedby="limite" id="loan-value" name="loan-value" value="Não aplicado" disabled>
-                </div>
-
-            </div>
-        </div>
-
-        {% else %}
-        <div class="row row-last">
-            <div class="col-6 form-group">
-                <label class="input-title" for="entity">Tipo de Fornecedor</label>
-                <select class="form-control" id="entity" name="entity">
-                    {% for entity in entity_options %}
-                    <option value="{{entity}}" {% if selected_entity==entity %} selected {% endif %}>
-                        {{entity}}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="col-6 form-group">
-
-                <div class="limit-options">
-                    <label class="input-title" for="loan-limit">Valor de Empenho</label>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="loan-limit" id="nao-aplicado"
-                            value="Não aplicado" checked>
-                        <label class="form-check-label" for="nao-aplicado">Não aplicado</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="loan-limit" id="maior-que"
-                            value="Maior que" {% if selected_loan_limit=="Maior que" %} checked {% endif %}>
-                        <label class="form-check-label" for="maior-que">Maior que</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="loan-limit" id="menor-que"
-                            value="Menor que" {% if selected_loan_limit=="Menor que" %} checked {% endif %}>
-                        <label class="form-check-label" for="menor-que">Menor que</label>
-                    </div>
-                </div>
-
-                {% if user_request == "GET" or selected_loan_limit == "Não aplicado" %}
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="limite">R$</span>
-                    </div>
-                    <input type="number" class="form-control" placeholder="Não aplicado" aria-label="Limite"
-                        aria-describedby="limite" id="loan-value" name="loan-value" value="Não aplicado" disabled>
-                </div>
-
-                {% else %}
-                <div class="input-group mb-3">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" id="limite">R$</span>
-                    </div>
-                    <input type="number" class="form-control" aria-label="Limite" aria-describedby="limite"
-                        id="loan-value" name="loan-value" value="{{loan_value_limit}}" required>
-                </div>
-                {% endif %}
-
-            </div>
-        </div>
-        {% endif %}
-
-
-        <div class="col-md-12 text-center">
-            <button class="btn btn-default btn-md button-style" name="apply" value="aplicar"
-                type="submit">Aplicar</button>
-        </div>
-
-
-        {% if user_request == "POST" %}
-        <hr>
-        <iframe class="map col-lg-12 col-md-12 col-sm-12 col-12 .col-xl-12" height="440" src="/payments_delay_map"></iframe>
-
-        <div class="row">
-            <div class="col"></div>
             <div class="col-sm-4 form-group">
-                <label class="input-title" for="city">Unidade Jurisdicionada</label>
-                <select class="form-control" id="city" name="city">
-                    {% for city in city_options %}
-                    <option value="{{ city }}" {% if selected_city==city %} selected {% endif %}>{{
-                        city }}
+                <label class="input-title" for="entity">Tipo de Fornecedor</label>
+                <select class="form-control" id="entity" name="entity" {% if user_request=="POST" %}
+                    onchange="document.getElementById('apply').click()" {% endif %}>
+                    {% for entity in options_entity %}
+                    <option value="{{ entity }}" {% if selected_entity==entity %} selected {% endif %}>{{
+                        entity }}
                     </option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="col"></div>
+
+            <div class="col-sm-4 form-group">
+                <label class="input-title" for="year">Ano</label>
+                <select class="form-control" id="year" name="year" {% if user_request=="POST" %}
+                    onchange="document.getElementById('apply').click()" {% endif %}>
+                    {% for year in options_year %}
+                    <option value="{{ year }}" {% if selected_year==year %} selected {% endif %}>{{
+                        year }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
 
+        <div class="row justify-content-center" style="margin-top: 9px;">
+
+            <div class="col-sm-4 form-group">
+                <label class="input-title" for="limit">Limite de Atraso</label>
+                <select class="form-control" id="limit" name="limit" {% if user_request=="POST" %}
+                    onchange="document.getElementById('apply').click()" {% endif %}>
+                    {% for limit in options_limit %}
+                    <option value="{{ limit }}" {% if selected_limit==limit %} selected {% endif %}>{{
+                        limit }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-sm-4 form-group">
+                <label class="input-title" for="loan_type">Tipo de Empenho</label>
+                <select class="form-control" id="loan_type" name="loan_type" {% if user_request=="POST" %}
+                    onchange="document.getElementById('apply').click()" {% endif %}>
+                    {% for loan_type in options_loan_type %}
+                    <option value="{{ loan_type }}" {% if selected_loan_type==loan_type %} selected {% endif %}>{{ loan_type }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+        </div>
+
+        {% if user_request == "GET" %}
         <div class="text-center">
-            <button type="submit" class="btn btn-default btn-md button-style" name="consult" value="consult"
-                id="consult">Consultar</button>
+            <button class="btn btn-default btn-md button-style" type="submit" name="action" value="apply"
+                id="apply">Aplicar</button>
         </div>
+        {% elif user_request == "POST" %}
+        <div class="text-center hidden">
+            <button class="btn btn-default btn-md button-style" type="submit" name="action" value="apply"
+                id="apply">Aplicar</button>
+        </div>
+        {% endif %}
 
-        <br>
+        {% if user_request == 'POST' %}
+        <iframe class="map col-lg-12 col-md-12 col-sm-12 col-12 .col-xl-12" height="440" srcdoc="{{selected_map}}"
+            style="margin-top: 20px;"></iframe>
+        {% endif %}
 
-        {% if selected_city %}
-        <div class="row">
-            <div class="col"></div>
-            <div class="col-lg-8 form-group">
-                <label class="input-title" for="loan">Fornecedor</label>
-                <select class="form-control" id="loan" name="loan"
-                    onchange="document.getElementById('consult').click()">
-                    {% for loan in loans %}
+        {% if user_request == 'POST' %}
+        <div class="row justify-content-center">
+
+            <div class="col-sm-4 form-group">
+                <label class="input-title" for="city">Unidade Jurisdicionada</label>
+                <select class="form-control" id="city" name="city" {% if user_request=="POST" and
+                    selected_action=="update" %} onchange="document.getElementById('update').click()" {% endif %}>
+                    {% for city in options_city %}
+                    <option value="{{ city }}" {% if selected_city==city %} selected {% endif %}>{{ city }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            {% if selected_action == "update" %}
+            <div class="col-sm-8 form-group">
+                <label class="input-title" for="loan">Empenho</label>
+                <select class="form-control" id="loan" name="loan" {% if user_request=="POST" and
+                    selected_action=="update" %} onchange="document.getElementById('update').click()" {% endif %}>
+                    {% for loan in options_loan %}
                     <option value="{{ loan }}" {% if selected_loan==loan %} selected {% endif %}>{{
                         loan }}
                     </option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="col"></div>
+            {% endif %}
+        </div>
+
+        {% if selected_action == "update" %}
+        <iframe class="map col-lg-12 col-md-12 col-sm-12 col-12 .col-xl-12" height="440" srcdoc="{{plot_data}}"></iframe>
+        {% endif %}
+        
+        {% if selected_action != "update" %}
+        <div class="text-center">
+            <button class="btn btn-default btn-md button-style" type="submit" name="action" value="update"
+            id="update">Atualizar</button>
+        </div>
+        {% else %}
+        <div class="text-center hidden">
+            <button class="btn btn-default btn-md button-style" type="submit" name="action" value="update"
+                id="update">Atualizar</button>
         </div>
         {% endif %}
 
+        {% endif %}
     </form>
-    {% endif %}
 
-    {% if plot_0 %}
-    <iframe class="map col-lg-12 col-md-12 col-sm-12 col-12 .col-xl-12" height="440" src="/payments_delay_plot_1"></iframe>
-    <img src="{{ url_for("static", filename="assets/plot.png" ) }}" class="img-fluid mx-auto d-block">
-    {% endif %}
+
 
 </div>
 

@@ -1,8 +1,23 @@
 import static.scripts.EmpenhosSalarios as empSal
 import static.scripts.EmpenhosServicosInicAntesEmp as empServ
+from static.scripts.UtilsUJsProcessadas import UJsProcessadas
 import os
 import pandas as pd
 from static.scripts.utils import format_cnpj_cpf
+
+
+def get_loans(selected_year, selected_city_num):
+    df_selected = UJsProcessadas.openFileUJ(selected_year, selected_city_num)
+
+    options_loans = []
+    for _, row in df_selected.iterrows():
+        loan = row['NOME_UO'] + ' - ' + row['NOME_FONTE_REC']
+
+        if loan not in options_loans:
+            options_loans.append(loan)
+
+
+    return options_loans
 
 
 def get_filenames(dir_path):
@@ -43,9 +58,9 @@ def get_dados_correspondencia(municipio):
     cols_general_description = df0.loc[0].index.values.tolist()
     
     
-    df1 = pd.read_csv('./static/datasets/correspondencia_fontes/tratado_' + municipio + '.csv')
+    df1 = pd.read_csv('./static/datasets/tratado_correspondencia_fontes/' + municipio + '.txt', sep=';')
 
-    modals = df1['modal'].dropna().tolist()
+    modals = df1.modal.dropna().tolist()
     df1.drop('modal', axis=1, inplace=True)
 
     cols = list(df1.columns)
