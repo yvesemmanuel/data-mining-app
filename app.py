@@ -12,6 +12,7 @@ from static.scripts.AnaliseScoreUJS import *
 from static.scripts.FilaP import *
 from static.scripts.utils import *
 import locale
+import math
 from static.scripts.Maps import *
 
 
@@ -361,6 +362,9 @@ def matching_sources():
                             user_request=user_request)
 
 
+def date_to_string(date):
+    return date.strftime('%d/%m/%Y')
+
 @app.route('/analysis/payments_queue', methods=['GET', 'POST'])
 def payments_queue():
     page_title = 'Filas de Pagamentos'
@@ -379,10 +383,21 @@ def payments_queue():
     selected_day = days_of_tolerance[0]
     sources = get_lista_UOFR(city_options[0], '2019')
 
+    #SALVAR MAPA
+    '''state_unemployment = './static/datasets/IndicesporMunicipio/ScoreMedio2020Li.csv'
+    dataset = pd.read_csv(state_unemployment, sep=';')
+    mapa = geraMapaFolium(dataset)
+    mapa.save("./templates/payment_queues_map_2020_Li.html")
+    mapa = mapa._repr_html_()'''
+    #==============---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---==========#
+
+    pathmapa = '/payment_queues_2019_Ge'
+    mapa = pathmapa
+
     if user_request == 'POST':
         selected_city = request.form.get('city', city_options[0])
         selected_year = request.form.get('year', year_options[0])
-        
+
         selected_action = request.form.get('action')
         
         if (selected_action == 'update2' or selected_action != 'apply') or selected_action != 'update':
@@ -391,6 +406,9 @@ def payments_queue():
 
         selected_payment = request.form.get('payment', payment_types[0])
         cities_num = int(df[df['Municipio'] == selected_city].numUJ)
+
+        pathmapa = '/payment_queues_' + str(selected_year) + '_' + str(selected_payment[0:2])
+        mapa = pathmapa
         
 
         if selected_action == 'apply' or selected_action == 'update':
@@ -402,6 +420,7 @@ def payments_queue():
             cities_num, selected_source, int(selected_day), selected_year, tipopagamento)
 
             return render_template('payments_queue.html',
+                                    mapa = mapa,
                                     acao = selected_action,
                                     # rendering
                                     page_title=page_title,
@@ -429,6 +448,7 @@ def payments_queue():
 
             if selected_action == 'mudaano':
                 return render_template('payments_queue.html',
+                            mapa = mapa,
                             acao = selected_action,
                            # rendering
                            page_title=page_title,
@@ -449,6 +469,7 @@ def payments_queue():
                 selected_day = request.form.get('day', days_of_tolerance[0])
 
                 return render_template('payments_queue.html',
+                                        mapa = mapa,
                                         acao = selected_action,
                                         # rendering
                                         page_title=page_title,
@@ -469,9 +490,8 @@ def payments_queue():
                                         # output
                                         sources=sources)
 
-        
-
     return render_template('payments_queue.html',
+                            mapa = mapa,
                             acao = selected_action,
                            # rendering
                            page_title=page_title,
@@ -483,16 +503,41 @@ def payments_queue():
                            )
 
 
-@app.route('/payment_queues_map')
-def payment_queues_map():
+@app.route('/payment_queues_2019_Ge')
+def payment_queues_2019_Ge():
     queues_map()
-    return render_template('payment_queues_map.html')
+    return render_template('/payment_queues_map_2019_Ge.html')
 
+<<<<<<< HEAD
 
 @app.route('/payment_queues_map2')
 def payment_queues_map2():
+=======
+@app.route('/payment_queues_2020_Ge')
+def payment_queues_2020_Ge():
+>>>>>>> 496038d48cf398d2e1ea703b063819ecf7b3ee79
     queues_map()
-    return render_template('payment_queues_map2.html')
+    return render_template('/payment_queues_map_2020_Ge.html')
+
+@app.route('/payment_queues_2019_Di')
+def payment_queues_2019_Di():
+    queues_map()
+    return render_template('/payment_queues_map_2019_Di.html')
+
+@app.route('/payment_queues_2020_Di')
+def payment_queues_2020_Di():
+    queues_map()
+    return render_template('/payment_queues_map_2020_Di.html')
+
+@app.route('/payment_queues_2019_Li')
+def payment_queues_2019_Li():
+    queues_map()
+    return render_template('/payment_queues_map_2019_Li.html')
+
+@app.route('/payment_queues_2020_Li')
+def payment_queues_2020_Li():
+    queues_map()
+    return render_template('/payment_queues_map_2020_Li.html')
 
 if __name__ == '__main__':
 

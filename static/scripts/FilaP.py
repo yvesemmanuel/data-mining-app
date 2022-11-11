@@ -7,8 +7,8 @@ def pegaQtdultrapass(item):
     return item[4]
 
 
-def MudaMunicipio2(index, numero, diastl, ano, tipop):
-    muniselect = pd.read_csv(index, sep=',', usecols=['NUMERO_EMPENHO',
+def MudaMunicipio2(index, numero, diastl, ano, tipop, ano, tipop):
+    muniselect = pd.read_csv(index, sep=',', usecols=['NUMERO_EMPENHO','DATA_EMP',
                                                       'VALOR_EMPENHO', 'DATA', 'CPF_CNPJ',
                                                       'DATA_LIQ', 'VALOR', 'FORNEC', 'ID_PAGAMENTO', 'NOME_FONTE_REC', 'NOME_UO'])
 
@@ -26,9 +26,15 @@ def MudaMunicipio2(index, numero, diastl, ano, tipop):
 
 
 def MudaMunicio(numero, uofr, diastl, ano, tipop):
-    muniselect = pd.read_csv("./datasets/outputs" + str(ano) + "/" + str(numero) + ".csv", sep=',', usecols=['NUMERO_EMPENHO',
+    if ano == '2020':
+        muniselect = pd.read_csv("./static/datasets/pagamentos2020/" + str(numero) + ".csv", sep=',', usecols=['NUMERO_EMPENHO','DATA_EMP',
+                                                                                                            'VALOR_EMPENHO', 'DATA', 'CPF_CNPJ',
+                                                                                                            'DATA_LIQ', 'VALOR', 'FORNEC', 'ID_PAGAMENTO', 'NOME_FONTE_REC', 'NOME_UO'])
+    else:
+        muniselect = pd.read_csv("./static/datasets/pagamentos2019/" + str(numero) + ".csv", sep=',', usecols=['NUMERO_EMPENHO','DATA_EMP',
                                                                                                         'VALOR_EMPENHO', 'DATA', 'CPF_CNPJ',
                                                                                                         'DATA_LIQ', 'VALOR', 'FORNEC', 'ID_PAGAMENTO', 'NOME_FONTE_REC', 'NOME_UO'])
+
 
     camposuteismuni = muniselect
     camposuteismuni.rename(columns={'DATA': 'DATA_PAGAMENTO', "VALOR": "VALOR_PAGAMENTO",
@@ -67,17 +73,35 @@ class UOFR:
         self.indice = 0
         self.indice2 = 0
         self.valortotal_pago = 0
+        self.listachavesdtframefiltrado = []
 
     def execute(self, df, dias1, chave, ano, tipop):
 
+        valorlicitacao = 17600
+
         emp_rows = df[df["FONTE_REC"] + df["UNID_ORC"] == self.key]
+        emp_rows1 = []
+        chavesfiltradas = []
         if tipop == 'Dispensa':
             if ano == '2020':
-                emp_rows = emp_rows[emp_rows.eval("DATA_LIQ >= '2020-07-40' & VALOR_EMPENHO <= 50000 | DATA_LIQ < '2020-07-40' & VALOR_EMPENHO <= 20000 ")]
+                emp_rows1 = emp_rows[emp_rows.eval("DATA_EMP > '2020-03-19' & VALOR_EMPENHO <= 50000 | DATA_EMP <= '2020-03-19' & VALOR_EMPENHO <= 17600 ")]
             else:
-                emp_rows = emp_rows[emp_rows["VALOR_EMPENHO"] <= 20000]
+                emp_rows1 = emp_rows[emp_rows["VALOR_EMPENHO"] <= 17600]
         elif tipop == 'Licitação':
-            emp_rows = emp_rows[emp_rows["VALOR_EMPENHO"] > 20000]
+            if ano == '2020':
+                emp_rows1 = emp_rows[emp_rows.eval("DATA_EMP > '2020-03-19' & VALOR_EMPENHO > 50000 | DATA_EMP <= '2020-03-19' & VALOR_EMPENHO > 17600 ")]
+            else:
+                emp_rows1 = emp_rows[emp_rows["VALOR_EMPENHO"] > 17600]
+
+        if(len(emp_rows1) > 0):
+            chavesfiltradas = (emp_rows1["DATA_PAGAMENTO"] + emp_rows1["DATA_LIQ"]).unique()
+            for i,v in enumerate(chavesfiltradas):
+                part1 = v[:10]
+                part2 = v[10:]
+                final_string = part1 + '-' + part2
+                chavesfiltradas[i] = final_string
+
+        #print(chavesfiltradas)
         pagament = []
         indice = 0
         Dicionario = {}
@@ -94,10 +118,15 @@ class UOFR:
                 chavedicio = str(dtpag)+'-'+str(dtliq)
 
                 if (chavedicio not in Dicionario):
+
+                    if chavedicio in chavesfiltradas:
+                        pertenceaofiltro = 1
+                    else:
+                        pertenceaofiltro = 0
                     vetorinterno = [row["NUMERO_EMPENHO"], str(
                         row["CPF_CNPJ"]), row["VALOR_EMPENHO"], row["VALOR_PAGAMENTO"]]
                     Dicionario[chavedicio] = {"dtp": dttratada, "dtl": dtliqtratada,
-                                              "quantidade": 1, "Pagamentosqultrapass": 0, "vetorzin": [vetorinterno]}
+                                              "quantidade": 1, "Pagamentosqultrapass": 0, "ehfiltrado": pertenceaofiltro, "vetorzin": [vetorinterno]}
 
                 else:
                     valoranterior = Dicionario[chavedicio]["quantidade"]
@@ -112,7 +141,9 @@ class UOFR:
                     Dicionario[chavedicio]["vetorzin"] = vetor2
 
         self.pagamentos = Dicionario
+        self.listachavesdtframefiltrado = chavesfiltradas
         self.indice = self.ordenaPagamentos(dias1)
+        
 
     def ordenaPagamentos(self, ndias):
         Dicionario = self.pagamentos
@@ -121,6 +152,13 @@ class UOFR:
         quantidadetotaldesordem = 0  # quantidade de pagamentos q foram ultrapassados
         quantidadetotaldesordem2 = 0
         pontuacao = 0
+
+        ehfiltrado = False
+        listafiltrada = []
+        if len(self.listachavesdtframefiltrado) > 0:
+            ehfiltrado = True
+            listafiltrada = self.listachavesdtframefiltrado
+        
 
         for i in range(1, len(chavesordenadas)):
             anteriores = chavesordenadas[0:i-1]
@@ -137,17 +175,19 @@ class UOFR:
             varx = 0
             libera = 1
 
-            if(datapagidx-dataliqidx).days > ndias:
-                for k in anteriores:
-                    dtl2 = Dicionario[k]["dtl"]
-                    dtp2 = Dicionario[k]["dtp"]
+            if(ehfiltrado == False) or (ehfiltrado == True and chavedicio in listafiltrada):
+                if(datapagidx-dataliqidx).days > ndias:
+                    for k in anteriores:
+                        dtl2 = Dicionario[k]["dtl"]
+                        dtp2 = Dicionario[k]["dtp"]
 
-                    if (datapagidx != Dicionario[k]["dtp"]) and (dtl2 > dtl1) and ((dtp1 - dtp2).days > ndias):
-                        # Significa desresopeito a fila de pagamentos
-                        dataantes = dtp2
-                        diferencadias = dtp1 - dataantes
-                        diff = diferencadias.days
+                        if (datapagidx != Dicionario[k]["dtp"]) and (dtl2 > dtl1) and ((dtp1 - dtp2).days > ndias):
+                            # Significa desresopeito a fila de pagamentos
+                            dataantes = dtp2
+                            diferencadias = dtp1 - dataantes
+                            diff = diferencadias.days
 
+<<<<<<< HEAD
                         # Antes do pagamento em questão
                         quantidadeantes = Dicionario[k]["quantidade"]
 
@@ -157,20 +197,39 @@ class UOFR:
                         pontosporpagamento += int(quantidadeantes) * \
                             int(qtd)*1
                             #int(qtd)*(1+int(diff/31))
+=======
+                            # Antes do pagamento em questão
+                            quantidadeantes = Dicionario[k]["quantidade"]
+>>>>>>> 496038d48cf398d2e1ea703b063819ecf7b3ee79
 
-                        varx += int(quantidadeantes)
+                            #3 * 8
+                            peso = math.log(1+int(diff/31),2.1)
+                            # QUantidade de pagamentos*(1+N)
+                            pontosporpagamento += int(quantidadeantes) * \
+                                int(qtd)*1
+                                #int(qtd)*(1+int(diff/31))
 
-                        if (libera == 1):
-                            quantidadetotaldesordem += int(qtd)
-                            quantidadetotaldesordem2 += int(quantidadeantes)
-                        libera = 0
+                            varx += int(quantidadeantes)
+
+                            if (libera == 1):
+                                quantidadetotaldesordem += int(qtd)
+                                quantidadetotaldesordem2 += int(quantidadeantes)
+                            libera = 0
 
                 Dicionario[chavedicio]["Pagamentosqultrapass"] = varx
                 pontuacao += pontosporpagamento
 
-        self.pagamentosordem1 = Dicionario
-                
-        self.pagamentosordem1 = [[k, v['dtp'], v['dtl'], v['quantidade'], v['Pagamentosqultrapass'], v['vetorzin']] for k, v in Dicionario.items()]
+        #self.pagamentosordem1 = Dicionario
+        if ehfiltrado:
+            tabelafinal = [[k, v['dtp'], v['dtl'], v['quantidade'], v['Pagamentosqultrapass'],
+                    v['vetorzin']] for k, v in Dicionario.items() if v['ehfiltrado'] == 1]
+        else:
+            tabelafinal = [[k, v['dtp'], v['dtl'], v['quantidade'], v['Pagamentosqultrapass'],
+                    v['vetorzin']] for k, v in Dicionario.items()]
+        #bbb = [[k, v['dtp'], v['dtl'], v['quantidade'], v['Pagamentosqultrapass'],
+        #        v['vetorzin']] for k, v in Dicionario.items()]
+        self.pagamentosordem1 = tabelafinal
+        #bbb.sort(reverse=True, key=pegaQtdultrapass)
         self.pagamentosordem2 = []
 
         return pontuacao
