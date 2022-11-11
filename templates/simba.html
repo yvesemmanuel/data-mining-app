@@ -12,7 +12,7 @@
                 <label class="input-title" for="entity">Entidade</label>
                 <select class="form-control" id="entity" name="entity"
                     onchange="document.getElementById('apply').click()">
-                    {% for idx, entity in enumerate(entity_options) %}
+                    {% for idx, entity in enumerate(options_entity) %}
                     <option value="{{ idx }}" {% if selected_entity==idx %} selected {% endif %}>{{
                         entity }}
                     </option>

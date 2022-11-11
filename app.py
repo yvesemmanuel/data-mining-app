@@ -93,91 +93,83 @@ def regular_payments():
     )
 
 
-@app.route('/analysis/service_before_payment', methods=['GET', 'POST'])
-def service_before_payment():
-    page_title = 'Análise de Serviços Antes de Empenho'
-    city_options = list(
-        pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';').Municipio
-    )
-    year_options = [2019, 2020]
-    user_request = request.method
+# @app.route('/analysis/service_before_payment', methods=['GET', 'POST'])
+# def service_before_payment():
+#     page_title = 'Análise de Serviços Antes de Empenho'
+#     city_options = list(
+#         pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';').Municipio
+#     )
+#     year_options = [2019, 2020]
+#     user_request = request.method
 
-    if user_request == 'POST':
-        selected_city = request.form.get('city')
-        selected_year = request.form.get('year')
-        selected_supplier = request.form.get('supplier', 0)
-        selected_action = request.form.get('action')
+#     if user_request == 'POST':
+#         selected_city = request.form.get('city')
+#         selected_year = request.form.get('year')
+#         selected_supplier = request.form.get('supplier', 0)
+#         selected_action = request.form.get('action')
 
-        loans = get_servico_emp(selected_city, selected_year)
-        supplier_options = []
-        for idx, loan in enumerate(loans):
-            supplier_options.append(str(idx) + ' - ' + str(loan.nmFornecedor))
+#         loans = get_servico_emp(selected_city, selected_year)
+#         supplier_options = []
+#         for idx, loan in enumerate(loans):
+#             supplier_options.append(str(idx) + ' - ' + str(loan.nmFornecedor))
 
-        if selected_action == 'apply':
-            loan_idx = 0
-        elif selected_action == 'update':
-            loan_idx = int(selected_supplier)
+#         if selected_action == 'apply':
+#             loan_idx = 0
+#         elif selected_action == 'update':
+#             loan_idx = int(selected_supplier)
 
-        loan_selected = loans[loan_idx]
-        y = loan_selected.listValoresPagamentos
-        x = loan_selected.datasPagamentosDateTime
-        service_before_payment_plot(x, y)
+#         loan_selected = loans[loan_idx]
+#         y = loan_selected.listValoresPagamentos
+#         x = loan_selected.datasPagamentosDateTime
+#         service_before_payment_plot(x, y)
 
-        supplier_id = '{} ({})'.format(
-            loan_selected.cnpj, loan_selected.nmFornecedor)
-        dates = '; '.join(
-            map(date_to_string, loan_selected.datasPagamentosDateTime))
-        values = '; '.join(map(str, loan_selected.listValoresPagamentos))
-        description = loan_selected.descricao
-        first_month = str(round(loan_selected.vlMes1, 2))
-        monthly_average = str(round(loan_selected.vlMedioMensal, 2))
+#         supplier_id = '{} ({})'.format(
+#             loan_selected.cnpj, loan_selected.nmFornecedor)
+#         dates = '; '.join(
+#             map(date_to_string, loan_selected.datasPagamentosDateTime))
+#         values = '; '.join(map(str, loan_selected.listValoresPagamentos))
+#         description = loan_selected.descricao
+#         first_month = str(round(loan_selected.vlMes1, 2))
+#         monthly_average = str(round(loan_selected.vlMedioMensal, 2))
 
-        loan_info = {
-            'CPF/CNPJ': supplier_id,
-            'Datas': dates,
-            'Valores': values,
-            'Descrição': description,
-            'Primeiro Mês': first_month,
-            'Média Mensal': monthly_average
-        }
+#         loan_info = {
+#             'CPF/CNPJ': supplier_id,
+#             'Datas': dates,
+#             'Valores': values,
+#             'Descrição': description,
+#             'Primeiro Mês': first_month,
+#             'Média Mensal': monthly_average
+#         }
 
-        return render_template(
-            'service_before_payment.html',
-            page_title=page_title,
-            city_options=city_options,
-            year_options=year_options,
-            user_request=user_request,
+#         return render_template(
+#             'service_before_payment.html',
+#             page_title=page_title,
+#             city_options=city_options,
+#             year_options=year_options,
+#             user_request=user_request,
 
-            supplier_options=supplier_options,
-            loan_info=loan_info,
-            selected_city=selected_city,
-            selected_year=int(selected_year),
-            year=int(selected_year),
-            selected_supplier=int(selected_supplier),
-        )
+#             supplier_options=supplier_options,
+#             loan_info=loan_info,
+#             selected_city=selected_city,
+#             selected_year=int(selected_year),
+#             year=int(selected_year),
+#             selected_supplier=int(selected_supplier),
+#         )
 
-    return render_template(
-        'service_before_payment.html',
-        page_title=page_title,
-        city_options=city_options,
-        year_options=year_options,
-        user_request=user_request,
-    )
+#     return render_template(
+#         'service_before_payment.html',
+#         page_title=page_title,
+#         city_options=city_options,
+#         year_options=year_options,
+#         user_request=user_request,
+#     )
 
 
 @app.route('/analysis/simba', methods=['GET', 'POST'])
 def simba():
     page_title = 'SIMBA'
-    lObjs = montaObjsSagresSimba(
-        'simba/SimbaGoiana.csv', 'simba/SagresGoiana.csv')
-    entity_options = []
-    for idx, o in enumerate(lObjs):
-        entity_options.append(
-            '{} - {}({}) - {}'.format(
-                idx, o.nmFornecedor, o.cpf_cnpj, round(
-                    o.somaSimba - o.somaSagres, 2)
-            )
-        )
+    lObjs = montaObjsSagresSimba('simba/SimbaGoiana.csv', 'simba/SagresGoiana.csv')
+    options_entity = ['{} - ({}) - {}'.format(o.nmFornecedor, format_cnpj_cpf(o.cpf_cnpj), round(o.somaSimba - o.somaSagres, 2)) for o in lObjs]
 
     selected_entity = int(request.form.get('entity', 0))
 
@@ -192,18 +184,17 @@ def simba():
         linhaSagres.append(round(dictPagsSagres[idx], 2))
         linhaSimba.append(round(dictPagsSimba[idx], 2))
 
-    entity_info = {'months': ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul',
-                              'Ago', 'Set', 'Out', 'Nov', 'Dez'], 'sagres': linhaSagres, 'simba': linhaSimba}
+    entity_info = {'months': ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'], 'sagres': linhaSagres, 'simba': linhaSimba}
 
     return render_template(
         'simba.html',
-        # rendering
+        # rendering values
         page_title=page_title,
-        # input
-        selected_entity=selected_entity,
+        
         # output
+        selected_entity=selected_entity,
         entity_info=entity_info,
-        entity_options=entity_options,
+        options_entity=options_entity,
     )
 
 

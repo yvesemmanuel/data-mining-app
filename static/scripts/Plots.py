@@ -78,7 +78,7 @@ def service_before_payment_plot(x, y):
 
 def simba_plot(idx):
     lObjs = montaObjsSagresSimba(
-        "../datasets/simba/SimbaGoiana.csv", "../datasets/simba/SagresGoiana.csv"
+        '../datasets/simba/SimbaGoiana.csv', '../datasets/simba/SagresGoiana.csv'
     )
 
     # gerar a figura (sem utilizar o pyploy)
@@ -99,43 +99,41 @@ def simba_plot(idx):
         gastosSagres.append(dictPagsSagres[i])
         gastosSimba.append(dictPagsSimba[i])
 
-    ax.bar(r1, gastosSagres, color="#6A5ACD", width=barWidth, label="Sagres")
-    ax.bar(r2, gastosSimba, color="#00BFFF", width=barWidth, label="Simba")
+    ax.bar(r1, gastosSagres, color='#6A5ACD', width=barWidth, label='Sagres')
+    ax.bar(r2, gastosSimba, color='#00BFFF', width=barWidth, label='Simba')
 
-    ax.ticklabel_format(style="plain")
+    ax.ticklabel_format(style='plain')
     ax.set(
-        title="Destino: " + str(lObjs[idx].nmFornecedor),
-        xlabel="Mês",
-        ylabel="Valor Mensal (R$)",
+        title='Destino: ' + str(lObjs[idx].nmFornecedor),
+        xlabel='Mês',
+        ylabel='Valor Mensal (R$)',
     )
     ax.set_xticklabels(
         [
-            "Jan",
-            "Fev",
-            "Mar",
-            "Abr",
-            "Mai",
-            "Jun",
-            "Jul",
-            "Ago",
-            "Set",
-            "Out",
-            "Nov",
-            "Dez",
+            'Jan',
+            'Fev',
+            'Mar',
+            'Abr',
+            'Mai',
+            'Jun',
+            'Jul',
+            'Ago',
+            'Set',
+            'Out',
+            'Nov',
+            'Dez',
         ]
     )
     ax.set_xticks([r + barWidth for r in range(12)])  # ,
-    ax.legend(loc="upper right")
+    ax.legend(loc='upper right')
 
     fig.autofmt_xdate()
 
-    # salvar imagem temporarimente em um buffer
     buf = BytesIO()
-    fig.savefig(buf, format="png")
-    # embed the result in the html output.
-    data_image = base64.b64encode(buf.getbuffer()).decode("ascii")
+    fig.savefig(buf, format='png')
+    data_image = base64.b64encode(buf.getbuffer()).decode('ascii')
 
-    image_file = open("./static/assets/plot.png", "wb")
+    image_file = open('./static/assets/plot.png', 'wb')
     image_file.write(base64.b64decode((data_image)))
     image_file.close()
 
