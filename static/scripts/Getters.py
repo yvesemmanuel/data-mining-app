@@ -73,14 +73,14 @@ def get_lista_UOFR(municipio, ano):
     municipio_num = int(df[df["Municipio"] == municipio].numUJ)
 
     if ano == '2020':
-        path = "./static/datasets/outputs2020/" + str(municipio_num) + ".csv"
+        path = "./static/datasets/pagamentos2020/" + str(municipio_num) + ".csv"
         df = pd.read_csv(path, sep=',', usecols=['NUMERO_EMPENHO', 'NOME_FONTE_REC', 'NOME_UO'])
 
         df.rename(columns = {'NOME_FONTE_REC':"FONTE_REC", 'NOME_UO':"UNID_ORC"},  inplace = True)
 
         return (df["FONTE_REC"] + df["UNID_ORC"]).dropna().unique().tolist()
     else:
-        path = "./static/datasets/outputs2019/" + str(municipio_num) + ".csv"
+        path = "./static/datasets/pagamentos2019/" + str(municipio_num) + ".csv"
         df = pd.read_csv(path, sep=',', usecols=['NUMERO_EMPENHO', 'NOME_FONTE_REC', 'NOME_UO'])
 
         df.rename(columns = {'NOME_FONTE_REC':"FONTE_REC", 'NOME_UO':"UNID_ORC"},  inplace = True)

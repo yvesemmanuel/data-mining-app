@@ -11,6 +11,7 @@ from static.scripts.CreateMap import *
 from static.scripts.AnaliseScoreUJS import *
 from static.scripts.FilaP import *
 import locale
+import math
 
 locale.getlocale()
 ('pt_BR', 'UTF-8')
@@ -398,6 +399,40 @@ def matching_sources():
 def date_to_string(date):
     return date.strftime('%d/%m/%Y')
 
+dicionario = {}
+'''for i in range(0,184):
+
+    indice = i
+    base = 5296
+    numero = base + indice
+    path = "./static/datasets/pagamentos2020/" + str(numero) + ".csv"
+
+    base = 10
+    #ponto0 = math.log(0.3,base)
+    #if(ponto0 >= 0): 
+    #    ponto0 = 0
+    if(i == 119):
+        b = 0
+    else:
+        
+
+        arq1 = pd.read_csv(path, nrows=2, usecols=['CIDADE'])
+        cidade = arq1['CIDADE'].iloc[1]
+        #print(str(numero) + "aaa" + str(cidade))
+        diastolerados = 30
+        score = MudaMunicipio2(path, numero, diastolerados, '2020', 'Dispensa')
+        
+        _,__ = (cidade,score)
+        if(score == 0):
+            print(str(_)+"; 0.0")
+        else:
+            _i_ = math.log(score,base)
+            print(str(_)+"; "+str(_i_))
+
+    
+
+    dicionario[cidade] = numero'''
+
 
 @app.route('/analysis/payments_queue', methods=['GET', 'POST'])
 def payments_queue():
@@ -417,11 +452,28 @@ def payments_queue():
     selected_day = days_of_tolerance[0]
     sources = get_lista_UOFR(city_options[0], '2019')
 
+    #SALVAR MAPA
+    '''state_unemployment = './static/datasets/IndicesporMunicipio/ScoreMedio2020geral.csv'
+    dataset = pd.read_csv(state_unemployment, sep=';')
+    mapa = geraMapaFolium(dataset)
+    mapa.save("./templates/payment_queues_map_2020_Ge.html")
+    mapa = mapa._repr_html_()'''
+    #==============---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---==========#
+
+    pathmapa = '/payment_queues_2019_Ge'
+    mapa = pathmapa
+
     if user_request == 'POST':
-        print("Chegou aquiiii")
         selected_city = request.form.get('city', city_options[0])
         selected_year = request.form.get('year', year_options[0])
-        
+
+        '''if selected_year == '2020':
+            state_unemployment = 'C:\Filipe\Estagio\MVPs Estagio\AplicacaoFlaskFilaP\IndicesporMunicipio\pontuacaomedia2020geral.csv'
+        else:
+            state_unemployment = 'C:\Filipe\Estagio\MVPs Estagio\AplicacaoFlaskFilaP\IndicesporMunicipio\pontuacaomedia2019geral.csv'
+        dataset = pd.read_csv(state_unemployment, sep=';')
+        mapa = geraMapaFolium(dataset)._repr_html_()'''
+
         selected_action = request.form.get('action')
         
         if (selected_action == 'update2' or selected_action != 'apply') or selected_action != 'update':
@@ -430,6 +482,9 @@ def payments_queue():
 
         selected_payment = request.form.get('payment', payment_types[0])
         cities_num = int(df[df['Municipio'] == selected_city].numUJ)
+
+        pathmapa = '/payment_queues_' + str(selected_year) + '_' + str(selected_payment[0:2])
+        mapa = pathmapa
         
 
         if selected_action == 'apply' or selected_action == 'update':
@@ -441,6 +496,7 @@ def payments_queue():
             cities_num, selected_source, int(selected_day), selected_year, tipopagamento)
 
             return render_template('payments_queue.html',
+                                    mapa = mapa,
                                     acao = selected_action,
                                     # rendering
                                     page_title=page_title,
@@ -468,6 +524,7 @@ def payments_queue():
 
             if selected_action == 'mudaano':
                 return render_template('payments_queue.html',
+                            mapa = mapa,
                             acao = selected_action,
                            # rendering
                            page_title=page_title,
@@ -488,6 +545,7 @@ def payments_queue():
                 selected_day = request.form.get('day', days_of_tolerance[0])
 
                 return render_template('payments_queue.html',
+                                        mapa = mapa,
                                         acao = selected_action,
                                         # rendering
                                         page_title=page_title,
@@ -511,6 +569,7 @@ def payments_queue():
         
 
     return render_template('payments_queue.html',
+                            mapa = mapa,
                             acao = selected_action,
                            # rendering
                            page_title=page_title,
@@ -522,15 +581,35 @@ def payments_queue():
                            )
 
 
-@app.route('/payment_queues_map')
-def payment_queues_map():
+@app.route('/payment_queues_2019_Ge')
+def payment_queues_2019_Ge():
     queues_map()
-    return render_template('payment_queues_map.html')
+    return render_template('/payment_queues_map_2019_Ge.html')
 
-@app.route('/payment_queues_map2')
-def payment_queues_map2():
+@app.route('/payment_queues_2020_Ge')
+def payment_queues_2020_Ge():
     queues_map()
-    return render_template('payment_queues_map2.html')
+    return render_template('/payment_queues_map_2020_Ge.html')
+
+@app.route('/payment_queues_2019_Di')
+def payment_queues_2019_Di():
+    queues_map()
+    return render_template('/payment_queues_map_2019_Di.html')
+
+@app.route('/payment_queues_2020_Di')
+def payment_queues_2020_Di():
+    queues_map()
+    return render_template('/payment_queues_map_2020_Di.html')
+
+@app.route('/payment_queues_2019_Li')
+def payment_queues_2019_Li():
+    queues_map()
+    return render_template('/payment_queues_map_2019_Li.html')
+
+@app.route('/payment_queues_2020_Li')
+def payment_queues_2020_Li():
+    queues_map()
+    return render_template('/payment_queues_map_2020_Li.html')
 
 if __name__ == '__main__':
 

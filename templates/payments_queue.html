@@ -5,18 +5,9 @@
 <div class="container">
 
     <hr>
-
-    
-
-    {% if selected_year == '2019' %} 
-    <iframe class="map col-lg-12 col-md-12 col-sm-12 col-12 .col-xl-12" height="400"
-    src="/payment_queues_map" ></iframe>
-    {% else: %}
-    
-    <iframe class="map col-lg-12 col-md-12 col-sm-12 col-12 .col-xl-12" height="400"
-    src="/payment_queues_map2"></iframe>
-
-    {% endif %}
+        <div>
+            <iframe class="map col-lg-12 col-md-12 col-sm-12 col-12 .col-xl-12" height="400" src={{ mapa }}></iframe>
+        </div>
 
     <form method="post">
         <div class="row">
