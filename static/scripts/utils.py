@@ -10,3 +10,7 @@ def format_cnpj_cpf(x):
 
 def format_money(x):
     return 'R$ {}'.format(str(round(float(x), 2)))
+
+
+def date_to_string(date):
+    return date.strftime('%d/%m/%Y')

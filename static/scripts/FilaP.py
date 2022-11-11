@@ -1,13 +1,14 @@
 import pandas as pd
 from datetime import datetime
 import math
+from static.scripts.utils import format_cnpj_cpf
 
 
 def pegaQtdultrapass(item):
     return item[4]
 
 
-def MudaMunicipio2(index, numero, diastl, ano, tipop, ano, tipop):
+def MudaMunicipio2(index, numero, diastl, ano, tipop):
     muniselect = pd.read_csv(index, sep=',', usecols=['NUMERO_EMPENHO','DATA_EMP',
                                                       'VALOR_EMPENHO', 'DATA', 'CPF_CNPJ',
                                                       'DATA_LIQ', 'VALOR', 'FORNEC', 'ID_PAGAMENTO', 'NOME_FONTE_REC', 'NOME_UO'])
@@ -27,14 +28,15 @@ def MudaMunicipio2(index, numero, diastl, ano, tipop, ano, tipop):
 
 def MudaMunicio(numero, uofr, diastl, ano, tipop):
     if ano == '2020':
-        muniselect = pd.read_csv("./static/datasets/pagamentos2020/" + str(numero) + ".csv", sep=',', usecols=['NUMERO_EMPENHO','DATA_EMP',
+        muniselect = pd.read_csv("./static/datasets/outputs2020/" + str(numero) + ".csv", sep=',', usecols=['NUMERO_EMPENHO','DATA_EMP',
                                                                                                             'VALOR_EMPENHO', 'DATA', 'CPF_CNPJ',
                                                                                                             'DATA_LIQ', 'VALOR', 'FORNEC', 'ID_PAGAMENTO', 'NOME_FONTE_REC', 'NOME_UO'])
     else:
-        muniselect = pd.read_csv("./static/datasets/pagamentos2019/" + str(numero) + ".csv", sep=',', usecols=['NUMERO_EMPENHO','DATA_EMP',
+        muniselect = pd.read_csv("./static/datasets/outputs2019/" + str(numero) + ".csv", sep=',', usecols=['NUMERO_EMPENHO','DATA_EMP',
                                                                                                         'VALOR_EMPENHO', 'DATA', 'CPF_CNPJ',
                                                                                                         'DATA_LIQ', 'VALOR', 'FORNEC', 'ID_PAGAMENTO', 'NOME_FONTE_REC', 'NOME_UO'])
 
+    muniselect['CPF_CNPJ'] = muniselect['CPF_CNPJ'].apply(format_cnpj_cpf)
 
     camposuteismuni = muniselect
     camposuteismuni.rename(columns={'DATA': 'DATA_PAGAMENTO', "VALOR": "VALOR_PAGAMENTO",
@@ -51,15 +53,9 @@ def MudaMunicio(numero, uofr, diastl, ano, tipop):
     textoretorno.append(empsagres[0])
     texto = pd.DataFrame(textoretorno)
 
-    #texto.to_csv("./static/datasets/cache_fila/" + str(numero) + ".csv")
+    texto.to_csv("./static/datasets/cache_fila/" + str(numero) + ".csv")
 
-    new = []
-    for k in retorno1:
-        for i in k[5]:
-            dale = [i[0], i[1], i[2], i[3], k[1].strftime("%Y-%m-%d"), k[2].strftime("%Y-%m-%d"), k[4]]
-            new.append(dale)
-
-    return new, retorno2
+    return retorno1, retorno2, retorno3
 
 
 class UOFR:
@@ -187,20 +183,8 @@ class UOFR:
                             diferencadias = dtp1 - dataantes
                             diff = diferencadias.days
 
-<<<<<<< HEAD
-                        # Antes do pagamento em questão
-                        quantidadeantes = Dicionario[k]["quantidade"]
-
-                        #3 * 8
-                        peso = math.log(1+int(diff/31),2.1)
-                        # QUantidade de pagamentos*(1+N)
-                        pontosporpagamento += int(quantidadeantes) * \
-                            int(qtd)*1
-                            #int(qtd)*(1+int(diff/31))
-=======
                             # Antes do pagamento em questão
                             quantidadeantes = Dicionario[k]["quantidade"]
->>>>>>> 496038d48cf398d2e1ea703b063819ecf7b3ee79
 
                             #3 * 8
                             peso = math.log(1+int(diff/31),2.1)
@@ -216,8 +200,8 @@ class UOFR:
                                 quantidadetotaldesordem2 += int(quantidadeantes)
                             libera = 0
 
-                Dicionario[chavedicio]["Pagamentosqultrapass"] = varx
-                pontuacao += pontosporpagamento
+                    Dicionario[chavedicio]["Pagamentosqultrapass"] = varx
+                    pontuacao += pontosporpagamento
 
         #self.pagamentosordem1 = Dicionario
         if ehfiltrado:
@@ -267,6 +251,8 @@ def CriaDivisao(df, dias1, chave, ano, tipop):
     new_emp = UOFR(chave)
     new_emp.execute(df, dias1, chave, ano, tipop)
     uomaisfonte.append(new_emp)
+
+    print(uomaisfonte)
 
     return uomaisfonte
 
