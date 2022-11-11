@@ -5,7 +5,7 @@ dictSimba = {}
 
 
 def getSagresInfor(fileName):
-    arquivo = ("./datasets/" + fileName)
+    arquivo = ("./static/datasets/" + fileName)
     arq = open(arquivo, "r", encoding="utf8")
     linhasArquivoPagamento = arq.readlines()
     arq.close()
@@ -19,7 +19,7 @@ def getSagresInfor(fileName):
 
 
 def getSimbaInfor(fileName):
-    arquivo = ("./datasets/" + fileName)
+    arquivo = ("./static/datasets/" + fileName)
     arq = open(arquivo, "r", encoding="utf8")
     linhasArquivoPagamento = arq.readlines()
     arq.close()

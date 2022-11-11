@@ -1,0 +1,68 @@
+{% extends "layout.html" %} {% block body %}
+
+<div class="container">
+    <h1 class="title section-title">{{page_title}}</h1>
+
+    <hr>
+
+    <form method="post">
+        <div class="row">
+            <div class="col"></div>
+            <div class="col-sm-4 form-group">
+                <label class="input-title" for="year">Ano</label>
+                <select class="form-control" id="year" name="year" {% if user_request=="POST" %}
+                    onchange="document.getElementById('apply').click()" {% endif %}>
+                    {% for year in options_year %}
+                    <option value="{{ year }}" {% if selected_year==year %} selected {% endif %}>{{
+                        year }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col"></div>
+        </div>
+
+        {% if user_request == "GET" %}
+        <div class="text-center">
+            <button class="btn btn-default btn-md button-style" type="submit" name="action" value="apply"
+                id="apply">Aplicar</button>
+        </div>
+        {% elif user_request == "POST" %}
+        <div class="text-center hidden">
+            <button class="btn btn-default btn-md button-style" type="submit" name="action" value="apply"
+                id="apply">Aplicar</button>
+        </div>
+        {% endif %}
+    </form>
+
+    <br>
+
+    {% if user_request == "POST" %}
+    <div class="table-responsive">
+        <table class="table table-hover matching-table">
+
+            <thead>
+                <tr scope="col">
+                    {% for col in cols %}
+                    <th>{{col}}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for idx, row in enumerate(rows) %}
+                <tr value={{idx}} style="cursor: pointer;">
+                    {% for idx, attr in enumerate(row) %}
+                    <td>{{attr}}</td>
+                    {% endfor%}
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

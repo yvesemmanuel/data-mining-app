@@ -3,7 +3,7 @@ import static.scripts.EmpenhosServicosInicAntesEmp as empServ
 from static.scripts.UtilsUJsProcessadas import UJsProcessadas
 import os
 import pandas as pd
-from static.scripts.utils import format_cnpj_cpf
+import json
 
 
 def get_loans(selected_year, selected_city_num):
@@ -58,7 +58,7 @@ def get_dados_correspondencia(municipio):
     cols_general_description = df0.loc[0].index.values.tolist()
     
     
-    df1 = pd.read_csv('./static/datasets/tratado_correspondencia_fontes/' + municipio + '.txt', sep=';')
+    df1 = pd.read_csv('./static/datasets/correspondencia_fontes/tratado_' + municipio + '.csv')
 
     modals = df1.modal.dropna().tolist()
     df1.drop('modal', axis=1, inplace=True)
@@ -68,6 +68,20 @@ def get_dados_correspondencia(municipio):
 
     return cols, rows, cols_general_description, rows_general_description, modals
 
+
+def get_non_conformities(selected_year):
+    df = pd.read_csv(
+        './static/datasets/inconformidades/tratado_inconformidades_' + str(selected_year) + '.csv')
+
+    links = df['link'].tolist()
+    df = df.drop('link', axis=1)
+
+    cols = list(df.columns)
+
+    rows = [row for _, row in df.iterrows()]
+
+    return rows, cols, links
+    
 
 def get_lista_UOFR(municipio, ano):
     df = pd.read_csv("./static/datasets/ListaMunicipios.csv", sep=";")

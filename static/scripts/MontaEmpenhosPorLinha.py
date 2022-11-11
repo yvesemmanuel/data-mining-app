@@ -177,7 +177,7 @@ def montaEmpenhos():
 
     empenhos[0] = cabecalho + "\n"
 
-    arquivo = ("./datasets/resultado222.csv")
+    arquivo = ("./static/datasets/resultado222.csv")
     arq = open(arquivo, 'w', encoding="utf8")
     arq.writelines(empenhos)
     arq.close()

@@ -12,7 +12,6 @@ from static.scripts.AnaliseScoreUJS import *
 from static.scripts.FilaP import *
 from static.scripts.utils import *
 import locale
-import codecs
 from static.scripts.Maps import *
 
 
@@ -58,7 +57,7 @@ def regular_payments():
         regular_payments_plot(x, y)
 
         supplier_id = '{} - ({})'.format(format_cnpj_cpf(loan_selected.cnpj), loan_selected.nmFornecedor)
-        dates = ' -> '.join(map(date_to_string, loan_selected.datasPagamentosDateTime))
+        dates = ' -> '.join([date.strftime('%m/%d/%Y') for date in loan_selected.datasPagamentosDateTime])
         values = ' -> '.join(map(str, loan_selected.listValoresPagamentos))
         description = loan_selected.descricao
 
@@ -174,9 +173,8 @@ def simba():
     options_entity = ['{} - ({}) - {}'.format(o.nmFornecedor, format_cnpj_cpf(o.cpf_cnpj), round(o.somaSimba - o.somaSagres, 2)) for o in lObjs]
 
     selected_entity = int(request.form.get('entity', 0))
-
     entity = lObjs[selected_entity]
-    simba_plot(selected_entity)
+    simba_plot(entity)
 
     dictPagsSagres = entity.dictPagsMensaisSagres
     dictPagsSimba = entity.dictPagsMensaisSimba
@@ -291,6 +289,40 @@ def payments_delay():
         options_loan_type=options_loan_type,
         user_request=user_request
     )
+
+
+@app.route('/analysis/nonconformity', methods=['GET', 'POST'])
+def nonconformity():
+    page_title = 'Análise de Pagamentos Inconformes'
+    # df_cities = pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';')
+    # city_options = dict(zip(df_cities.Municipio, df_cities.numUJ))
+    options_year = [2019, 2020]
+    user_request = request.method
+
+    if user_request == 'POST':
+        selected_year = request.form.get('year')
+
+        rows, cols, links = get_non_conformities(selected_year)
+        return render_template(
+            'nonconformity.html',
+            # rendering values
+            page_title=page_title,
+            options_year=options_year,
+            user_request=user_request,
+
+            # output
+            selected_year=int(selected_year),
+            cols=cols,
+            rows=rows,
+            links=links
+        )
+
+    return render_template('nonconformity.html',
+                            # rendering values
+                            page_title=page_title,
+                            options_year=options_year,
+                            user_request=user_request)
+
 
 
 @app.route('/analysis/matching_sources', methods=['GET', 'POST'])
