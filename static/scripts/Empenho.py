@@ -8,11 +8,11 @@ class Empenho:
     listValoresPagamentos = []
     datasPagamentosDateTime = []
     scoreRegularidade = 1000
-    cpf = ""
-    cnpj = ""
-    nmFornecedor = ""
+    cpf = ''
+    cnpj = ''
+    nmFornecedor = ''
     vlEmpenho = 0
-    descricao = ""
+    descricao = ''
     vlMes1 = 0
     vlMedioMensal = 0
 
@@ -37,7 +37,7 @@ class Empenho:
     def getDtPagamentosDatetime(self):
         for i in self.listDtPagamentos:
             self.datasPagamentosDateTime.append(
-                datetime.strptime(i, "%Y-%m-%d").date())
+                datetime.strptime(i, '%Y-%m-%d').date())
         return self.datasPagamentosDateTime
 
     def getScoreRegularidadeSalario(self):
@@ -104,7 +104,7 @@ class Empenho:
 
             diffPercentual = (percent - 100) / 100
             # Printa diferença percentural, fornecedor e média para pagamentos por mês > 2
-            #print(str(diffPercentual)+" "+self.nmFornecedor + " "+ str(mediaPags))
+            #print(str(diffPercentual)+' '+self.nmFornecedor + ' '+ str(mediaPags))
 
             incrScore = 0
             if (stdev(self.listValoresPagamentos) == 0):

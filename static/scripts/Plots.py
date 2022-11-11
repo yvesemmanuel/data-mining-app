@@ -12,13 +12,11 @@ import plotly.express as px
 
 
 def regular_payments_plot(x, y):
-    # gerar a figura (sem utilizar o pyploy)
     fig = Figure(figsize=(7, 5))
     ax = fig.subplots()
 
-    ax.plot(x, y, color="black", linestyle="--", marker="o")
+    ax.plot(x, y, color='black', linestyle='--', marker='o')
 
-    # arrumar as datas no eixo X
     avg = mean(y)
     std = stdev(y)
     lower_bound = []
@@ -30,17 +28,14 @@ def regular_payments_plot(x, y):
     ax.fill_between(x, lower_bound, upper_bound, alpha=0.2)
     fig.autofmt_xdate()
 
-    # estilo
-    ax.set_xlabel("Data Pagamento")
-    ax.set_ylabel("Valor (R$)")
+    ax.set_xlabel('Data Pagamento')
+    ax.set_ylabel('Valor (R$)')
 
-    # salvar imagem temporarimente em um buffer
     buf = BytesIO()
-    fig.savefig(buf, format="png")
-    # embed the result in the html output.
-    data_image = base64.b64encode(buf.getbuffer()).decode("ascii")
+    fig.savefig(buf, format='png')
+    data_image = base64.b64encode(buf.getbuffer()).decode('ascii')
 
-    image_file = open("./static/assets/plot.png", "wb")
+    image_file = open('./static/assets/plot.png', 'wb')
     image_file.write(base64.b64decode((data_image)))
     image_file.close()
 

@@ -4,11 +4,12 @@ from static.scripts.Empenho import Empenho
 
 
 empenhos = []
+sortedEmpenhos = []
 
 
 def montaEmpenhos(linhaPag):
     format = '%Y-%m-%d'
-    listaItems = linhaPag.split(";")
+    listaItems = linhaPag.split(';')
     nrEmpenho = listaItems[4]
     cnpj = listaItems[2]
     cpf = listaItems[3]
@@ -19,10 +20,9 @@ def montaEmpenhos(linhaPag):
     datasEmpenhos = []
     valoresEmpenhos = []
     vlEmpenho = listaItems[1]
-    if ((dtEmpenho > datetime.strptime("2019-01-01", format).date()) and float(listaItems[6]) < 40000):
+    if ((dtEmpenho > datetime.strptime('2019-01-01', format).date()) and float(listaItems[6]) < 40000):
         for i in range(9, len(listaItems)):
-            # print(listaItems)
-            if (listaItems[i] != "\n"):
+            if (listaItems[i] != '\n'):
                 if (i % 2 != 0):
                     try:
                         res = bool(datetime.strptime(listaItems[i], format))
@@ -40,10 +40,6 @@ def montaEmpenhos(linhaPag):
                         cpf, cnpj, vlEmpenho, 1, descricao, nmFornecedor))
 
 
-sortedEmpenhos = []
-# Abre arquivo de empenhos
-
-
 def openFileEmpenhos(fileName):
 
     mtEmp.openFile(fileName)
@@ -53,19 +49,11 @@ def openFileEmpenhos(fileName):
     for line in linhasEmpenhos[1:]:
         montaEmpenhos(line)
 
-    # print(len(empenhos))
-    emp = sorted(empenhos, key=lambda Empenho: Empenho.scoreRegularidade)
+    emp = sorted(empenhos, key=lambda Empenho: Empenho.scoreRegularidade, reverse=True)
 
-    # print("--Empenhos: " + str(len(emp)))
-    emp2 = []
-    ct = 0
     for e in emp:
-        # score = getScoreRegularidade(e.getDtPagamentosDatetime())
         if (len(e.listDtPagamentos) >= 5):
-            #print(e.nrEmpenho, len(e.listDtPagamentos), ct, e.scoreRegularidade)
             sortedEmpenhos.append(e)
-        ct = ct + 1
-    # print("Sorted Empenhos: " + str(len(sortedEmpenhos)))
 
 
 def getSortedEmpenhos(fileName):
@@ -73,7 +61,6 @@ def getSortedEmpenhos(fileName):
     global empenhos
     sortedEmpenhos = []
     empenhos = []
-    # print(fileName)
     openFileEmpenhos(fileName)
 
     return sortedEmpenhos

@@ -7,21 +7,23 @@
 
     <form method="post">
         <div class="row justify-content-center">
-            <div class="col-4 form-group">
+
+            <div class="col-sm-4 form-group">
                 <label class="input-title" for="city">Unidade Jurisdicionada</label>
-                <select class="form-control" id="city" name="city">
-                    {% for city in city_options %}
+                <select class="form-control" id="city" name="city" {% if user_request=="POST" %} onchange="document.getElementById('apply').click()" {% endif %}>
+                    {% for city in options_city %}
                     <option value="{{ city }}" {% if selected_city==city %} selected {% endif %}>{{
                         city }}
                     </option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-4 form-group">
+
+            <div class="col-sm-4 form-group">
                 <label class="input-title" for="year">Ano</label>
-                <select class="form-control" id="year" name="year">
-                    {% for year in year_options %}
-                    <option value="{{ year }}" {% if year_selecionado==year %} selected {% endif %}>{{
+                <select class="form-control" id="year" name="year" {% if user_request=="POST" %} onchange="document.getElementById('apply').click()" {% endif %}>
+                    {% for year in options_year %}
+                    <option value="{{ year }}" {% if selected_year==year %} selected {% endif %}>{{
                         year }}
                     </option>
                     {% endfor %}
@@ -29,17 +31,23 @@
             </div>
         </div>
 
+        {% if user_request == "GET" %}
         <div class="text-center">
-            <button class="btn btn-default btn-md button-style" type="submit" name="action" value="apply">Aplicar</button>
+            <button class="btn btn-default btn-md button-style" type="submit" name="action" value="apply" id="apply">Aplicar</button>
         </div>
-
+        {% elif user_request == "POST" %}
+        <div class="text-center hidden">
+            <button class="btn btn-default btn-md button-style" type="submit" name="action" value="apply" id="apply">Aplicar</button>
+        </div>
+        {% endif %}
+        
         {% if user_request == "POST" %}
-        <div class="row">
+        <div class="row" style="margin-top: 15px;">
             <div class="col"></div>
             <div class="col-lg-8 form-group">
                 <label class="input-title" for="supplier">Fornecedor</label>
                 <select class="form-control" id="supplier" name="supplier" onchange="document.getElementById('update').click()">
-                    {% for idx, supplier in enumerate(supplier_options) %}
+                    {% for idx, supplier in enumerate(options_supplier) %}
                     <option value="{{ idx }}" {% if selected_supplier==idx %} selected {% endif %}>{{
                         supplier }}
                     </option>

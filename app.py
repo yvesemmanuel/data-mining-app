@@ -10,7 +10,9 @@ from static.scripts.Plots import *
 from static.scripts.CreateMap import *
 from static.scripts.AnaliseScoreUJS import *
 from static.scripts.FilaP import *
+from static.scripts.utils import *
 import locale
+
 
 locale.getlocale()
 ('pt_BR', 'UTF-8')
@@ -31,10 +33,10 @@ def home():
 @app.route('/analysis/regular_payments', methods=['GET', 'POST'])
 def regular_payments():
     page_title = 'Análise de Pagamentos Regulares'
-    city_options = list(
+    options_city = list(
         pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';').Municipio
     )
-    year_options = [2019, 2020]
+    options_year = [2019, 2020]
     user_request = request.method
 
     if user_request == 'POST':
@@ -44,26 +46,18 @@ def regular_payments():
         selected_action = request.form.get('action')
 
         loans = get_salario_emp(selected_city, selected_year)
-        supplier_options = []
-        for idx, empenho in enumerate(loans):
-            supplier_options.append(
-                str(idx) + ' - ' + str(empenho.nmFornecedor))
+        options_supplier = [str(empenho.nmFornecedor) for empenho in loans]
 
-        if selected_action == 'apply':
-            loan_idx = 0
-        elif selected_action == 'update':
-            loan_idx = int(selected_supplier)
-
+        loan_idx = 0 if selected_action == 'apply' else int(selected_supplier)
         loan_selected = loans[loan_idx]
+
         y = loan_selected.listValoresPagamentos
         x = loan_selected.datasPagamentosDateTime
         regular_payments_plot(x, y)
 
-        supplier_id = '{} ({})'.format(
-            loan_selected.cnpj, loan_selected.nmFornecedor)
-        dates = '; '.join(
-            map(date_to_string, loan_selected.datasPagamentosDateTime))
-        values = '; '.join(map(str, loan_selected.listValoresPagamentos))
+        supplier_id = '{} - ({})'.format(format_cnpj_cpf(loan_selected.cnpj), loan_selected.nmFornecedor)
+        dates = ' -> '.join(map(date_to_string, loan_selected.datasPagamentosDateTime))
+        values = ' -> '.join(map(str, loan_selected.listValoresPagamentos))
         description = loan_selected.descricao
 
         loan_info = {
@@ -75,24 +69,27 @@ def regular_payments():
 
         return render_template(
             'payments_regular.html',
+            # rendering values
             page_title=page_title,
-            city_options=city_options,
-            year_options=year_options,
+            options_city=options_city,
+            options_year=options_year,
             user_request=user_request,
 
-            supplier_options=supplier_options,
+            # outputs
+            options_supplier=options_supplier,
             loan_info=loan_info,
             selected_city=selected_city,
             selected_year=int(selected_year),
-            selected_supplier=int(selected_supplier),
+            selected_supplier=int(selected_supplier)
         )
 
     return render_template(
         'payments_regular.html',
+        # rendering values
         page_title=page_title,
-        city_options=city_options,
-        year_options=year_options,
-        user_request=user_request,
+        options_city=options_city,
+        options_year=options_year,
+        user_request=user_request
     )
 
 
@@ -393,10 +390,6 @@ def matching_sources():
                             page_title=page_title,
                             city_options=city_options,
                             user_request=user_request)
-
-
-def date_to_string(date):
-    return date.strftime('%d/%m/%Y')
 
 
 @app.route('/analysis/payments_queue', methods=['GET', 'POST'])
