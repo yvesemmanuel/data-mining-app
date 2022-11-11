@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    $(".correspondencia-table").dataTable({
+    $(".matching-table").dataTable({
         searching: false, info: false,
         bLengthChange: false,
         language: {

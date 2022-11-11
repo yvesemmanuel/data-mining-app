@@ -334,52 +334,39 @@ def payments_delay():
     )
 
 
-@app.route('/payments_delay_map')
-def payments_delay_map():
-    return render_template('payments_delay_map.html')
-
-
-@app.route('/payments_delay_plot_1')
-def payments_delay_plot_1():
-    return render_template('payments_delay_plot_1.html')
-
-
 @app.route('/analysis/matching_sources', methods=['GET', 'POST'])
 def matching_sources():
     page_title = 'Correspondência Entre Fontes de Dados'
     # df_cities = pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';')
     # city_options = dict(zip(df_cities.Municipio, df_cities.numUJ))
-    city_options = ['Cabo de Santo Agostinho']
+    options_city = ['Cabo de Santo Agostinho']
     user_request = request.method
 
     if user_request == 'POST':
         selected_city = request.form.get('city')
 
-        columns, rows, payment_rows, row_general_descriptions, columns_general_descriptions = get_dados_correspondencia(
-            selected_city)
+        cols, rows, cols_general_description, rows_general_description, modals = get_dados_correspondencia(selected_city)
 
         return render_template(
             'matching_sources.html',
-            # rendering
+            # rendering values
             page_title=page_title,
-            city_options=city_options,
+            options_city=options_city,
             user_request=user_request,
 
-            # input
-            selected_city=selected_city,
-
             # output
-            columns=columns,
+            selected_city=selected_city,
+            cols=cols,
             rows=rows,
-            payment_rows=json.dumps(payment_rows),
-            row_general_descriptions=row_general_descriptions,
-            columns_general_descriptions=columns_general_descriptions
+            rows_general_description=rows_general_description,
+            cols_general_description=cols_general_description,
+            modals=modals
         )
 
     return render_template('matching_sources.html',
-                            # rendering
+                            # rendering values
                             page_title=page_title,
-                            city_options=city_options,
+                            options_city=options_city,
                             user_request=user_request)
 
 

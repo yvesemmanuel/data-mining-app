@@ -10,8 +10,9 @@
             <div class="col"></div>
             <div class="col-sm-4 form-group">
                 <label class="input-title" for="city">Unidade Jurisdicionada</label>
-                <select class="form-control" id="city" name="city">
-                    {% for city in city_options %}
+                <select class="form-control" id="city" name="city" {% if user_request=="POST" %}
+                    onchange="document.getElementById('apply').click()" {% endif %}>
+                    {% for city in options_city %}
                     <option value="{{ city }}" {% if selected_city==city %} selected {% endif %}>{{
                         city }}
                     </option>
@@ -21,58 +22,69 @@
             <div class="col"></div>
         </div>
 
+        {% if user_request == "GET" %}
         <div class="text-center">
-            <button class="btn btn-default btn-md button-style" type="submit" name="action"
-                value="aplicar">Aplicar</button>
+            <button class="btn btn-default btn-md button-style" type="submit" name="action" value="apply"
+                id="apply">Aplicar</button>
         </div>
+        {% elif user_request == "POST" %}
+        <div class="text-center hidden">
+            <button class="btn btn-default btn-md button-style" type="submit" name="action" value="apply"
+                id="apply">Aplicar</button>
+        </div>
+        {% endif %}
     </form>
 
     <br>
 
     {% if user_request == "POST" %}
-    <table class="table" style="width: 50%; margin-left: auto; margin-right: auto;">
-        <thead>
-            <tr scope="col">
-                {% for col in columns_general_descriptions%}
-                <th>{{col}}</th>
+    <div class="table-responsive">
+        <table class="table" style="width: 50%; margin-left: auto; margin-right: auto;">
+            <thead>
+                <tr scope="col">
+                    {% for col in cols_general_description%}
+                    <th>{{col}}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr>
+                    {% for attr in rows_general_description%}
+                    <td>{{attr}}</td>
+                    {% endfor %}
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover matching-table">
+
+            <thead>
+                <tr scope="col">
+                    {% for col in cols %}
+                    <th>{{col}}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for idx, row in enumerate(rows) %}
+                <tr value={{idx}} style="cursor: pointer;">
+                    {% for attr in row %}
+                    <td>{{attr}}</td>
+                    {% endfor %}
+                </tr>
                 {% endfor %}
-            </tr>
-        </thead>
+            </tbody>
 
-        <tbody>
-            <tr>
-                {% for attr in row_general_descriptions%}
-                <td>{{attr}}</td>
-                {% endfor %}
-            </tr>
-        </tbody>
-    </table>
-
-    <table class="table table-hover correspondencia-table">
-
-        <thead>
-            <tr scope="col">
-                {% for col in columns %}
-                <th>{{col}}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-
-        <tbody>
-            {% for i in range(rows|length) %}
-            <tr value={{i}} style="cursor: pointer;">
-                {% for attr in rows[i] %}
-                <td>{{attr}}</td>
-                {% endfor %}
-            </tr>
-            {% endfor %}
-        </tbody>
-
-    </table>
+        </table>
+    </div>
 
     <br>
 
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-window"
+    <!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-window"
         style="display: none;" id="modal-button"></button>
 
     <div class="modal fade" id="modal-window">
@@ -93,41 +105,18 @@
     </div>
 
     <script>
-        $(document).ready(function () {
-            $(".table-hover").on("click", "tbody tr", function () {
-                // remove previous data from modal window
-                $(".modal-body").empty();
+        $(".table-hover").on("click", "tbody tr", function () {
+            $(".modal-body").empty();
 
-                // get data
-                var rowIdx = $(this)[0].attributes.value.value;
-                var data = {{ payment_rows | safe}}[rowIdx];
+            var rowIdx = $(this)[0].attributes.value;
 
-                // table header
-                var table = '<table class="table">';
-                table += '<thead><tr><td>VALOR</td><td>Data Pag.</td><td>Data Liq.</td><td>Descrição</td></tr></head>';
+            var data = {{ modal | safe}}[rowIdx];
 
-                // table body
-                table += '<tbody>'
-                for (i = 0; i < data.length; i++) {
-                    var descricao = data[i][1];
-                    var empenho = JSON.parse(data[i][0]);
-
-                    table += '<tr>' + '<td>' + empenho.VALOR + '</td>' + '<td>' + empenho.DATA_PAG + '</td>' + '<td>' + empenho.DATA_LIQ + '</td>' + '<td>' + descricao + '</td>' + '</tr>'
-                }
-                table += '</tbody></table>'
-
-                $(".modal-body").append(table);
-                // show modal
-                document.getElementById("modal-button").click();
-            });
-
-
-            $(document).on("click");
+            console.log(data);
         });
-    </script>
+    </script> -->
     {% endif %}
 
 </div>
-
 
 {% endblock %}

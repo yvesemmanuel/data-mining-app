@@ -2,6 +2,7 @@ import static.scripts.EmpenhosSalarios as empSal
 import static.scripts.EmpenhosServicosInicAntesEmp as empServ
 import os
 import pandas as pd
+from static.scripts.utils import format_cnpj_cpf
 
 
 def get_filenames(dir_path):
@@ -25,47 +26,32 @@ def get_servico_emp(municipio, ano):
 
 
 def get_salario_emp(municipio, ano):
-    df = pd.read_csv("./static/datasets/ListaMunicipios.csv", sep=";")
-    municipio_num = int(df[df["Municipio"] == municipio].numUJ)
+    df = pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';')
+    municipio_num = int(df[df['Municipio'] == municipio].numUJ)
 
-    filename = "./static/datasets/outputs" + ano + "/" + \
-        str(municipio_num) + ".csv"
+    filename = './static/datasets/outputs' + ano + '/' + \
+        str(municipio_num) + '.csv'
 
     return empSal.getSortedEmpenhos(filename)
 
 
 def get_dados_correspondencia(municipio):
-    df0 = pd.read_csv(
-        "./static/datasets/correspondencia_fontes/" + municipio + ".txt", sep=";")
-    df1 = pd.read_csv(
-        "./static/datasets/correspondencia_fontes/" + municipio + " - descrição.txt")
+    df0 = pd.read_csv('./static/datasets/correspondencia_fontes/' + municipio + ' - descrição.txt')
 
-    # tratando dados
-    df0.drop(["Unnamed: 5", "Cidade"], axis=1, inplace=True)
+    # rows and cols
+    rows_general_description = df0.loc[0].tolist()
+    cols_general_description = df0.loc[0].index.values.tolist()
+    
+    
+    df1 = pd.read_csv('./static/datasets/correspondencia_fontes/tratado_' + municipio + '.csv')
 
-    # linhas e colunas
-    linhas = []
-    colunas = list(df0.columns)
-    linhas_validas = df0[df0["CNPJ"].isna() == False]
+    modals = df1['modal'].dropna().tolist()
+    df1.drop('modal', axis=1, inplace=True)
 
-    for i, row in linhas_validas.iterrows():
-        linhas.append(row.tolist())
+    cols = list(df1.columns)
+    rows = [row.tolist() for _, row in df1.iterrows()]
 
-    idxs = linhas_validas.index.tolist()
-    linhas_descricoes = {}
-
-    i = 0
-    for j in idxs[1:]:
-        linhas_descricoes[i] = [df0.loc[i].tolist()[:2]
-                                for i in range(i + 1, j)]
-        i = j
-
-    descricoes = list(linhas_descricoes.values())
-
-    descricao_geral = df1.loc[0].tolist()
-    colunas_descricao_geral = df1.loc[0].index.values.tolist()
-
-    return colunas, linhas, descricoes, descricao_geral, colunas_descricao_geral
+    return cols, rows, cols_general_description, rows_general_description, modals
 
 
 def get_lista_UOFR(municipio, ano):
