@@ -65,7 +65,7 @@
     </form>
 
     {% if user_request == "POST" %}
-    <div class="row description">
+    <div class="row description" style="margin-top: 28px;">
         <div class="col"></div>
         <div class="col-lg-8">
             <div class="card">
@@ -73,7 +73,7 @@
                     <b>Descrição: </b>{{loan_info["Descrição"]}} 
                 </div>
                 <ul class="list-group list-group-flush">
-                    {% for col in ["CPF/CNPJ", "Datas", "Valores"] %}
+                    {% for col in loan_info.keys() %}
                     <li class="list-group-item"><b>{{col}}: </b>{{loan_info[col]}}</li>
                     {% endfor %}
                 </ul>

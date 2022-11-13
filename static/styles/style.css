@@ -39,12 +39,24 @@
 }
 
 hr {
-    height: 3px!important;
-    opacity: 100%!important;
+    height: 3px !important;
+    opacity: 100% !important;
     background-color: #E0E0E0;
     border-color: #E0E0E0;
 }
 
 h1 {
     font-size: 35px;
+}
+
+.button-style {
+    color: white;
+    background-color: #B82C64;
+    width: 120px;
+    margin-top: 10px;
+}
+
+.input-title {
+    margin-bottom: 5px;
+    font-size: 15px;
 }

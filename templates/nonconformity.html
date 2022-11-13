@@ -38,8 +38,8 @@
     <br>
 
     {% if user_request == "POST" %}
-    <div class="table-responsive">
-        <table class="table table-hover matching-table">
+    <div class="table-responsive" style="margin-bottom: 20px;">
+        <table class="table table-hover">
 
             <thead>
                 <tr scope="col">
@@ -53,7 +53,7 @@
                 {% for idx, row in enumerate(rows) %}
                 <tr value={{idx}} style="cursor: pointer;">
                     {% for idx, attr in enumerate(row) %}
-                    <td>{{attr}}</td>
+                    <td>{{attr | safe}}</td>
                     {% endfor%}
                 </tr>
                 {% endfor %}
@@ -64,5 +64,20 @@
     {% endif %}
 
 </div>
+
+<script>
+    $(document).ready(function () {
+        $('.table').DataTable({
+            searching: false,
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/pt-BR.json'
+            },
+            columnDefs: [
+                { orderable: true, className: 'reorder', targets: [1, 2, 3, 4, 6] },
+                { orderable: false, targets: '_all' }
+            ]
+        });
+    });
+</script>
 
 {% endblock %}

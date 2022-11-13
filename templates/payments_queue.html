@@ -1,154 +1,170 @@
 {% extends "layout.html" %} {% block body %}
 
-<h1 class="title section-title">{{page_title}}</h1>
-
 <div class="container">
+    <h1 class="title section-title">{{page_title}}</h1>
 
     <hr>
-        <div>
-            <iframe class="map col-lg-12 col-md-12 col-sm-12 col-12 .col-xl-12" height="400" src={{ mapa }}></iframe>
-        </div>
 
     <form method="post">
-        <div class="row">
-            
+        <div class="row justify-content-center">
+
+            <div class="col-sm-4 form-group">
+                <label class="input-title" for="year">Ano</label>
+                <select class="form-control" id="year" name="year" {% if user_request=="POST" %}
+                    onchange="document.getElementById('apply').click()" {% endif %}>
+                    {% for year in options_year %}
+                    <option value="{{ year }}" {% if selected_year==year %} selected {% endif %}>{{
+                        year }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-sm-4 form-group">
+                <label class="input-title" for="payment">Tipo de Pagamento</label>
+                <select class="form-control" id="payment" name="payment" {% if user_request=="POST" %}
+                    onchange="document.getElementById('apply').click()" {% endif %}>
+                    {% for payment in options_payment_type.keys() %}
+                    <option value="{{ payment }}" {% if selected_payment==payment %} selected {% endif %}>{{
+                        payment }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+        </div>
+
+        {% if user_request == "GET" %}
+        <div class="text-center">
+            <button class="btn btn-default btn-md button-style" type="submit" name="action" value="apply"
+                id="apply">Aplicar</button>
+        </div>
+        {% elif user_request == "POST" %}
+        <div class="text-center hidden">
+            <button class="btn btn-default btn-md button-style" type="submit" name="action" value="apply"
+                id="apply">Aplicar</button>
+        </div>
+        {% endif %}
+
+        {% if user_request == 'POST' %}
+        <iframe class="col-lg-12 col-md-12 col-sm-12 col-12 .col-xl-12" height="440" srcdoc="{{selected_map}}"
+            style="margin-top: 20px; margin-bottom: 15px;"></iframe>
+        {% endif %}
+
+        {% if user_request == 'POST' %}
+        <div class="row justify-content-center">
+
             <div class="col-sm-4 form-group">
                 <label class="input-title" for="city">Unidade Jurisdicionada</label>
-                <select class="form-control" id="city" name="city"
-                    onchange="document.getElementById('aplica').click()">
-                    {% for city in city_options %}
+                <select class="form-control" id="city" name="city" {% if user_request=="POST" and
+                    selected_action=="update" %} onchange="document.getElementById('update').click()" {% endif %}>
+                    {% for city in options_city %}
                     <option value="{{ city }}" {% if selected_city==city %} selected {% endif %}>{{ city }}
                     </option>
                     {% endfor %}
                 </select>
             </div>
+
             <div class="col-sm-4 form-group">
-                <label class="input-title" for="year">Ano</label>
-                <select class="form-control" id="year" name="year"
-                    onchange="document.getElementById('mudaano').click()">
-                    {% for year in year_options %}
-                    <option value="{{ year }}" {% if selected_year==year %} selected {% endif %}>{{ year }}
+                <label class="input-title" for="tolerance">Dias de Tolerância</label>
+                <select class="form-control" id="tolerance" name="tolerance" {% if user_request=="POST" and
+                    selected_action=="update" %} onchange="document.getElementById('update').click()" {% endif %}>
+                    {% for tolerance in options_tolerance %}
+                    <option value="{{ tolerance }}" {% if selected_tolerance==tolerance %} selected {% endif %}>{{
+                        tolerance }}
                     </option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-sm-4 form-group">
-                <label class="input-title" for="payment">Tipo de Pagamento</label>
-                <select class="form-control" id="payment" name="payment"
-                    onchange="document.getElementById('mudaano').click()">
-                    {% for payment in payment_types %}
-                    <option value="{{ payment }}" {% if selected_payment==payment %} selected {% endif %}>{{ payment }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-            
-            
+
         </div>
 
-        <div class="col-md-12 text-center">
-            <button class="btn btn-default btn-md button-style" name="action" value="apply" id="posta"
-                type="submit">Aplicar</button>
-        </div>
-
-        <div class="text-center hidden">
-            <button class="btn btn-default btn-md button-style" type="submit" name="action" value="mudaano" id="mudaano">Atualizar</button>
-        </div>
-
-        <br>
-
-        {% if user_request == "POST" and acao != 'mudaano' %}
-
-        <div class="row">
-            <div class="col-2 form-group">
-                <label class="input-title" for="day">Dias de Tolerância</label>
-                <select class="form-control" id="day" name="day"
-                    onchange="document.getElementById('update').click()">
-                    {% for day in days_of_tolerance %}
-                    <option value="{{ day }}" {% if selected_day==day %} selected {% endif %}>{{
-                        day }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-10 form-group">
-                <label class="input-title" for="source">Unidade Orçamentária + Fonte de Recursos</label>
+        {% if selected_action == "update" %}
+        <div class="row" style="margin-top: 15px;">
+            <div class="col"></div>
+            <div class="col-lg-8 form-group">
+                <label class="input-title" for="source">Fonte</label>
                 <select class="form-control" id="source" name="source"
                     onchange="document.getElementById('update').click()">
-                    {% for source in sources %}
-                    <option value="{{ source }}" {% if selected_source==source %} selected {% endif %}>{{
+                    {% for idx, source in enumerate(options_source) %}
+                    <option value="{{ idx }}" {% if selected_source==idx %} selected {% endif %}>{{
                         source }}
                     </option>
                     {% endfor %}
                 </select>
             </div>
+            <div class="col"></div>
         </div>
+        {% endif %}
+
         
-</div>
+        {% if selected_action == "update" %}
+        <br>
+        
+        <div class="table-responsive" style="margin-bottom: 20px;">
+            <table class="table table-hover">
+    
+                <thead>
+                    <tr scope="col">
+                        {% for col in cols %}
+                        <th>{{col}}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
 
-<div class="text-center hidden">
-    <button class="btn btn-default btn-md button-style" type="submit" name="action" value="update2" id="aplica">Atualizar</button>
-</div>
+                <tbody>
+                    {% for idx, k in enumerate(rows)%}
+                    {% for i in k[5] %}
+            
+                    <tr value={{idx}} style="cursor: pointer;">
+                        <td> {{ i[0] }} </td>
+                        <td> {{ i[1] }} </td>
+                        <td> {{ i[2] }} </td>
+                        <td> {{ i[3] }} </td>
+                        <td> {{ k[1].strftime("%Y-%m-%d") }} </td>
+                        <td> {{ k[2].strftime("%Y-%m-%d") }} </td>
+                        <td> {% if k[4] != 0 %} {{ k[4] }} {% else: %} 0 {% endif %}</td>
+                    </tr>
+            
+                    {% endfor %}
+                    {% endfor %}
+                </tbody>
+    
+            </table>
+        </div>
+        {% endif %}
 
-<div class="text-center hidden">
-    <button class="btn btn-default btn-md button-style" type="submit" name="action" value="update"
-        id="update">Atualizar</button>
-</div>
+        {% if selected_action != "update" %}
+        <div class="text-center">
+            <button class="btn btn-default btn-md button-style" type="submit" name="action" value="update"
+                id="update">Atualizar</button>
+        </div>
+        {% else %}
+        <div class="text-center hidden">
+            <button class="btn btn-default btn-md button-style" type="submit" name="action" value="update"
+                id="update">Atualizar</button>
+        </div>
+        {% endif %}
+        <br>
 
-<br>
-{% endif %}
-
-</form>
-
-
-{% if show_table %}
-<div class="row">
-    <div class="col"></div>
-    <div class="col">
-        <div class="card" style="width: 18rem;">
-            <div class="card-body">
-              <!-- <h5 class="card-title">Resultado</h5> -->
-              <!-- <h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6> -->
-              <h7>A pontuação da consulta foi <strong>{{ score }}</strong>.</h7>
-            </div>
-          </div>
-    </div>
-    <div class="col"></div>
-</div>
-<hr>
-<!-- <table class="table table-hover"> -->
-<table class="table fila-table table-striped table-bordered table-sm" cellspacing="0" width="100%">
-
-    <thead>
-        <tr scope="col">
-            {% for col in columns %}
-            <th>{{ col }}</th>
-            {% endfor %}
-        </tr>
-    </thead>
-
-    <tbody>
-        {% for k in rows %}
-        {% for i in k[5] %}
-
-        <tr>
-            <td> {{ i[0] }} </td>
-            <td> {{ i[1] }} </td>
-            <td> {{ i[2] }} </td>
-            <td> {{ i[3] }} </td>
-            <td> {{ k[1].strftime("%Y-%m-%d") }} </td>
-            <td> {{ k[2].strftime("%Y-%m-%d") }} </td>
-            <td> {% if k[4] != 0 %} {{ k[4] }} {% else: %} 0 {% endif %}</td>
-        </tr>
-
-        {% endfor %}
-        {% endfor %}
-    </tbody>
-
-</table>
-<br>
-{% endif %}
+        {% endif %}
+    </form>
 
 </div>
+
+<script>
+    $(document).ready(function () {
+        $('.table').DataTable({
+            searching: false,
+            language: {
+                url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/pt-BR.json'
+            },
+            columnDefs: [
+                { orderable: true, className: 'reorder', targets: [2, 3, 6] },
+                { orderable: false, targets: '_all' }
+            ]
+        });
+    });
+</script>
 
 {% endblock %}

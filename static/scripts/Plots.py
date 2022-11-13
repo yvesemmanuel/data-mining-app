@@ -1,10 +1,6 @@
 from matplotlib.figure import Figure
 import base64
 import numpy as np
-import matplotlib.pyplot as plt
-import folium
-import geopandas as gpd
-import pandas as pd
 from io import BytesIO
 from statistics import mean, stdev
 from static.scripts.MontaSagresSimba import *
@@ -12,7 +8,7 @@ import plotly.express as px
 
 
 def regular_payments_plot(x, y):
-    fig = Figure(figsize=(5,3))
+    fig = Figure(figsize=(7,5))
     ax = fig.subplots()
 
     ax.plot(x, y, color='black', linestyle='--', marker='o')
@@ -40,35 +36,35 @@ def regular_payments_plot(x, y):
     image_file.close()
 
 
-# def service_before_payment_plot(x, y):
-#     fig = Figure(figsize=(5,3))
-#     ax = fig.subplots()
+def service_before_payment_plot(x, y):
+    fig = Figure(figsize=(5,3))
+    ax = fig.subplots()
 
-#     ax.plot(x, y, color='black', linestyle='--', marker='o')
-#     fig.set_size_inches(7.41, 5)
+    ax.plot(x, y, color='black', linestyle='--', marker='o')
+    fig.set_size_inches(7.41, 5)
 
-#     avg = mean(y)
-#     std = stdev(y)
+    avg = mean(y)
+    std = stdev(y)
 
-#     lb = []
-#     ub = []
-#     for _ in range(len(y)):
-#         lb.append(avg - std)
-#         ub.append(avg + std)
+    lb = []
+    ub = []
+    for _ in range(len(y)):
+        lb.append(avg - std)
+        ub.append(avg + std)
 
-#     ax.fill_between(x, lb, ub, alpha=0.2)
-#     fig.autofmt_xdate()
+    ax.fill_between(x, lb, ub, alpha=0.2)
+    fig.autofmt_xdate()
 
-#     ax.set_xlabel('Data Pagamento')
-#     ax.set_ylabel('Valor (R$)')
+    ax.set_xlabel('Data Pagamento')
+    ax.set_ylabel('Valor (R$)')
 
-#     buf = BytesIO()
-#     fig.savefig(buf, format="png")
-#     data_image = base64.b64encode(buf.getbuffer()).decode("ascii")
+    buf = BytesIO()
+    fig.savefig(buf, format='png')
+    data_image = base64.b64encode(buf.getbuffer()).decode('ascii')
 
-#     image_file = open("./static/assets/plot.png", "wb")
-#     image_file.write(base64.b64decode((data_image)))
-#     image_file.close()
+    image_file = open('./static/assets/plot.png', 'wb')
+    image_file.write(base64.b64decode((data_image)))
+    image_file.close()
 
 
 def simba_plot(entity):
@@ -159,7 +155,7 @@ def payments_delay_plot_0(x):
     image_file.close()
 
 
-def payments_delay_plot_1(df):
+def payments_delay_scatter_plot(df):
     fig = px.scatter(df, x='ATRASO', y='VALOR', color='FORNECEDOR')
 
     fig.write_html('./templates/payments_delay_plot_1.html')

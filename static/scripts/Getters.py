@@ -70,15 +70,20 @@ def get_dados_correspondencia(municipio):
 
 
 def get_non_conformities(selected_year):
-    df = pd.read_csv(
-        './static/datasets/inconformidades/tratado_inconformidades_' + str(selected_year) + '.csv')
+    df = pd.read_csv('./static/datasets/inconformidades/tratado_inconformidades_' + str(selected_year) + '.csv')
 
     links = df['link'].tolist()
     df = df.drop('link', axis=1)
 
     cols = list(df.columns)
 
-    rows = [row for _, row in df.iterrows()]
+    # rows = [row for _, row in df.iterrows()]
+
+    rows = []
+    for idx, row in df.iterrows():
+        new_id = '<a href="{}" target="_blank">{}</a>'.format(links[idx], row['ID'])
+        row['ID'] = new_id
+        rows.append(row)
 
     return rows, cols, links
     
@@ -87,17 +92,8 @@ def get_lista_UOFR(municipio, ano):
     df = pd.read_csv("./static/datasets/ListaMunicipios.csv", sep=";")
     municipio_num = int(df[df["Municipio"] == municipio].numUJ)
 
-    if ano == '2020':
-        path = "./static/datasets/outputs2020/" + str(municipio_num) + ".csv"
-        df = pd.read_csv(path, sep=',', usecols=['NUMERO_EMPENHO', 'NOME_FONTE_REC', 'NOME_UO'])
+    df = pd.read_csv('./static/datasets/outputs{}/{}.csv'.format(ano, municipio_num), sep=',', usecols=['NUMERO_EMPENHO', 'NOME_FONTE_REC', 'NOME_UO'])
 
-        df.rename(columns = {'NOME_FONTE_REC':"FONTE_REC", 'NOME_UO':"UNID_ORC"},  inplace = True)
+    df.rename(columns = {'NOME_FONTE_REC':"FONTE_REC", 'NOME_UO':"UNID_ORC"},  inplace = True)
 
-        return (df["FONTE_REC"] + df["UNID_ORC"]).dropna().unique().tolist()
-    else:
-        path = "./static/datasets/outputs2019/" + str(municipio_num) + ".csv"
-        df = pd.read_csv(path, sep=',', usecols=['NUMERO_EMPENHO', 'NOME_FONTE_REC', 'NOME_UO'])
-
-        df.rename(columns = {'NOME_FONTE_REC':"FONTE_REC", 'NOME_UO':"UNID_ORC"},  inplace = True)
-
-        return (df["FONTE_REC"] + df["UNID_ORC"]).dropna().unique().tolist()
+    return (df["FONTE_REC"] + df["UNID_ORC"]).dropna().unique().tolist()

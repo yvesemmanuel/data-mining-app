@@ -27,35 +27,30 @@ def MudaMunicipio2(index, numero, diastl, ano, tipop):
 
 
 def MudaMunicio(numero, uofr, diastl, ano, tipop):
-    if ano == '2020':
-        muniselect = pd.read_csv("./static/datasets/outputs2020/" + str(numero) + ".csv", sep=',', usecols=['NUMERO_EMPENHO','DATA_EMP',
-                                                                                                            'VALOR_EMPENHO', 'DATA', 'CPF_CNPJ',
-                                                                                                            'DATA_LIQ', 'VALOR', 'FORNEC', 'ID_PAGAMENTO', 'NOME_FONTE_REC', 'NOME_UO'])
-    else:
-        muniselect = pd.read_csv("./static/datasets/outputs2019/" + str(numero) + ".csv", sep=',', usecols=['NUMERO_EMPENHO','DATA_EMP',
-                                                                                                        'VALOR_EMPENHO', 'DATA', 'CPF_CNPJ',
-                                                                                                        'DATA_LIQ', 'VALOR', 'FORNEC', 'ID_PAGAMENTO', 'NOME_FONTE_REC', 'NOME_UO'])
+    muniselect = pd.read_csv('./static/datasets/outputs{}/{}.csv'.format(ano, numero), sep=',', usecols=['NUMERO_EMPENHO','DATA_EMP',
+                                                                                                    'VALOR_EMPENHO', 'DATA', 'CPF_CNPJ',
+                                                                                                    'DATA_LIQ', 'VALOR', 'FORNEC', 'ID_PAGAMENTO', 'NOME_FONTE_REC', 'NOME_UO'])
+
 
     muniselect['CPF_CNPJ'] = muniselect['CPF_CNPJ'].apply(format_cnpj_cpf)
 
     camposuteismuni = muniselect
-    camposuteismuni.rename(columns={'DATA': 'DATA_PAGAMENTO', "VALOR": "VALOR_PAGAMENTO",
-                           'NOME_FONTE_REC': "FONTE_REC", 'NOME_UO': "UNID_ORC"},  inplace=True)
+    camposuteismuni.rename(columns={'DATA': 'DATA_PAGAMENTO', 'VALOR': 'VALOR_PAGAMENTO',
+                           'NOME_FONTE_REC': 'FONTE_REC', 'NOME_UO': 'UNID_ORC'},  inplace=True)
 
     empsagres = CriaDivisao(camposuteismuni, diastl, uofr, ano, tipop)
 
+    colunas = ['Nº Empenho', 'CPF/CNPJ', 'Valor Emp', 'Valor Liq.', 'Data Pag', 'Data Liq.', 'Qtd ultrapassaram']
 
     retorno1 = empsagres[0].retresultado1()
-    retorno2 = empsagres[0].retornaIndice()
-    retorno3 = empsagres[0].retresultado2()
 
     textoretorno = []
     textoretorno.append(empsagres[0])
     texto = pd.DataFrame(textoretorno)
 
-    texto.to_csv("./static/datasets/cache_fila/" + str(numero) + ".csv")
+    texto.to_csv('./static/datasets/cache_fila/{}.csv'.format(numero))
 
-    return retorno1, retorno2, retorno3
+    return colunas, retorno1
 
 
 class UOFR:

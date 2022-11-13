@@ -1,18 +1,13 @@
-from turtle import update
 from flask import Flask, render_template, request
 import pandas as pd
-import json
-from os import listdir
 from static.scripts.UtilsUJsProcessadas import *
 from static.scripts.MontaSagresSimba import *
 from static.scripts.Getters import *
 from static.scripts.Plots import *
-from static.scripts.CreateMap import *
 from static.scripts.AnaliseScoreUJS import *
 from static.scripts.FilaP import *
 from static.scripts.utils import *
 import locale
-import math
 from static.scripts.Maps import *
 
 
@@ -59,7 +54,7 @@ def regular_payments():
 
         supplier_id = '{} - ({})'.format(format_cnpj_cpf(loan_selected.cnpj),
                                          loan_selected.nmFornecedor)
-        dates = ' -> '.join([date.strftime('%m/%d/%Y')
+        dates = ' -> '.join([date_to_string(date)
                             for date in loan_selected.datasPagamentosDateTime])
         values = ' -> '.join(map(str, loan_selected.listValoresPagamentos))
         description = loan_selected.descricao
@@ -206,18 +201,17 @@ def simba():
 
 @app.route('/analysis/payments_delay', methods=['GET', 'POST'])
 def payments_delay():
-    df_city = pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';')
     page_title = 'Análise de Atraso de Pagamentos'
+    df_city = pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';')
     options_city = list(df_city.Municipio)
     options_entity_types = {'Pessoa Física': 'cpf',
                             'Pessoa Jurídica': 'cnpj', 'Ambos': 'ambos'}
     options_entity = list(options_entity_types.keys())
     options_year = [2019, 2020]
     options_limit = [7, 30, 60]
-    user_request = request.method
     options_loan_types = {'Licitação': 'lic',
                           'Dispensado': 'disp', 'Ambos': 'ambos'}
-    options_loan_type = list(options_loan_types.keys())
+    user_request = request.method
 
     if user_request == 'POST':
         selected_entity = request.form.get('entity', 0)
@@ -227,12 +221,11 @@ def payments_delay():
         selected_action = request.form.get('action')
         selected_city = request.form.get('city')
 
-        selected_map = generate_map(
+        selected_map = generate_delay_map(
             selected_year, options_loan_types[selected_loan_type], options_entity_types[selected_entity], selected_limit)
 
         if selected_action == 'update':
-            selected_city_num = int(
-                df_city[df_city['Municipio'] == selected_city].numUJ)
+            selected_city_num = int(df_city[df_city['Municipio'] == selected_city].numUJ)
             options_loan = get_loans(selected_year, selected_city_num)
 
             selected_loan = request.form.get('loan', options_loan[0])
@@ -241,7 +234,7 @@ def payments_delay():
             df = UJsProcessadas.get_pagamentos_atrasados(selected_year, options_loan_types[selected_loan_type], options_entity_types[selected_entity], float(
                 selected_limit), selected_city_num, selected_uo, selected_source)
 
-            plot_data = payments_delay_plot_1(df)
+            plot_data = payments_delay_scatter_plot(df)
 
             return render_template(
                 'payments_delay.html',
@@ -251,7 +244,7 @@ def payments_delay():
                 options_entity=options_entity,
                 options_year=options_year,
                 options_limit=options_limit,
-                options_loan_type=options_loan_type,
+                options_loan_types=options_loan_types,
                 options_loan=options_loan,
                 user_request=user_request,
                 plot_data=plot_data,
@@ -275,7 +268,7 @@ def payments_delay():
             options_entity=options_entity,
             options_year=options_year,
             options_limit=options_limit,
-            options_loan_type=options_loan_type,
+            options_loan_types=options_loan_types,
             user_request=user_request,
 
             # outputs
@@ -296,7 +289,7 @@ def payments_delay():
         options_entity=options_entity,
         options_year=options_year,
         options_limit=options_limit,
-        options_loan_type=options_loan_type,
+        options_loan_types=options_loan_types,
         user_request=user_request
     )
 
@@ -374,173 +367,79 @@ def matching_sources():
 @app.route('/analysis/payments_queue', methods=['GET', 'POST'])
 def payments_queue():
     page_title = 'Filas de Pagamentos'
-    df = pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';')
-    city_options = df['Municipio'].tolist()
-
-    year_options = ['2019', '2020']
-    payment_types = ['Geral', 'Dispensa', 'Licitação']
-
-    days_of_tolerance = [7, 30, 60]
-    columns = ['Numero Empenho', 'CPF/CNPJ', 'VL Emp',
-               'VL Liq', 'Data Pag', 'Data Liq.', 'Qtd ultrapassaram']
+    df_city = pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';')
+    options_city = list(df_city.Municipio)
+    options_year = [2019, 2020]
+    options_tolerance = [7, 30, 60]
+    options_payment_type = {'Geral': 'Ge', 'Dispensa': 'Di', 'Licitação': 'Li'}
     user_request = request.method
-    selected_action = request.form.get('action')
-    selected_year = request.form.get('year', year_options[0])
-    selected_day = days_of_tolerance[0]
-    sources = get_lista_UOFR(city_options[0], '2019')
-
-    '''state_unemployment = './static/datasets/IndicesporMunicipio/ScoreMedio2020Li.csv'
-    dataset = pd.read_csv(state_unemployment, sep=';')
-    mapa = geraMapaFolium(dataset)
-    mapa.save("./templates./maps/queues_maps/payment_queues_map_2020_Li.html")
-    mapa = mapa._repr_html_()'''
-
-    pathmapa = '/payment_queues_2019_Ge'
-    mapa = pathmapa
 
     if user_request == 'POST':
-        selected_city = request.form.get('city', city_options[0])
-        selected_year = request.form.get('year', year_options[0])
-
         selected_action = request.form.get('action')
+        selected_payment = request.form.get('payment')
+        selected_year = request.form.get('year')
 
-        if (selected_action == 'update2' or selected_action != 'apply') or selected_action != 'update':
-            sources = get_lista_UOFR(selected_city, selected_year)
-        selected_source = request.form.get('source', sources[0])
+        selected_map = generate_queue_map( selected_year, options_payment_type[selected_payment])
 
-        selected_payment = request.form.get('payment', payment_types[0])
-        cities_num = int(df[df['Municipio'] == selected_city].numUJ)
+        if selected_action == 'update':
+            selected_city = request.form.get('city')
+            selected_city_num = int(df_city[df_city['Municipio'] == selected_city].numUJ)
+            selected_tolerance = request.form.get('tolerance')
 
-        pathmapa = '/payment_queues_' + \
-            str(selected_year) + '_' + str(selected_payment[0:2])
-        mapa = pathmapa
+            options_source = get_lista_UOFR(selected_city, selected_year)
+            selected_source = request.form.get('source', options_source[0])
 
-        if selected_action == 'apply' or selected_action == 'update':
-            selected_day = request.form.get('day', int(7))
-
-            tipopagamento = request.form.get('payment', payment_types[0])
-
-            rows, varia, _ = MudaMunicio(cities_num, selected_source, int(selected_day), selected_year, tipopagamento)
-
-            return render_template('payments_queue.html',
-                                   mapa=mapa,
-                                   acao=selected_action,
-                                   # rendering
-                                   page_title=page_title,
-                                   city_options=city_options,
-                                   year_options=year_options,
-                                   days_of_tolerance=days_of_tolerance,
-                                   user_request=user_request,
-                                   payment_types=payment_types,
-
-                                   # input
-                                   selected_city=selected_city,
-                                   selected_year=selected_year,
-                                   selected_day=int(selected_day),
-                                   selected_source=selected_source,
-                                   selected_payment=selected_payment,
-
-                                   # output
-                                   sources=sources,
-                                   score=varia,
-                                   rows=rows,
-                                   show_table=True,
-                                   columns=columns)
-        else:
-
-            if selected_action == 'mudaano':
-                return render_template('payments_queue.html',
-                                       mapa=mapa,
-                                       acao=selected_action,
-                                       # rendering
-                                       page_title=page_title,
-                                       city_options=city_options,
-                                       year_options=year_options,
-                                       days_of_tolerance=days_of_tolerance,
-                                       user_request=user_request,
-                                       payment_types=payment_types,
+            cols, rows = MudaMunicio(selected_city_num, selected_source, int(selected_tolerance), selected_year, options_payment_type[selected_payment])
 
 
-                                       selected_city=selected_city,
-                                       selected_year=selected_year,
-                                       selected_day=int(selected_day),
-                                       selected_source=selected_source,
-                                       selected_payment=selected_payment)
+            return render_template(
+                'payments_queue.html',
+                # rendering values
+                page_title=page_title,
+                options_city=options_city,
+                options_payment_type=options_payment_type,
+                options_year=options_year,
+                options_tolerance=options_tolerance,
+                options_source=options_source,
+                user_request=user_request,
 
-            else:
-                selected_day = request.form.get('day', days_of_tolerance[0])
+                # outputs
+                selected_map=selected_map,
+                selected_city=selected_city,
+                selected_tolerance=int(selected_tolerance),
+                selected_action=selected_action,
+                selected_year=int(selected_year),
+                rows=rows,
+                cols=cols
+            )
 
-                return render_template('payments_queue.html',
-                                       mapa=mapa,
-                                       acao=selected_action,
-                                       # rendering
-                                       page_title=page_title,
-                                       city_options=city_options,
-                                       year_options=year_options,
-                                       days_of_tolerance=days_of_tolerance,
-                                       user_request=user_request,
-                                       payment_types=payment_types,
+        return render_template(
+            'payments_queue.html',
+            # rendering values
+            page_title=page_title,
+            options_city=options_city,
+            options_payment_type=options_payment_type,
+            options_year=options_year,
+            options_tolerance=options_tolerance,
+            user_request=user_request,
 
-                                       # input
-                                       selected_city=selected_city,
-                                       selected_year=selected_year,
-                                       selected_day=int(selected_day),
-                                       selected_source=selected_source,
-                                       selected_payment=selected_payment,
+            # outputs
+            selected_map=selected_map,
+            selected_action=selected_action,
+            selected_year=int(selected_year)
+        )
 
-
-                                       # output
-                                       sources=sources)
-
-    return render_template('payments_queue.html',
-                           mapa=mapa,
-                           acao=selected_action,
-                           # rendering
-                           page_title=page_title,
-                           city_options=city_options,
-                           year_options=year_options,
-                           days_of_tolerance=days_of_tolerance,
-                           user_request=user_request,
-                           payment_types=payment_types
-                           )
-
-
-@app.route('/payment_queues_2019_Ge')
-def payment_queues_2019_Ge():
-    queues_map()
-    return render_template('./maps/queues_maps/payment_queues_map_2019_Ge.html')
-
-
-@app.route('/payment_queues_2020_Ge')
-def payment_queues_2020_Ge():
-    queues_map()
-    return render_template('./maps/queues_maps/payment_queues_map_2020_Ge.html')
-
-
-@app.route('/payment_queues_2019_Di')
-def payment_queues_2019_Di():
-    queues_map()
-    return render_template('./maps/queues_maps/payment_queues_map_2019_Di.html')
-
-
-@app.route('/payment_queues_2020_Di')
-def payment_queues_2020_Di():
-    queues_map()
-    return render_template('./maps/queues_maps/payment_queues_map_2020_Di.html')
-
-
-@app.route('/payment_queues_2019_Li')
-def payment_queues_2019_Li():
-    queues_map()
-    return render_template('./maps/queues_maps/payment_queues_map_2019_Li.html')
-
-
-@app.route('/payment_queues_2020_Li')
-def payment_queues_2020_Li():
-    queues_map()
-    return render_template('./maps/queues_maps/payment_queues_map_2020_Li.html')
+    return render_template(
+        'payments_queue.html',
+        # rendering values
+        page_title=page_title,
+        options_city=options_city,
+        options_payment_type=options_payment_type,
+        options_year=options_year,
+        user_request=user_request
+    )
 
 
 if __name__ == '__main__':
 
-    app.run()
+    app.run(debug=True)
