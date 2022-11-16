@@ -3,6 +3,8 @@
 
 from datetime import datetime
 import pandas as pd
+import os
+
 
 linhasArquivoPagamento = []
 
@@ -12,6 +14,8 @@ def openFile(fileName):
 
     arquivo = (fileName)
     dados = []
+    print("Path at terminal when executing this file")
+    print(os.getcwd() + "\n")
     with open(arquivo, 'r') as file:
         data = file.readlines()
         #print(data)
@@ -32,8 +36,9 @@ def openFile(fileName):
     #print(map(str, adicionar))
     colunas=colunas + adicionar
     variavel4.columns=colunas
-
-
+    variavel4['DATA2'] = pd.to_datetime(variavel4['DATA'], format='%Y-%m-%d')
+    variavel4.sort_values(['ID_EMPENHO', 'DATA2'],
+                   ascending=[True, True], inplace=True)
     variavel3 = variavel4.loc[:,['ID_EMPENHO','NUMERO_EMPENHO','VALOR_EMPENHO','DATA_LIQ','PAG_E_RETENCAO','FORNEC','CPF_CNPJ','VALOR','DATA']]
 
     linhasArquivoPagamento = variavel3
