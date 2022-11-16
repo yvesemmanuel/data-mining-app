@@ -362,18 +362,6 @@ def payments_queue():
     #options_payment_type = {'Geral': 'Ge', 'Dispensa': 'Di', 'Licitação': 'Li'}
     sources = get_lista_UOFR(city_options[0], '2019')
 
-    #SALVAR MAPA
-
-    '''for ano in ['2019','2020']:
-        for dia in [7,60]:
-            for tipo in ['Geral','Dispensa','Licitação']:
-                state_unemployment = 'ScoreMedio_' + ano + '_' + str(tipo[0:2]) + '_' + str(dia) + '.csv'
-                dataset = pd.read_csv(state_unemployment, sep=';')
-                mapa = geraMapaFolium(dataset)
-                mapa.save("./templates/payment_queues_map_" + ano + '_' + str(tipo[0:2]) + '_' + str(dia) + ".html")
-                mapa = mapa._repr_html_()'''
-    #==============---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---===---==========#
-
     pathmapa = generate_queue_map( selected_year, 'Ge', selected_day)
     mapa = pathmapa
 
@@ -396,7 +384,6 @@ def payments_queue():
         
 
         if selected_action == 'apply' or selected_action == 'update':
-            #selected_day = request.form.get('day', int(7))
 
             tipopagamento = request.form.get('payment', payment_types[0])
 
@@ -431,9 +418,6 @@ def payments_queue():
         else:
 
             if selected_action == 'mudaano':
-
-                #selected_day = request.form.get('day', int(7))
-
                 return render_template('payments_queue.html',
                             mapa = mapa,
                             acao = selected_action,
@@ -453,8 +437,6 @@ def payments_queue():
                                         selected_payment=selected_payment)
             
             else:
-                #selected_day = request.form.get('day', days_of_tolerance[0])
-
                 return render_template('payments_queue.html',
                                         mapa = mapa,
                                         acao = selected_action,
