@@ -158,8 +158,8 @@ def payments_delay_plot_0(x):
 def payments_delay_scatter_plot(df):
     fig = px.scatter(df, x='ATRASO', y='VALOR', color='FORNECEDOR')
 
-    fig.write_html('./templates/payments_delay_plot_1.html')
-    HtmlFile = open('./templates/payments_delay_plot_1.html', 'r', encoding='utf-8')
+    fig.write_html('./templates/maps/cache/payments_delay_plot.html')
+    HtmlFile = open('./templates/maps/cache/payments_delay_plot.html', 'r', encoding='utf-8')
     source_code = HtmlFile.read()
     
     return source_code

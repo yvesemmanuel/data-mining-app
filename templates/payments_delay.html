@@ -10,8 +10,7 @@
 
             <div class="col-sm-4 form-group">
                 <label class="input-title" for="year">Ano</label>
-                <select class="form-control" id="year" name="year" {% if user_request=="POST" %}
-                    onchange="document.getElementById('apply').click()" {% endif %}>
+                <select class="form-control" id="year" name="year">
                     {% for year in options_year %}
                     <option value="{{ year }}" {% if selected_year==year %} selected {% endif %}>{{
                         year }}
@@ -22,8 +21,7 @@
             
             <div class="col-sm-4 form-group">
                 <label class="input-title" for="entity">Tipo de Fornecedor</label>
-                <select class="form-control" id="entity" name="entity" {% if user_request=="POST" %}
-                    onchange="document.getElementById('apply').click()" {% endif %}>
+                <select class="form-control" id="entity" name="entity">
                     {% for entity in options_entity %}
                     <option value="{{ entity }}" {% if selected_entity==entity %} selected {% endif %}>{{
                         entity }}
@@ -38,8 +36,7 @@
 
             <div class="col-sm-4 form-group">
                 <label class="input-title" for="limit">Limite de Atraso</label>
-                <select class="form-control" id="limit" name="limit" {% if user_request=="POST" %}
-                    onchange="document.getElementById('apply').click()" {% endif %}>
+                <select class="form-control" id="limit" name="limit">
                     {% for limit in options_limit %}
                     <option value="{{ limit }}" {% if selected_limit==limit %} selected {% endif %}>{{
                         limit }}
@@ -50,8 +47,7 @@
 
             <div class="col-sm-4 form-group">
                 <label class="input-title" for="loan_type">Tipo de Empenho</label>
-                <select class="form-control" id="loan_type" name="loan_type" {% if user_request=="POST" %}
-                    onchange="document.getElementById('apply').click()" {% endif %}>
+                <select class="form-control" id="loan_type" name="loan_type">
                     {% for loan_type in options_loan_types.keys() %}
                     <option value="{{ loan_type }}" {% if selected_loan_type==loan_type %} selected {% endif %}>{{ loan_type }}
                     </option>
@@ -61,29 +57,20 @@
 
         </div>
 
-        {% if user_request == "GET" %}
         <div class="text-center">
             <button class="btn btn-default btn-md button-style" type="submit" name="action" value="apply"
                 id="apply">Aplicar</button>
         </div>
-        {% elif user_request == "POST" %}
-        <div class="text-center hidden">
-            <button class="btn btn-default btn-md button-style" type="submit" name="action" value="apply"
-                id="apply">Aplicar</button>
-        </div>
-        {% endif %}
 
         {% if user_request == 'POST' %}
         <iframe class="col-lg-12 col-md-12 col-sm-12 col-12 .col-xl-12" height="440" srcdoc="{{selected_map}}" style="margin-top: 20px; margin-bottom: 15px;"></iframe>
-        {% endif %}
-
-        {% if user_request == 'POST' %}
+  
+        
         <div class="row justify-content-center">
 
             <div class="col-sm-4 form-group">
                 <label class="input-title" for="city">Unidade Jurisdicionada</label>
-                <select class="form-control" id="city" name="city" {% if user_request=="POST" and
-                    selected_action=="update" %} onchange="document.getElementById('update').click()" {% endif %}>
+                <select class="form-control" id="city" name="city" onchange="document.getElementById('update').click()">
                     {% for city in options_city %}
                     <option value="{{ city }}" {% if selected_city==city %} selected {% endif %}>{{ city }}
                     </option>
@@ -91,11 +78,9 @@
                 </select>
             </div>
 
-            {% if selected_action == "update" %}
             <div class="col-sm-8 form-group">
                 <label class="input-title" for="loan">Empenho</label>
-                <select class="form-control" id="loan" name="loan" {% if user_request=="POST" and
-                    selected_action=="update" %} onchange="document.getElementById('update').click()" {% endif %}>
+                <select class="form-control" id="loan" name="loan" onchange="document.getElementById('update').click()">
                     {% for loan in options_loan %}
                     <option value="{{ loan }}" {% if selected_loan==loan %} selected {% endif %}>{{
                         loan }}
@@ -103,24 +88,16 @@
                     {% endfor %}
                 </select>
             </div>
-            {% endif %}
+            
         </div>
 
-        {% if selected_action == "update" %}
         <iframe class="col-lg-12 col-md-12 col-sm-12 col-12 .col-xl-12" height="440" srcdoc="{{plot_data}}"></iframe>
-        {% endif %}
         
-        {% if selected_action != "update" %}
-        <div class="text-center">
-            <button class="btn btn-default btn-md button-style" type="submit" name="action" value="update"
-            id="update">Atualizar</button>
-        </div>
-        {% else %}
         <div class="text-center hidden">
             <button class="btn btn-default btn-md button-style" type="submit" name="action" value="update"
                 id="update">Atualizar</button>
         </div>
-        {% endif %}
+        
         <br>
 
         {% endif %}

@@ -214,51 +214,26 @@ def payments_delay():
     user_request = request.method
 
     if user_request == 'POST':
-        selected_entity = request.form.get('entity', 0)
+        selected_entity = request.form.get('entity')
         selected_year = request.form.get('year')
         selected_limit = request.form.get('limit')
         selected_loan_type = request.form.get('loan_type')
         selected_action = request.form.get('action')
-        selected_city = request.form.get('city')
 
-        selected_map = generate_delay_map(
-            selected_year, options_loan_types[selected_loan_type], options_entity_types[selected_entity], selected_limit)
+        selected_map = generate_delay_map(selected_year, options_loan_types[selected_loan_type], options_entity_types[selected_entity], selected_limit)
 
-        if selected_action == 'update':
-            selected_city_num = int(df_city[df_city['Municipio'] == selected_city].numUJ)
-            options_loan = get_loans(selected_year, selected_city_num)
+        selected_city = options_city[0] if selected_action == 'apply' else request.form.get('city')
+        selected_city_num = int(df_city[df_city['Municipio'] == selected_city].numUJ)
+        
+        options_loan = get_loans(selected_year, selected_city_num)
+        selected_loan = options_loan[0] if selected_action == 'apply' else request.form.get('loan')
 
-            selected_loan = request.form.get('loan', options_loan[0])
-            selected_uo, selected_source = selected_loan.split(' - ', 1)
+        selected_uo, selected_source = selected_loan.split(' - ', 1)
 
-            df = UJsProcessadas.get_pagamentos_atrasados(selected_year, options_loan_types[selected_loan_type], options_entity_types[selected_entity], float(
-                selected_limit), selected_city_num, selected_uo, selected_source)
+        df = UJsProcessadas.get_pagamentos_atrasados(selected_year, options_loan_types[selected_loan_type], options_entity_types[selected_entity], float(
+            selected_limit), selected_city_num, selected_uo, selected_source)
 
-            plot_data = payments_delay_scatter_plot(df)
-
-            return render_template(
-                'payments_delay.html',
-                # rendering values
-                page_title=page_title,
-                options_city=options_city,
-                options_entity=options_entity,
-                options_year=options_year,
-                options_limit=options_limit,
-                options_loan_types=options_loan_types,
-                options_loan=options_loan,
-                user_request=user_request,
-                plot_data=plot_data,
-
-                # outputs
-                selected_action=selected_action,
-                selected_entity=selected_entity,
-                selected_city=selected_city,
-                selected_year=int(selected_year),
-                selected_limit=int(selected_limit),
-                selected_loan=selected_loan,
-                selected_loan_type=selected_loan_type,
-                selected_map=selected_map
-            )
+        plot_data = payments_delay_scatter_plot(df)
 
         return render_template(
             'payments_delay.html',
@@ -269,7 +244,9 @@ def payments_delay():
             options_year=options_year,
             options_limit=options_limit,
             options_loan_types=options_loan_types,
+            options_loan=options_loan,
             user_request=user_request,
+            plot_data=plot_data,
 
             # outputs
             selected_action=selected_action,
@@ -277,6 +254,7 @@ def payments_delay():
             selected_city=selected_city,
             selected_year=int(selected_year),
             selected_limit=int(selected_limit),
+            selected_loan=selected_loan,
             selected_loan_type=selected_loan_type,
             selected_map=selected_map
         )
