@@ -1,7 +1,6 @@
 import pandas as pd
 from datetime import datetime
 import math
-from static.scripts.utils import format_cnpj_cpf
 
 
 def pegaQtdultrapass(item):
@@ -27,30 +26,34 @@ def MudaMunicipio2(index, numero, diastl, ano, tipop):
 
 
 def MudaMunicio(numero, uofr, diastl, ano, tipop):
-    muniselect = pd.read_csv('./static/datasets/outputs{}/{}.csv'.format(ano, numero), sep=',', usecols=['NUMERO_EMPENHO','DATA_EMP',
-                                                                                                    'VALOR_EMPENHO', 'DATA', 'CPF_CNPJ',
-                                                                                                    'DATA_LIQ', 'VALOR', 'FORNEC', 'ID_PAGAMENTO', 'NOME_FONTE_REC', 'NOME_UO'])
+    if ano == '2020':
+        muniselect = pd.read_csv("./static/datasets/pagamentos2020/" + str(numero) + ".csv", sep=',', usecols=['NUMERO_EMPENHO','DATA_EMP',
+                                                                                                            'VALOR_EMPENHO', 'DATA', 'CPF_CNPJ',
+                                                                                                            'DATA_LIQ', 'VALOR', 'FORNEC', 'ID_PAGAMENTO', 'NOME_FONTE_REC', 'NOME_UO'])
+    else:
+        muniselect = pd.read_csv("./static/datasets/pagamentos2019/" + str(numero) + ".csv", sep=',', usecols=['NUMERO_EMPENHO','DATA_EMP',
+                                                                                                        'VALOR_EMPENHO', 'DATA', 'CPF_CNPJ',
+                                                                                                        'DATA_LIQ', 'VALOR', 'FORNEC', 'ID_PAGAMENTO', 'NOME_FONTE_REC', 'NOME_UO'])
 
-
-    muniselect['CPF_CNPJ'] = muniselect['CPF_CNPJ'].apply(format_cnpj_cpf)
 
     camposuteismuni = muniselect
-    camposuteismuni.rename(columns={'DATA': 'DATA_PAGAMENTO', 'VALOR': 'VALOR_PAGAMENTO',
-                           'NOME_FONTE_REC': 'FONTE_REC', 'NOME_UO': 'UNID_ORC'},  inplace=True)
+    camposuteismuni.rename(columns={'DATA': 'DATA_PAGAMENTO', "VALOR": "VALOR_PAGAMENTO",
+                           'NOME_FONTE_REC': "FONTE_REC", 'NOME_UO': "UNID_ORC"},  inplace=True)
 
     empsagres = CriaDivisao(camposuteismuni, diastl, uofr, ano, tipop)
 
-    colunas = ['Nº Empenho', 'CPF/CNPJ', 'Valor Emp', 'Valor Liq.', 'Data Pag', 'Data Liq.', 'Qtd ultrapassaram']
 
     retorno1 = empsagres[0].retresultado1()
+    retorno2 = empsagres[0].retornaIndice()
+    retorno3 = []
 
     textoretorno = []
     textoretorno.append(empsagres[0])
     texto = pd.DataFrame(textoretorno)
 
-    texto.to_csv('./static/datasets/cache_fila/{}.csv'.format(numero))
+    #texto.to_csv("./static/datasets/cache_fila/" + str(numero) + ".csv")
 
-    return colunas, retorno1
+    return retorno1, retorno2, retorno3
 
 
 class UOFR:
@@ -114,10 +117,16 @@ class UOFR:
                         pertenceaofiltro = 1
                     else:
                         pertenceaofiltro = 0
-                    vetorinterno = [row["NUMERO_EMPENHO"], str(
-                        row["CPF_CNPJ"]), row["VALOR_EMPENHO"], row["VALOR_PAGAMENTO"]]
+
+                    diferencadias = dttratada - dtliqtratada
+                    atraso = diferencadias.days
+                    
+                    vetorinterno = [row["NUMERO_EMPENHO"], str(row["CPF_CNPJ"]), 
+                                    row["VALOR_EMPENHO"], row["VALOR_PAGAMENTO"], row["FORNEC"]]
+                    #print(row["FORNEC"])
                     Dicionario[chavedicio] = {"dtp": dttratada, "dtl": dtliqtratada,
-                                              "quantidade": 1, "Pagamentosqultrapass": 0, "ehfiltrado": pertenceaofiltro, "vetorzin": [vetorinterno]}
+                                              "quantidade": 1, "Pagamentosqultrapass": 0, 
+                                              "ehfiltrado": pertenceaofiltro, "vetorzin": [vetorinterno], "atraso":atraso}
 
                 else:
                     valoranterior = Dicionario[chavedicio]["quantidade"]
@@ -125,7 +134,7 @@ class UOFR:
                     Dicionario[chavedicio]["quantidade"] = valoratual
 
                     vetorinterno = [row["NUMERO_EMPENHO"], str(
-                        row["CPF_CNPJ"]), row["VALOR_EMPENHO"], row["VALOR_PAGAMENTO"]]
+                        row["CPF_CNPJ"]), row["VALOR_EMPENHO"], row["VALOR_PAGAMENTO"], row["FORNEC"]]
 
                     vetor2 = Dicionario[chavedicio]["vetorzin"]
                     vetor2.append(vetorinterno)
@@ -200,10 +209,10 @@ class UOFR:
 
         #self.pagamentosordem1 = Dicionario
         if ehfiltrado:
-            tabelafinal = [[k, v['dtp'], v['dtl'], v['quantidade'], v['Pagamentosqultrapass'],
+            tabelafinal = [[k, v['dtp'], v['dtl'], v['quantidade'], v['Pagamentosqultrapass'], v["atraso"],
                     v['vetorzin']] for k, v in Dicionario.items() if v['ehfiltrado'] == 1]
         else:
-            tabelafinal = [[k, v['dtp'], v['dtl'], v['quantidade'], v['Pagamentosqultrapass'],
+            tabelafinal = [[k, v['dtp'], v['dtl'], v['quantidade'], v['Pagamentosqultrapass'], v["atraso"],
                     v['vetorzin']] for k, v in Dicionario.items()]
         #bbb = [[k, v['dtp'], v['dtl'], v['quantidade'], v['Pagamentosqultrapass'],
         #        v['vetorzin']] for k, v in Dicionario.items()]

@@ -92,7 +92,7 @@ def get_lista_UOFR(municipio, ano):
     df = pd.read_csv("./static/datasets/ListaMunicipios.csv", sep=";")
     municipio_num = int(df[df["Municipio"] == municipio].numUJ)
 
-    df = pd.read_csv('./static/datasets/outputs{}/{}.csv'.format(ano, municipio_num), sep=',', usecols=['NUMERO_EMPENHO', 'NOME_FONTE_REC', 'NOME_UO'])
+    df = pd.read_csv('./static/datasets/pagamentos{}/{}.csv'.format(ano, municipio_num), sep=',', usecols=['NUMERO_EMPENHO', 'NOME_FONTE_REC', 'NOME_UO'])
 
     df.rename(columns = {'NOME_FONTE_REC':"FONTE_REC", 'NOME_UO':"UNID_ORC"},  inplace = True)
 
