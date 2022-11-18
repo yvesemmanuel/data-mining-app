@@ -39,11 +39,11 @@
 
     {% if user_request == "POST" %}
     <div class="table-responsive">
-        <table class="table" style="width: 50%; margin-left: auto; margin-right: auto;">
+        <table class="table-description" style="width: 50%; margin-left: auto; margin-right: auto;">
             <thead>
                 <tr scope="col">
                     {% for col in cols_general_description%}
-                    <th>{{col}}</th>
+                    <th style="text-align: center;">{{col}}</th>
                     {% endfor %}
                 </tr>
             </thead>
@@ -51,7 +51,7 @@
             <tbody>
                 <tr>
                     {% for attr in rows_general_description%}
-                    <td>{{attr}}</td>
+                    <td style="text-align: center;">{{attr}}</td>
                     {% endfor %}
                 </tr>
             </tbody>
@@ -84,7 +84,7 @@
 
     <br>
 
-    <!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-window"
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-window"
         style="display: none;" id="modal-button"></button>
 
     <div class="modal fade" id="modal-window">
@@ -98,6 +98,17 @@
 
                 <div class="modal-body">
 
+                    <div class="row">
+    <div class="col"></div>
+    <div class="col">
+        <div class="card" style="width: 18rem;">
+            <div class="card-body" style="text-align: center;">
+                <h7>A pontuação da consulta foi <strong>{{ score }}</strong>.</h7>
+            </div>
+        </div>
+    </div>
+    <div class="col"></div>
+</div>
                 </div>
 
             </div>
@@ -105,30 +116,98 @@
     </div>
 
     <script>
+
         $(".table-hover").on("click", "tbody tr", function () {
             $(".modal-body").empty();
+            var value = $(this)[0].attributes.value.value;
+            var data = {{ modals | safe}}[value];
 
-            var rowIdx = $(this)[0].attributes.value;
+            var table = "<table class='table table-hover matching-table'> <thead> <tr scope='col'>";
+            
+            var objs = [];
+            let description = "Inconforme";
+            for (var i = 0; i < data.length; i++) {
+                if ((typeof data[i]) !== "string") {
+                    objs.push(data[i]);
+                } else {
+                    var str = data[i];
+                    description = str.charAt(0).toUpperCase() + str.slice(1);
+                }
+            }
+            
+            var cols = Object.keys(objs[0]);
+            var rows = objs.map(function (x) { return Object.values(x); });
 
-            var data = {{ modal | safe}}[rowIdx];
+            cols.forEach((x, i) => {
+                table = table + "<th scope='col'>" + x + "</th>";
+            });
 
-            console.log(data);
+            table = table + "</tr></thead> <tbody>";
+
+            rows.forEach((row, i) => {
+                table = table + "<tr>";
+
+                row.forEach((attr, j) => {
+                    table = table + "<td>" + attr + "</td>";
+                })
+                
+                table = table + "</tr>";
+            });
+
+            table = table + "</tbody> </table>";
+            
+            table = table + "<div class='row'> <div class='col'></div> <div class='col'> <div class='card' style='width: 18rem;'> <div class='card-body' style='text-align: center;'> <h7> <strong>" + description + "</strong></h7> </div> </div> </div> <div class='col'></div> </div>"
+
+
+            $(".modal-body").append(table);
+
+            $("#modal-button").click();
         });
-    </script> -->
+    </script>
     {% endif %}
 
 </div>
 
 <script>
+    jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+        "chinese-string-asc": function (s1, s2) {
+            return s1.localeCompare(s2);
+        },
+
+        "chinese-string-desc": function (s1, s2) {
+            return s2.localeCompare(s1);
+        }
+    });
+
     $(document).ready(function () {
-        $('.matching-table').DataTable({
+        $(".table").DataTable({
+            serverSide: false,
+            paging: false,
+            info: false,
             searching: false,
             language: {
-                url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/pt-BR.json'
+                url: "https://cdn.datatables.net/plug-ins/1.13.1/i18n/pt-BR.json"
             },
             columnDefs: [
-                { orderable: true, className: 'reorder', targets: [1] },
-                { orderable: false, targets: '_all' }
+                { type: "num", "targets": [0, 1] },
+                { type: "chinese-string", targets: 2 },
+                { orderable: true, targets: [0, 1] },
+                { orderable: false, targets: "_all" }
+            ],
+            order: [[0, "asc"]]
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+        $(".table-description").DataTable({
+            serverSide: false,
+            info: false,
+            paging: false,
+            searching: false,
+            columnDefs: [
+                { orderable: false, targets: "_all" }
             ]
         });
     });

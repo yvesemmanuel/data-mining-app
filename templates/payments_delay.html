@@ -79,11 +79,11 @@
             </div>
 
             <div class="col-sm-8 form-group">
-                <label class="input-title" for="loan">Empenho</label>
-                <select class="form-control" id="loan" name="loan" onchange="document.getElementById('update').click()">
-                    {% for loan in options_loan %}
-                    <option value="{{ loan }}" {% if selected_loan==loan %} selected {% endif %}>{{
-                        loan }}
+                <label class="input-title" for="source">Unidade Orçamentária + Fonte de Recursos</label>
+                <select class="form-control" id="source" name="source" onchange="document.getElementById('update').click()">
+                    {% for source in options_source %}
+                    <option value="{{ source }}" {% if selected_uo_source==source %} selected {% endif %}>{{
+                        source }}
                     </option>
                     {% endfor %}
                 </select>

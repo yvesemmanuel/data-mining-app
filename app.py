@@ -26,13 +26,12 @@ def inject_enumerate():
 def home():
     return render_template('home.html', title='Home')
 
+df_cities = pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';')
 
 @app.route('/analysis/regular_payments', methods=['GET', 'POST'])
 def regular_payments():
     page_title = 'Análise de Pagamentos Regulares'
-    options_city = list(
-        pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';').Municipio
-    )
+    options_city = df_cities.Municipio.tolist()
     options_year = [2019, 2020]
     user_request = request.method
 
@@ -202,8 +201,7 @@ def simba():
 @app.route('/analysis/payments_delay', methods=['GET', 'POST'])
 def payments_delay():
     page_title = 'Análise de Atraso de Pagamentos'
-    df_city = pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';')
-    options_city = list(df_city.Municipio)
+    options_city = df_cities.Municipio.tolist()
     options_entity_types = {'Pessoa Física': 'cpf',
                             'Pessoa Jurídica': 'cnpj', 'Ambos': 'ambos'}
     options_entity = list(options_entity_types.keys())
@@ -223,17 +221,18 @@ def payments_delay():
         selected_map = generate_delay_map(selected_year, options_loan_types[selected_loan_type], options_entity_types[selected_entity], selected_limit)
 
         selected_city = options_city[0] if selected_action == 'apply' else request.form.get('city')
-        selected_city_num = int(df_city[df_city['Municipio'] == selected_city].numUJ)
+        selected_city_num = int(df_cities[df_cities['Municipio'] == selected_city].numUJ)
         
-        options_loan = get_loans(selected_year, selected_city_num)
-        selected_loan = options_loan[0] if selected_action == 'apply' else request.form.get('loan')
+        options_source = get_delay_sources(selected_year, selected_city_num)
+        selected_uo_source = options_source[0] if selected_action == 'apply' else request.form.get('source')
 
-        selected_uo, selected_source = selected_loan.split(' - ', 1)
+        selected_uo, selected_source, _ = selected_uo_source.split(' + ')
 
-        df = UJsProcessadas.get_pagamentos_atrasados(selected_year, options_loan_types[selected_loan_type], options_entity_types[selected_entity], float(
-            selected_limit), selected_city_num, selected_uo, selected_source)
+        df = UJsProcessadas.get_pagamentos_atrasados(selected_year, options_loan_types[selected_loan_type], options_entity_types[selected_entity], float(selected_limit), selected_city_num, selected_uo, selected_source)
 
         plot_data = payments_delay_scatter_plot(df)
+
+        # print(df.columns)
 
         return render_template(
             'payments_delay.html',
@@ -244,7 +243,7 @@ def payments_delay():
             options_year=options_year,
             options_limit=options_limit,
             options_loan_types=options_loan_types,
-            options_loan=options_loan,
+            options_source=options_source,
             user_request=user_request,
             plot_data=plot_data,
 
@@ -254,7 +253,7 @@ def payments_delay():
             selected_city=selected_city,
             selected_year=int(selected_year),
             selected_limit=int(selected_limit),
-            selected_loan=selected_loan,
+            selected_uo_source=selected_uo_source,
             selected_loan_type=selected_loan_type,
             selected_map=selected_map
         )
@@ -316,8 +315,7 @@ def matching_sources():
     if user_request == 'POST':
         selected_city = request.form.get('city')
 
-        cols, rows, cols_general_description, rows_general_description, modals = get_dados_correspondencia(
-            selected_city)
+        cols, rows, cols_general_description, rows_general_description, modals = get_dados_correspondencia(selected_city)
 
         return render_template(
             'matching_sources.html',
@@ -332,7 +330,7 @@ def matching_sources():
             rows=rows,
             rows_general_description=rows_general_description,
             cols_general_description=cols_general_description,
-            modals=modals
+            modals=json.dumps(modals)
         )
 
     return render_template('matching_sources.html',
@@ -375,6 +373,7 @@ def payments_queue():
         if (selected_action == 'update2' or selected_action != 'apply') or selected_action != 'update':
             sources = get_lista_UOFR(selected_city, selected_year)
         selected_source = request.form.get('source', sources[0])
+        formatted_source = ''.join(selected_source.split(' + '))
 
         selected_payment = request.form.get('payment', payment_types[0])
         cities_num = int(df[df['Municipio'] == selected_city].numUJ)
@@ -387,8 +386,7 @@ def payments_queue():
 
             tipopagamento = request.form.get('payment', payment_types[0])
 
-            rows, varia, _ = MudaMunicio(
-            cities_num, selected_source, int(selected_day), selected_year, tipopagamento)
+            rows, varia = MudaMunicio(cities_num, formatted_source, int(selected_day), selected_year, tipopagamento)
 
             return render_template('payments_queue.html',
                                     mapa = mapa,

@@ -2,58 +2,20 @@ import pandas as pd
 from datetime import datetime
 import math
 
-
-def pegaQtdultrapass(item):
-    return item[4]
-
-
-def MudaMunicipio2(index, numero, diastl, ano, tipop):
-    muniselect = pd.read_csv(index, sep=',', usecols=['NUMERO_EMPENHO','DATA_EMP',
-                                                      'VALOR_EMPENHO', 'DATA', 'CPF_CNPJ',
-                                                      'DATA_LIQ', 'VALOR', 'FORNEC', 'ID_PAGAMENTO', 'NOME_FONTE_REC', 'NOME_UO'])
-
-    camposuteismuni = muniselect
-    camposuteismuni.rename(columns={'DATA': 'DATA_PAGAMENTO', "VALOR": "VALOR_PAGAMENTO",
-                           'NOME_FONTE_REC': "FONTE_REC", 'NOME_UO': "UNID_ORC"},  inplace=True)
-
-    vetorempsagres2 = CriaDivisao2(camposuteismuni, diastl, ano, tipop)
-    calculo1 = 0
-    for k in vetorempsagres2:
-        calculo1 += k.retornaIndice()
-    calculo1 = calculo1/len(vetorempsagres2)
-
-    return calculo1
-
-
 def MudaMunicio(numero, uofr, diastl, ano, tipop):
-    if ano == '2020':
-        muniselect = pd.read_csv("./static/datasets/pagamentos2020/" + str(numero) + ".csv", sep=',', usecols=['NUMERO_EMPENHO','DATA_EMP',
-                                                                                                            'VALOR_EMPENHO', 'DATA', 'CPF_CNPJ',
-                                                                                                            'DATA_LIQ', 'VALOR', 'FORNEC', 'ID_PAGAMENTO', 'NOME_FONTE_REC', 'NOME_UO'])
-    else:
-        muniselect = pd.read_csv("./static/datasets/pagamentos2019/" + str(numero) + ".csv", sep=',', usecols=['NUMERO_EMPENHO','DATA_EMP',
+    muniselect = pd.read_csv('./static/datasets/outputs' + str(ano) +  '/' + str(numero) + '.csv', sep=',', usecols=['NUMERO_EMPENHO','DATA_EMP',
                                                                                                         'VALOR_EMPENHO', 'DATA', 'CPF_CNPJ',
                                                                                                         'DATA_LIQ', 'VALOR', 'FORNEC', 'ID_PAGAMENTO', 'NOME_FONTE_REC', 'NOME_UO'])
 
-
-    camposuteismuni = muniselect
-    camposuteismuni.rename(columns={'DATA': 'DATA_PAGAMENTO', "VALOR": "VALOR_PAGAMENTO",
+    muniselect.rename(columns={'DATA': 'DATA_PAGAMENTO', "VALOR": "VALOR_PAGAMENTO",
                            'NOME_FONTE_REC': "FONTE_REC", 'NOME_UO': "UNID_ORC"},  inplace=True)
 
-    empsagres = CriaDivisao(camposuteismuni, diastl, uofr, ano, tipop)
-
+    empsagres = CriaDivisao(muniselect, diastl, uofr, ano, tipop)
 
     retorno1 = empsagres[0].retresultado1()
     retorno2 = empsagres[0].retornaIndice()
-    retorno3 = []
 
-    textoretorno = []
-    textoretorno.append(empsagres[0])
-    texto = pd.DataFrame(textoretorno)
-
-    #texto.to_csv("./static/datasets/cache_fila/" + str(numero) + ".csv")
-
-    return retorno1, retorno2, retorno3
+    return retorno1, retorno2
 
 
 class UOFR:
@@ -257,18 +219,6 @@ def CriaDivisao(df, dias1, chave, ano, tipop):
     uomaisfonte.append(new_emp)
 
     print(uomaisfonte)
-
-    return uomaisfonte
-
-
-def CriaDivisao2(df, dias1, ano, tipop):
-    uofr_keys = (df["FONTE_REC"] + df["UNID_ORC"]).unique()
-    uomaisfonte = []
-
-    for i in uofr_keys:
-        new_emp = UOFR(i)
-        new_emp.execute(df, dias1, i, ano, tipop)
-        uomaisfonte.append(new_emp)
 
     return uomaisfonte
 

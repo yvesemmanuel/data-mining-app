@@ -51,7 +51,7 @@
 
             <tbody>
                 {% for idx, row in enumerate(rows) %}
-                <tr value={{idx}} style="cursor: pointer;">
+                <tr value={{idx}}>
                     {% for idx, attr in enumerate(row) %}
                     <td>{{attr | safe}}</td>
                     {% endfor%}
@@ -66,16 +66,31 @@
 </div>
 
 <script>
+    jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+        "chinese-string-asc": function (s1, s2) {
+            return s1.localeCompare(s2);
+        },
+
+        "chinese-string-desc": function (s1, s2) {
+            return s2.localeCompare(s1);
+        }
+    });
+
     $(document).ready(function () {
-        $('.table').DataTable({
+        $(".table").DataTable({
+            serverSide: false,
+            paging: false,
             searching: false,
             language: {
-                url: 'https://cdn.datatables.net/plug-ins/1.13.1/i18n/pt-BR.json'
+                url: "https://cdn.datatables.net/plug-ins/1.13.1/i18n/pt-BR.json"
             },
             columnDefs: [
-                { orderable: true, className: 'reorder', targets: [1, 2, 3, 4, 6] },
-                { orderable: false, targets: '_all' }
-            ]
+                { type: "num", "targets": [1, 2, 3, 4] },
+                { type: "chinese-string", targets: 6 },
+                { orderable: true, targets: [1, 2, 3, 4] },
+                { orderable: false, targets: "_all" }
+            ],
+            order: [[6, "asc"]]
         });
     });
 </script>

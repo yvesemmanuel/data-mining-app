@@ -4,14 +4,21 @@ from static.scripts.UtilsUJsProcessadas import UJsProcessadas
 import os
 import pandas as pd
 import json
+from ast import literal_eval
 
 
-def get_loans(selected_year, selected_city_num):
+def get_delay_sources(selected_year, selected_city_num):
     df_selected = UJsProcessadas.openFileUJ(selected_year, selected_city_num)
 
     options_loans = []
     for _, row in df_selected.iterrows():
-        loan = row['NOME_UO'] + ' - ' + row['NOME_FONTE_REC']
+        somaAtrasos = row["DIFF_LIQ_PAG"]
+        score = somaAtrasos / 30
+
+        totalPagsUO = len(df_selected[(row['NOME_FONTE_REC'] == df_selected['NOME_FONTE_REC']) & (row['NOME_UO'] == df_selected['NOME_UO'])])
+        score = score / totalPagsUO
+
+        loan = row['NOME_UO'] + ' + ' + row['NOME_FONTE_REC'] + ' + ({})'.format(score)
 
         if loan not in options_loans:
             options_loans.append(loan)
@@ -60,7 +67,21 @@ def get_dados_correspondencia(municipio):
     
     df1 = pd.read_csv('./static/datasets/correspondencia_fontes/tratado_' + municipio + '.csv')
 
-    modals = df1.modal.dropna().tolist()
+    modals = []
+    for modal in df1.modal.tolist():
+        lst = literal_eval(modal)
+        
+        new_lst = []
+        for item in lst:
+            try:
+                new_item = literal_eval(item)
+            except:
+                new_item = item
+
+            new_lst.append(new_item)
+    
+        modals.append(new_lst)
+
     df1.drop('modal', axis=1, inplace=True)
 
     cols = list(df1.columns)
@@ -77,8 +98,6 @@ def get_non_conformities(selected_year):
 
     cols = list(df.columns)
 
-    # rows = [row for _, row in df.iterrows()]
-
     rows = []
     for idx, row in df.iterrows():
         new_id = '<a href="{}" target="_blank">{}</a>'.format(links[idx], row['ID'])
@@ -92,8 +111,8 @@ def get_lista_UOFR(municipio, ano):
     df = pd.read_csv("./static/datasets/ListaMunicipios.csv", sep=";")
     municipio_num = int(df[df["Municipio"] == municipio].numUJ)
 
-    df = pd.read_csv('./static/datasets/pagamentos{}/{}.csv'.format(ano, municipio_num), sep=',', usecols=['NUMERO_EMPENHO', 'NOME_FONTE_REC', 'NOME_UO'])
+    df = pd.read_csv('./static/datasets/outputs{}/{}.csv'.format(ano, municipio_num), sep=',', usecols=['NUMERO_EMPENHO', 'NOME_FONTE_REC', 'NOME_UO'])
 
     df.rename(columns = {'NOME_FONTE_REC':"FONTE_REC", 'NOME_UO':"UNID_ORC"},  inplace = True)
 
-    return (df["FONTE_REC"] + df["UNID_ORC"]).dropna().unique().tolist()
+    return (df["FONTE_REC"] + ' + ' + df["UNID_ORC"]).dropna().unique().tolist()
