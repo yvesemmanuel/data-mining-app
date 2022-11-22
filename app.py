@@ -1,13 +1,14 @@
 from flask import Flask, render_template, request
 import pandas as pd
+import locale
+import os
+from static.scripts.Getters import *
+from static.scripts.AnaliseScoreUJS import *
 from static.scripts.UtilsUJsProcessadas import *
 from static.scripts.MontaSagresSimba import *
-from static.scripts.Getters import *
-from static.scripts.Plots import *
-from static.scripts.AnaliseScoreUJS import *
-from static.scripts.FilaP import *
 from static.scripts.utils import *
-import locale
+from static.scripts.FilaP import *
+from static.scripts.Plots import *
 from static.scripts.Maps import *
 
 
@@ -16,6 +17,7 @@ locale.getlocale()
 
 app = Flask(__name__)
 
+df_cities = pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';')
 
 @app.context_processor
 def inject_enumerate():
@@ -26,7 +28,6 @@ def inject_enumerate():
 def home():
     return render_template('home.html', title='Home')
 
-df_cities = pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';')
 
 @app.route('/analysis/regular_payments', methods=['GET', 'POST'])
 def regular_payments():
@@ -471,5 +472,4 @@ def payments_queue():
 
 
 if __name__ == '__main__':
-
     app.run(debug=True)
