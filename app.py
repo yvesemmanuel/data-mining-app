@@ -1,7 +1,6 @@
 from flask import Flask, render_template, request
 import pandas as pd
 import locale
-import os
 from static.scripts.Getters import *
 from static.scripts.AnaliseScoreUJS import *
 from static.scripts.UtilsUJsProcessadas import *
@@ -29,14 +28,36 @@ def home():
     return render_template('home.html', title='Home')
 
 
+def output_regular_payments(loan_selected):
+    y = loan_selected.listValoresPagamentos
+    x = loan_selected.datasPagamentosDateTime
+    regular_payments_plot(x, y)
+
+    supplier_id = '{} - ({})'.format(format_cnpj_cpf(loan_selected.cnpj), loan_selected.nmFornecedor)
+    
+    dates = ' -> '.join([date_to_string(date) for date in loan_selected.datasPagamentosDateTime])
+    values = ' -> '.join(map(str, loan_selected.listValoresPagamentos))
+    description = loan_selected.descricao
+
+    loan_info = {
+        'CPF/CNPJ': supplier_id,
+        'Datas': dates,
+        'Valores': values,
+        'Descrição': description,
+    }
+
+    return loan_info
+
+
 @app.route('/analysis/regular_payments', methods=['GET', 'POST'])
 def regular_payments():
     page_title = 'Análise de Pagamentos Regulares'
     options_city = df_cities.Municipio.tolist()
     options_year = [2019, 2020]
     user_request = request.method
+    is_post_request = user_request == 'POST'
 
-    if user_request == 'POST':
+    if is_post_request:
         selected_city = request.form.get('city')
         selected_year = request.form.get('year')
         selected_supplier = request.form.get('supplier', 0)
@@ -44,37 +65,22 @@ def regular_payments():
 
         loans = get_salario_emp(selected_city, selected_year)
         options_supplier = [str(empenho.nmFornecedor) for empenho in loans]
+    
+        if selected_action == 'apply':
+            supplier_idx = 0
+        else:
+            supplier_idx = int(selected_supplier)
 
-        loan_idx = 0 if selected_action == 'apply' else int(selected_supplier)
-        loan_selected = loans[loan_idx]
-
-        y = loan_selected.listValoresPagamentos
-        x = loan_selected.datasPagamentosDateTime
-        regular_payments_plot(x, y)
-
-        supplier_id = '{} - ({})'.format(format_cnpj_cpf(loan_selected.cnpj),
-                                         loan_selected.nmFornecedor)
-        dates = ' -> '.join([date_to_string(date)
-                            for date in loan_selected.datasPagamentosDateTime])
-        values = ' -> '.join(map(str, loan_selected.listValoresPagamentos))
-        description = loan_selected.descricao
-
-        loan_info = {
-            'CPF/CNPJ': supplier_id,
-            'Datas': dates,
-            'Valores': values,
-            'Descrição': description,
-        }
+        loan_selected = loans[supplier_idx]
+        loan_info = output_regular_payments(loan_selected)
 
         return render_template(
             'payments_regular.html',
-            # rendering values
             page_title=page_title,
             options_city=options_city,
             options_year=options_year,
             user_request=user_request,
 
-            # outputs
             options_supplier=options_supplier,
             loan_info=loan_info,
             selected_city=selected_city,
@@ -84,7 +90,6 @@ def regular_payments():
 
     return render_template(
         'payments_regular.html',
-        # rendering values
         page_title=page_title,
         options_city=options_city,
         options_year=options_year,
@@ -472,4 +477,6 @@ def payments_queue():
 
 
 if __name__ == '__main__':
+    # from waitress import serve
+    # serve(app, host="0.0.0.0", port=5000)
     app.run(debug=True)

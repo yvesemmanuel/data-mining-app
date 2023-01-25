@@ -51,8 +51,7 @@ def get_salario_emp(municipio, ano):
     df = pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';')
     municipio_num = int(df[df['Municipio'] == municipio].numUJ)
 
-    filename = './static/datasets/outputs' + ano + '/' + \
-        str(municipio_num) + '.csv'
+    filename = './static/datasets/outputs' + ano + '/' + str(municipio_num) + '.csv'
 
     return empSal.getSortedEmpenhos(filename)
 
