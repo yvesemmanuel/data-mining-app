@@ -172,10 +172,8 @@ def regular_payments():
 @app.route('/analysis/simba', methods=['GET', 'POST'])
 def simba():
     page_title = 'SIMBA'
-    lObjs = montaObjsSagresSimba(
-        'simba/SimbaGoiana.csv', 'simba/SagresGoiana.csv')
-    options_entity = ['{} - ({}) - {}'.format(o.nmFornecedor, format_cnpj_cpf(
-        o.cpf_cnpj), round(o.somaSimba - o.somaSagres, 2)) for o in lObjs]
+    lObjs = montaObjsSagresSimba('simba/SimbaGoiana.csv', 'simba/SagresGoiana.csv')
+    options_entity = ['{} - ({}) - {}'.format(o.nmFornecedor, format_cnpj_cpf(o.cpf_cnpj), round(o.somaSimba - o.somaSagres, 2)) for o in lObjs]
 
     selected_entity = int(request.form.get('entity', 0))
     entity = lObjs[selected_entity]
@@ -189,15 +187,12 @@ def simba():
         linhaSagres.append(round(dictPagsSagres[idx], 2))
         linhaSimba.append(round(dictPagsSimba[idx], 2))
 
-    entity_info = {'months': ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul',
-                              'Ago', 'Set', 'Out', 'Nov', 'Dez'], 'sagres': linhaSagres, 'simba': linhaSimba}
+    entity_info = {'months': ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'], 'sagres': linhaSagres, 'simba': linhaSimba}
 
     return render_template(
         'simba.html',
-        # rendering values
         page_title=page_title,
 
-        # output
         selected_entity=selected_entity,
         entity_info=entity_info,
         options_entity=options_entity,
@@ -208,52 +203,69 @@ def simba():
 def payments_delay():
     page_title = 'Análise de Atraso de Pagamentos'
     options_city = df_cities.Municipio.tolist()
-    options_entity_types = {'Pessoa Física': 'cpf',
-                            'Pessoa Jurídica': 'cnpj', 'Ambos': 'ambos'}
+    options_entity_types = {
+        'Pessoa Física': 'cpf',
+        'Pessoa Jurídica': 'cnpj',
+        'Ambos': 'ambos'
+    }
     options_entity = list(options_entity_types.keys())
     options_year = [2019, 2020]
     options_limit = [7, 30, 60]
-    options_loan_types = {'Licitação': 'lic',
-                          'Dispensado': 'disp', 'Ambos': 'ambos'}
+    options_loan_types = {
+        'Licitação': 'lic',
+        'Dispensado': 'disp',
+        'Ambos': 'ambos'
+    }
     user_request = request.method
+    is_post_request = user_request == 'POST'
 
-    if user_request == 'POST':
+    if is_post_request:
         selected_entity = request.form.get('entity')
         selected_year = request.form.get('year')
         selected_limit = request.form.get('limit')
         selected_loan_type = request.form.get('loan_type')
         selected_action = request.form.get('action')
+        is_apply_selected = selected_action == 'apply'
 
         selected_map = generate_delay_map(selected_year, options_loan_types[selected_loan_type], options_entity_types[selected_entity], selected_limit)
 
-        selected_city = options_city[0] if selected_action == 'apply' else request.form.get('city')
-        selected_city_num = int(df_cities[df_cities['Municipio'] == selected_city].numUJ)
+        if is_apply_selected:
+            selected_city = options_city[0]
+        else:
+            selected_city = request.form.get('city')
         
+        selected_city_num = int(df_cities[df_cities['Municipio'] == selected_city].numUJ)
         options_source = get_delay_sources(selected_year, selected_city_num)
-        selected_uo_source = options_source[0] if selected_action == 'apply' else request.form.get('source')
+
+        if is_apply_selected:
+            selected_uo_source = options_source[0]
+        else:
+            selected_uo_source = request.form.get('source')
 
         selected_uo, selected_source, _ = selected_uo_source.split(' + ')
-
-        df = UJsProcessadas.get_pagamentos_atrasados(selected_year, options_loan_types[selected_loan_type], options_entity_types[selected_entity], float(selected_limit), selected_city_num, selected_uo, selected_source)
+        df = UJsProcessadas.get_pagamentos_atrasados(
+            selected_year,
+            options_loan_types[selected_loan_type],
+            options_entity_types[selected_entity],
+            float(selected_limit),
+            selected_city_num,
+            selected_uo, selected_source
+        )
 
         plot_data = payments_delay_scatter_plot(df)
 
-        # print(df.columns)
-
         return render_template(
             'payments_delay.html',
-            # rendering values
             page_title=page_title,
             options_city=options_city,
             options_entity=options_entity,
             options_year=options_year,
             options_limit=options_limit,
             options_loan_types=options_loan_types,
-            options_source=options_source,
             user_request=user_request,
-            plot_data=plot_data,
 
-            # outputs
+            options_source=options_source,
+            plot_data=plot_data,
             selected_action=selected_action,
             selected_entity=selected_entity,
             selected_city=selected_city,
@@ -266,7 +278,6 @@ def payments_delay():
 
     return render_template(
         'payments_delay.html',
-        # rendering values
         page_title=page_title,
         options_city=options_city,
         options_entity=options_entity,
@@ -280,23 +291,20 @@ def payments_delay():
 @app.route('/analysis/nonconformity', methods=['GET', 'POST'])
 def nonconformity():
     page_title = 'Análise de Pagamentos Inconformes'
-    # df_cities = pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';')
-    # city_options = dict(zip(df_cities.Municipio, df_cities.numUJ))
     options_year = [2019, 2020]
     user_request = request.method
+    is_post_request = user_request == 'POST'
 
-    if user_request == 'POST':
+    if is_post_request:
         selected_year = request.form.get('year')
 
         rows, cols, links = get_non_conformities(selected_year)
         return render_template(
             'nonconformity.html',
-            # rendering values
             page_title=page_title,
             options_year=options_year,
             user_request=user_request,
 
-            # output
             selected_year=int(selected_year),
             cols=cols,
             rows=rows,
@@ -304,7 +312,6 @@ def nonconformity():
         )
 
     return render_template('nonconformity.html',
-                           # rendering values
                            page_title=page_title,
                            options_year=options_year,
                            user_request=user_request)
@@ -313,24 +320,21 @@ def nonconformity():
 @app.route('/analysis/matching_sources', methods=['GET', 'POST'])
 def matching_sources():
     page_title = 'Correspondência Entre Fontes de Dados'
-    # df_cities = pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';')
-    # city_options = dict(zip(df_cities.Municipio, df_cities.numUJ))
     options_city = ['Cabo de Santo Agostinho']
     user_request = request.method
+    is_post_request = user_request == 'POST'
 
-    if user_request == 'POST':
+    if is_post_request:
         selected_city = request.form.get('city')
 
         cols, rows, cols_general_description, rows_general_description, modals = get_dados_correspondencia(selected_city)
 
         return render_template(
             'matching_sources.html',
-            # rendering values
             page_title=page_title,
             options_city=options_city,
             user_request=user_request,
 
-            # output
             selected_city=selected_city,
             cols=cols,
             rows=rows,
@@ -339,11 +343,12 @@ def matching_sources():
             modals=json.dumps(modals)
         )
 
-    return render_template('matching_sources.html',
-                           # rendering values
-                           page_title=page_title,
-                           options_city=options_city,
-                           user_request=user_request)
+    return render_template(
+        'matching_sources.html',
+        page_title=page_title,
+        options_city=options_city,
+        user_request=user_request
+    )
 
 
 @app.route('/analysis/payments_queue', methods=['GET', 'POST'])
@@ -363,13 +368,12 @@ def payments_queue():
     selected_year = request.form.get('year', year_options[0])
     selected_payment = 'Geral'
     selected_day = days_of_tolerance[0]
-    #options_payment_type = {'Geral': 'Ge', 'Dispensa': 'Di', 'Licitação': 'Li'}
     sources = get_lista_UOFR(city_options[0], '2019')
 
-    pathmapa = generate_queue_map( selected_year, 'Ge', selected_day)
-    mapa = pathmapa
+    pathmapa = generate_queue_map(selected_year, 'Ge', selected_day)
+    is_post_request = user_request == 'POST'
 
-    if user_request == 'POST':
+    if is_post_request:
         selected_city = request.form.get('city', city_options[0])
         selected_year = request.form.get('year', year_options[0])
         selected_day = request.form.get('day', int(7))
@@ -378,6 +382,7 @@ def payments_queue():
         
         if (selected_action == 'update2' or selected_action != 'apply') or selected_action != 'update':
             sources = get_lista_UOFR(selected_city, selected_year)
+        
         selected_source = request.form.get('source', sources[0])
         formatted_source = ''.join(selected_source.split(' + '))
 
@@ -385,8 +390,6 @@ def payments_queue():
         cities_num = int(df[df['Municipio'] == selected_city].numUJ)
 
         pathmapa = generate_queue_map( selected_year, selected_payment[0:2], selected_day)
-        mapa = pathmapa
-        
 
         if selected_action == 'apply' or selected_action == 'update':
 
@@ -394,86 +397,82 @@ def payments_queue():
 
             rows, varia = MudaMunicio(cities_num, formatted_source, int(selected_day), selected_year, tipopagamento)
 
-            return render_template('payments_queue.html',
-                                    mapa = mapa,
-                                    acao = selected_action,
-                                    # rendering
-                                    page_title=page_title,
-                                    city_options=city_options,
-                                    year_options=year_options,
-                                    days_of_tolerance=days_of_tolerance,
-                                    user_request=user_request,
-                                    payment_types=payment_types,
-                                    
-                                    # input
-                                    selected_city=selected_city,
-                                    selected_year=selected_year,
-                                    selected_day=int(selected_day),
-                                    selected_source=selected_source,
-                                    selected_payment=selected_payment,
-                                    
-
-                                    # output
-                                    sources=sources,
-                                    score=varia,
-                                    rows=rows,
-                                    show_table=True,
-                                    columns=columns)
+            return render_template(
+                'payments_queue.html',
+                page_title=page_title,
+                city_options=city_options,
+                year_options=year_options,
+                days_of_tolerance=days_of_tolerance,
+                user_request=user_request,
+                payment_types=payment_types,
+                
+                mapa = pathmapa,
+                acao = selected_action,
+                selected_city=selected_city,
+                selected_year=selected_year,
+                selected_day=int(selected_day),
+                selected_source=selected_source,
+                selected_payment=selected_payment,
+                
+                sources=sources,
+                score=varia,
+                rows=rows,
+                show_table=True,
+                columns=columns
+            )
         else:
 
             if selected_action == 'mudaano':
-                return render_template('payments_queue.html',
-                            mapa = mapa,
-                            acao = selected_action,
-                           # rendering
-                           page_title=page_title,
-                           city_options=city_options,
-                           year_options=year_options,
-                           days_of_tolerance=days_of_tolerance,
-                           user_request=user_request,
-                            payment_types=payment_types,
+                return render_template(
+                    'payments_queue.html',
+                    page_title=page_title,
+                    city_options=city_options,
+                    year_options=year_options,
+                    days_of_tolerance=days_of_tolerance,
+                    user_request=user_request,
+                    payment_types=payment_types,
 
-
-                           selected_city=selected_city,
-                                        selected_year=selected_year,
-                                        selected_day=int(selected_day),
-                                        selected_source=selected_source,
-                                        selected_payment=selected_payment)
+                    mapa = pathmapa,
+                    acao = selected_action,
+                    selected_city=selected_city,
+                    selected_year=selected_year,
+                    selected_day=int(selected_day),
+                    selected_source=selected_source,
+                    selected_payment=selected_payment
+                )
             
             else:
-                return render_template('payments_queue.html',
-                                        mapa = mapa,
-                                        acao = selected_action,
-                                        # rendering
-                                        page_title=page_title,
-                                        city_options=city_options,
-                                        year_options=year_options,
-                                        days_of_tolerance=days_of_tolerance,
-                                        user_request=user_request,
-                                        payment_types=payment_types,
-                                        
-                                        # input
-                                        selected_city=selected_city,
-                                        selected_year=selected_year,
-                                        selected_day=int(selected_day),
-                                        selected_source=selected_source,
-                                        selected_payment=selected_payment,
-                                        
+                return render_template(
+                    'payments_queue.html',
+                    page_title=page_title,
+                    city_options=city_options,
+                    year_options=year_options,
+                    days_of_tolerance=days_of_tolerance,
+                    user_request=user_request,
+                    payment_types=payment_types,
+                    
+                    selected_city=selected_city,
+                    selected_year=selected_year,
+                    selected_day=int(selected_day),
+                    selected_source=selected_source,
+                    selected_payment=selected_payment,
+                    sources=sources,
+                    mapa = pathmapa,
+                    acao = selected_action,
+                )
 
-                                        # output
-                                        sources=sources)
+    return render_template(
+        'payments_queue.html',
+        page_title=page_title,
+        city_options=city_options,
+        year_options=year_options,
+        days_of_tolerance=days_of_tolerance,
+        user_request=user_request,
+        payment_types=payment_types,
 
-    return render_template('payments_queue.html',
-                            mapa = mapa,
-                            acao = selected_action,
-                           # rendering
-                           page_title=page_title,
-                           city_options=city_options,
-                           year_options=year_options,
-                           days_of_tolerance=days_of_tolerance,
-                           user_request=user_request,
-                            payment_types=payment_types
-                           )
+        mapa = pathmapa,
+        acao = selected_action
+    )
 
 
 if __name__ == '__main__':

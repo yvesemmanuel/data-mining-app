@@ -13,7 +13,7 @@ def get_delay_sources(selected_year, selected_city_num):
     options_loans = []
     for _, row in df_selected.iterrows():
         somaAtrasos = row["DIFF_LIQ_PAG"]
-        score = somaAtrasos / 30
+        score = somaAtrasos / 30 # TODO: check a way to add scoring info on tables
 
         totalPagsUO = len(df_selected[(row['NOME_FONTE_REC'] == df_selected['NOME_FONTE_REC']) & (row['NOME_UO'] == df_selected['NOME_UO'])])
         score = score / totalPagsUO
