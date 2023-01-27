@@ -311,10 +311,12 @@ def nonconformity():
             links=links
         )
 
-    return render_template('nonconformity.html',
-                           page_title=page_title,
-                           options_year=options_year,
-                           user_request=user_request)
+    return render_template(
+        'nonconformity.html',
+        page_title=page_title,
+        options_year=options_year,
+        user_request=user_request
+    )
 
 
 @app.route('/analysis/matching_sources', methods=['GET', 'POST'])
@@ -370,7 +372,7 @@ def payments_queue():
     selected_day = days_of_tolerance[0]
     sources = get_lista_UOFR(city_options[0], '2019')
 
-    pathmapa = generate_queue_map(selected_year, 'Ge', selected_day)
+    map = generate_queue_map(selected_year, 'Ge', selected_day)
     is_post_request = user_request == 'POST'
 
     if is_post_request:
@@ -389,13 +391,12 @@ def payments_queue():
         selected_payment = request.form.get('payment', payment_types[0])
         cities_num = int(df[df['Municipio'] == selected_city].numUJ)
 
-        pathmapa = generate_queue_map( selected_year, selected_payment[0:2], selected_day)
+        map = generate_queue_map( selected_year, selected_payment[0:2], selected_day)
 
         if selected_action == 'apply' or selected_action == 'update':
 
-            tipopagamento = request.form.get('payment', payment_types[0])
-
-            rows, varia = MudaMunicio(cities_num, formatted_source, int(selected_day), selected_year, tipopagamento)
+            selected_payment_type = request.form.get('payment', payment_types[0])
+            rows, varia = MudaMunicio(cities_num, formatted_source, int(selected_day), selected_year, selected_payment_type)
 
             return render_template(
                 'payments_queue.html',
@@ -406,7 +407,7 @@ def payments_queue():
                 user_request=user_request,
                 payment_types=payment_types,
                 
-                mapa = pathmapa,
+                map = map,
                 acao = selected_action,
                 selected_city=selected_city,
                 selected_year=selected_year,
@@ -432,7 +433,7 @@ def payments_queue():
                     user_request=user_request,
                     payment_types=payment_types,
 
-                    mapa = pathmapa,
+                    map = map,
                     acao = selected_action,
                     selected_city=selected_city,
                     selected_year=selected_year,
@@ -457,7 +458,7 @@ def payments_queue():
                     selected_source=selected_source,
                     selected_payment=selected_payment,
                     sources=sources,
-                    mapa = pathmapa,
+                    map = map,
                     acao = selected_action,
                 )
 
@@ -470,12 +471,12 @@ def payments_queue():
         user_request=user_request,
         payment_types=payment_types,
 
-        mapa = pathmapa,
+        map = map,
         acao = selected_action
     )
 
 
 if __name__ == '__main__':
-    # from waitress import serve
-    # serve(app, host="0.0.0.0", port=5000)
-    app.run(debug=True)
+    from waitress import serve
+    serve(app, host="0.0.0.0", port=5000)
+    # app.run(debug=True)

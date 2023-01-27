@@ -11,18 +11,15 @@ def get_delay_sources(selected_year, selected_city_num):
     df_selected = UJsProcessadas.openFileUJ(selected_year, selected_city_num)
 
     options_loans = []
-    for _, row in df_selected.iterrows():
-        somaAtrasos = row["DIFF_LIQ_PAG"]
-        score = somaAtrasos / 30 # TODO: check a way to add scoring info on tables
+    try:
+        df_selected.sort_values(by='score_delay', ascending=False, inplace=True)
+        for _, row in df_selected.iterrows():
+            loan = '{} + {} + {}'.format(row['NOME_UO'], row['NOME_FONTE_REC'], row['score_delay'])
 
-        totalPagsUO = len(df_selected[(row['NOME_FONTE_REC'] == df_selected['NOME_FONTE_REC']) & (row['NOME_UO'] == df_selected['NOME_UO'])])
-        score = score / totalPagsUO
-
-        loan = row['NOME_UO'] + ' + ' + row['NOME_FONTE_REC'] + ' + ({})'.format(score)
-
-        if loan not in options_loans:
-            options_loans.append(loan)
-
+            if loan not in options_loans:
+                options_loans.append(loan)
+    except:
+        pass
 
     return options_loans
 
