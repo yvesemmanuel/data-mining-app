@@ -1,54 +1,53 @@
 from . import SagresSimbaObj
 
-dictSagres = {}
-dictSimba = {}
 
+def get_sagres_info():
+    sagres_info = {}
+    file = open('./static/datasets/simba_sagres/SagresGoiana.csv', 'r', encoding='utf8')
+    file_lines = file.readlines()
+    file.close()
 
-def getSagresInfor(fileName):
-    arquivo = ("./static/datasets/" + fileName)
-    arq = open(arquivo, "r", encoding="utf8")
-    linhasArquivoPagamento = arq.readlines()
-    arq.close()
-
-    for line in linhasArquivoPagamento:
-        l = line.split(";")
+    for line in file_lines:
+        l = line.split(';')
         listPags = []
         for i in range(2, len(l)):
             listPags.append(l[i])
-        dictSagres[str(l[0])+";"+str(l[1])] = listPags
+        sagres_info[str(l[0])+';'+str(l[1])] = listPags
+
+    return sagres_info
 
 
-def getSimbaInfor(fileName):
-    arquivo = ("./static/datasets/" + fileName)
-    arq = open(arquivo, "r", encoding="utf8")
-    linhasArquivoPagamento = arq.readlines()
-    arq.close()
+def get_simba_info():
+    simba_info = {}
+    arquivo = ('./static/datasets/simba_sagres/SimbaGoiana.csv')
+    file = open(arquivo, 'r', encoding='utf8')
+    file_lines = file.readlines()
+    file.close()
 
-    for line in linhasArquivoPagamento:
-        l = line.split(";")
+    for line in file_lines:
+        l = line.split(';')
         listPags = []
         for i in range(1, len(l)):
             listPags.append(l[i])
-        dictSimba[str(l[0])] = listPags
+        simba_info[str(l[0])] = listPags
+
+    return simba_info
 
 
-def montaObjsSagresSimba(fileNameSimba, fileNameSagres):
-    getSagresInfor(fileNameSagres)
-    getSimbaInfor(fileNameSimba)
+def get_sagres_simba_objects():
+    sagres_info = get_sagres_info()
+    simba_info = get_simba_info()
 
-    listSagresSimbaObjs = []
+    sagres_simba_objects = []
+    for key in sagres_info:
+        supplier_cpf_cnpj, supplier_name = key.split(';')
 
-    for key in dictSagres:
-        l = key.split(";")
-        cpf_cnpj = str(l[0])
-        nmFornecedor = l[1]
-        listPagSagres = dictSagres.get(key)
-        listPagSimba = dictSimba.get(cpf_cnpj)
+        sagres_payments = sagres_info.get(key)
+        simba_payments = simba_info.get(supplier_cpf_cnpj)
 
-        listSagresSimbaObjs.append(SagresSimbaObj.SagresSimbaObj(
-            cpf_cnpj, nmFornecedor, listPagSimba, listPagSagres))
+        sagres_simba_objects.append(SagresSimbaObj.SagresSimbaObj(supplier_cpf_cnpj, supplier_name, simba_payments, sagres_payments))
 
-    sortedSagresSimbaObjs = sorted(listSagresSimbaObjs, key=lambda SagresSimbaObj: (
-        SagresSimbaObj.somaSimba - SagresSimbaObj.somaSagres), reverse=True)
+    sort_key = lambda SagresSimbaObj: (SagresSimbaObj.somaSimba - SagresSimbaObj.somaSagres)
+    sorted_sagres_simba_objects = sorted(sagres_simba_objects, key=sort_key, reverse=True)
 
-    return sortedSagresSimbaObjs
+    return sorted_sagres_simba_objects

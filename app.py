@@ -63,7 +63,8 @@ def regular_payments():
         selected_supplier = request.form.get('supplier', 0)
         selected_action = request.form.get('action')
 
-        loans = get_salario_emp(selected_city, selected_year)
+        selected_city_id = int(df_cities[df_cities['Municipio'] == selected_city].numUJ)
+        loans = get_sorted_loans(selected_city_id, selected_year)
         options_supplier = [str(empenho.nmFornecedor) for empenho in loans]
     
         if selected_action == 'apply':
@@ -172,22 +173,22 @@ def regular_payments():
 @app.route('/analysis/simba', methods=['GET', 'POST'])
 def simba():
     page_title = 'SIMBA'
-    lObjs = montaObjsSagresSimba('simba/SimbaGoiana.csv', 'simba/SagresGoiana.csv')
-    options_entity = ['{} - ({}) - {}'.format(o.nmFornecedor, format_cnpj_cpf(o.cpf_cnpj), round(o.somaSimba - o.somaSagres, 2)) for o in lObjs]
+    simba_sagres_objects = get_sagres_simba_objects()
+    options_entity = ['{} - ({}) - {}'.format(obj.nmFornecedor, format_cnpj_cpf(obj.cpf_cnpj), round(obj.somaSimba - obj.somaSagres, 2)) for obj in simba_sagres_objects]
 
     selected_entity = int(request.form.get('entity', 0))
-    entity = lObjs[selected_entity]
+    entity = simba_sagres_objects[selected_entity]
     simba_plot(entity)
 
-    dictPagsSagres = entity.dictPagsMensaisSagres
-    dictPagsSimba = entity.dictPagsMensaisSimba
-    linhaSagres = []
-    linhaSimba = []
+    sagres_payments = entity.dictPagsMensaisSagres
+    simba_payments = entity.dictPagsMensaisSimba
+    sagres_rows = []
+    simba_rows = []
     for idx in range(1, 13):
-        linhaSagres.append(round(dictPagsSagres[idx], 2))
-        linhaSimba.append(round(dictPagsSimba[idx], 2))
+        sagres_rows.append(round(sagres_payments[idx], 2))
+        simba_rows.append(round(simba_payments[idx], 2))
 
-    entity_info = {'months': ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'], 'sagres': linhaSagres, 'simba': linhaSimba}
+    entity_info = {'months': ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'], 'sagres': sagres_rows, 'simba': simba_rows}
 
     return render_template(
         'simba.html',
@@ -356,8 +357,7 @@ def matching_sources():
 @app.route('/analysis/payments_queue', methods=['GET', 'POST'])
 def payments_queue():
     page_title = 'Filas de Pagamentos'
-    df = pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';')
-    city_options = df['Municipio'].tolist()
+    city_options = df_cities['Municipio'].tolist()
 
     year_options = ['2019','2020']
     payment_types = ['Geral','Dispensa','Licitação']
@@ -389,7 +389,7 @@ def payments_queue():
         formatted_source = ''.join(selected_source.split(' + '))
 
         selected_payment = request.form.get('payment', payment_types[0])
-        cities_num = int(df[df['Municipio'] == selected_city].numUJ)
+        cities_num = int(df_cities[df_cities['Municipio'] == selected_city].numUJ)
 
         map = generate_queue_map( selected_year, selected_payment[0:2], selected_day)
 
@@ -477,6 +477,6 @@ def payments_queue():
 
 
 if __name__ == '__main__':
-    from waitress import serve
-    serve(app, host="0.0.0.0", port=5000)
-    # app.run(debug=True)
+    # from waitress import serve
+    # serve(app, host="0.0.0.0", port=5000)
+    app.run(debug=True)

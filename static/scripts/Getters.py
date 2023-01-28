@@ -44,11 +44,8 @@ def get_servico_emp(municipio, ano):
     return empServ.getSortedEmpenhos(filename)
 
 
-def get_salario_emp(municipio, ano):
-    df = pd.read_csv('./static/datasets/ListaMunicipios.csv', sep=';')
-    municipio_num = int(df[df['Municipio'] == municipio].numUJ)
-
-    filename = './static/datasets/outputs' + ano + '/' + str(municipio_num) + '.csv'
+def get_sorted_loans(selected_city_id, year):
+    filename = './static/datasets/outputs{}/{}.csv'.format(year, selected_city_id)
 
     return empSal.getSortedEmpenhos(filename)
 
