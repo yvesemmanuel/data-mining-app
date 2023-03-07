@@ -171,8 +171,6 @@ def montaEmpenhos():
                         + descricao + ";"
                         + fornecedor + ";" + empenho + "\n")'''
 
-    
-
 
     #CABEÇALHO P/ MAXIMO DE COLUNAS
     cabecalho = "QUANTIDADE_PARCELAS;SOMA_PARCELAS;CPF/CNPJ;CPF/CNPJ;ID_EMPENHO;DATA_EMPENHO;VALOR_TOTAL_EMPENHO;DESCRICAO;"
@@ -182,10 +180,10 @@ def montaEmpenhos():
 
     empenhos[0] = cabecalho + "\n"
 
-    arquivo = ("./static/datasets/resultado222.csv")
-    arq = open(arquivo, 'w', encoding="utf8")
-    arq.writelines(empenhos)
-    arq.close()
+    # arquivo = ("./static/datasets/resultado222.csv")
+    # arq = open(arquivo, 'w', encoding="utf8")
+    # arq.writelines(empenhos)
+    # arq.close()
     linhasArquivoPagamento = []
 
 def getEmpenhos():

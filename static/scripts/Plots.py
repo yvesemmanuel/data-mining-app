@@ -156,7 +156,48 @@ def payments_delay_plot_0(x):
 
 
 def payments_delay_scatter_plot(df):
-    fig = px.scatter(df, x='ATRASO', y='VALOR', color='FORNECEDOR')
+
+    #preprocessa casos de pagamentos com o mesmo valor e atraso que serão sobrescritos na figura
+    dic = {}
+    dic_forn_ann = {}
+    for idx, row in df.iterrows():
+        if (dic_forn_ann.get((row["ATRASO"],row["VALOR"])) == None):
+            dic_forn_ann[(row["ATRASO"],row["VALOR"])] = [row['FORNECEDOR']]
+        else:
+            dic_forn_ann[(row["ATRASO"], row["VALOR"])].append(row['FORNECEDOR'])
+
+    dic_ann = {}
+    for k in dic_forn_ann.keys():
+        l = dic_forn_ann[k]
+
+        dic_qtd_forn = {}
+        ann = ""
+
+        if(len(l) > 1):
+            for f in l:
+                if(f not in dic_qtd_forn):
+                    dic_qtd_forn[f] = 1
+                else:
+                    dic_qtd_forn[f] = dic_qtd_forn[f] + 1
+
+            for f in dic_qtd_forn.keys():
+                if (dic_qtd_forn[f] > 1):
+                    ann += f + " ("+str(dic_qtd_forn[f])+");<br>"
+                else:
+                    ann += f + ";<br>"
+        else:
+            ann += l[0]+";<br>"
+
+        dic_ann[k] = ann
+
+    lst_ann = []
+
+    for idx, row in df.iterrows():
+        lst_ann.append(dic_ann[(row["ATRASO"],row["VALOR"])])
+
+    df["FORNECEDORE(S)"] = lst_ann
+
+    fig = px.scatter(df, x='ATRASO', y='VALOR', color='FORNECEDOR', hover_data={"FORNECEDOR":False, "FORNECEDORE(S)":True, "VALOR":True, "ATRASO":True})
 
     fig.write_html('./templates/maps/cache/payments_delay_plot.html')
     HtmlFile = open('./templates/maps/cache/payments_delay_plot.html', 'r', encoding='utf-8')
