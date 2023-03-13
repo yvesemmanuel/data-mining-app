@@ -3,7 +3,6 @@ import static.scripts.EmpenhosServicosInicAntesEmp as empServ
 from static.scripts.UtilsUJsProcessadas import UJsProcessadas
 import os
 import pandas as pd
-import json
 from ast import literal_eval
 import static.scripts.Constantes as Constantes
 import datetime
