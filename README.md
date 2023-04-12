@@ -10,12 +10,22 @@
 
 ### A aplicação é monolítica e para executá-la basta instalar as dependências utilizando o seguinte comando:
 
-``` pip install -r requirements.txt ```
+    $ make install-dependencies
 
 ### Em seguida, basta executar o arquivo ```app.py``` através do seguinte comando no diretório do arquivo:
-``` python3 app.py ```
+
+    $ python3 app.py
 
 ### Assim a aplicação será executada na porta 5000 por padrão: ```localhost:5000```
+
+
+## Deployment
+
+### Para construir a aplicação, utilize o comando:
+
+    $ make build
+
+### Assim, será criado um diretório (current_dir/build) que isola todas as dependências da aplicação. Nesse diretório, um arquivo construído com a base do seu sistema operacional estará disponível para execução.
 
 
 ## Dependências
